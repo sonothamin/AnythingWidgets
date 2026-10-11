@@ -35,7 +35,7 @@ object DataSnapshot {
         )
     }
 
-    private val token = Regex("\\{\\{([A-Za-z0-9_.]+)}}")
+    private val token = Regex("\\{\\{([A-Za-z0-9_.]+)\\}\\}")
 
     fun apply(template: String, data: Map<String, String>): String =
         token.replace(template) { data[it.groupValues[1]].orEmpty() }

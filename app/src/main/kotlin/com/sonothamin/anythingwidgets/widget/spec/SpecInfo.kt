@@ -4,7 +4,7 @@ import java.net.URI
 
 /** Read-only facts derived from a spec, shown on the widget details screen. */
 object SpecInfo {
-    private val TOKEN = Regex("\\{\\{([A-Za-z0-9_.]+)}}")
+    private val TOKEN = Regex("\\{\\{([A-Za-z0-9_.]+)\\}\\}")
 
     private fun nodes(spec: WidgetSpec): List<Node> {
         val out = mutableListOf<Node>()
