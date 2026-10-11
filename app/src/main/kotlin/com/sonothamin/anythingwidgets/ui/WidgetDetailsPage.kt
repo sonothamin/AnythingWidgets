@@ -19,10 +19,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -42,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.updateAll
 import com.sonothamin.anythingwidgets.ui.components.CardShape
 import com.sonothamin.anythingwidgets.ui.components.NothingCard
@@ -299,22 +302,36 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                         )
                     }
                     row { shape ->
-                        NothingCard(shape) {
-                            Text(
-                                "Add to home screen",
-                                style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
-                                color = MaterialTheme.colorScheme.onSurface,
+                        var sizeMenu by remember { mutableStateOf(false) }
+                        Box {
+                            NothingItem(
+                                title = "Add to home screen",
+                                shape = shape,
+                                onClick = { sizeMenu = true },
+                                trailing = {
+                                    Icon(
+                                        Icons.Rounded.Add,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                },
                             )
-                            Text(
-                                "Place one, then choose which widget it shows.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Spacer(Modifier.height(12.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                FilledTonalButton(onClick = { pin(SmallWidgetReceiver::class.java) }) { Text("Small") }
-                                FilledTonalButton(onClick = { pin(WideWidgetReceiver::class.java) }) { Text("Wide") }
-                                FilledTonalButton(onClick = { pin(LargeWidgetReceiver::class.java) }) { Text("Large") }
+                            DropdownMenu(expanded = sizeMenu, onDismissRequest = { sizeMenu = false }) {
+                                PreviewSize.entries.forEach { s ->
+                                    DropdownMenuItem(
+                                        text = { Text(s.label) },
+                                        onClick = {
+                                            sizeMenu = false
+                                            pin(
+                                                when (s) {
+                                                    PreviewSize.Small -> SmallWidgetReceiver::class.java
+                                                    PreviewSize.Wide -> WideWidgetReceiver::class.java
+                                                    PreviewSize.Large -> LargeWidgetReceiver::class.java
+                                                },
+                                            )
+                                        },
+                                    )
+                                }
                             }
                         }
                     }

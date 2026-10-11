@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.updateAll
+import com.sonothamin.anythingwidgets.ui.components.CardShape
+import com.sonothamin.anythingwidgets.ui.components.NothingCard
 import com.sonothamin.anythingwidgets.ui.components.NothingItem
 import com.sonothamin.anythingwidgets.ui.components.PageHeader
 import com.sonothamin.anythingwidgets.ui.components.SectionLabel
@@ -38,6 +41,7 @@ import com.sonothamin.anythingwidgets.widget.SpecWidget
 import com.sonothamin.anythingwidgets.widget.data.Registry
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import com.sonothamin.anythingwidgets.widget.spec.IndexEntry
+import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.net.URI
@@ -85,20 +89,26 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                 CircularProgressIndicator()
             }
 
-            ExploreState.Failed -> Column(
-                Modifier.fillMaxWidth().weight(1f).padding(24.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text("Can't reach the registry", style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    "Check your connection and try again.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(16.dp))
-                Button(onClick = { load() }) { Text("Retry") }
+            ExploreState.Failed -> {
+                val local = remember(refreshKey, installed) { store.installed() }
+                LazyColumn(
+                    Modifier.fillMaxWidth().weight(1f),
+                    contentPadding = PaddingValues(bottom = 120.dp),
+                ) {
+                    item {
+                        NothingCard(CardShape, Modifier.pageMargin()) {
+                            Text("Can't reach the registry", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                "Check your connection and try again.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 2.dp, bottom = 12.dp),
+                            )
+                            Button(onClick = { load() }) { Text("Retry") }
+                        }
+                    }
+                    onDevice(local, onOpen)
+                }
             }
 
             is ExploreState.Ready -> LazyColumn(
@@ -160,7 +170,35 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                         },
                     )
                 }
+                val registryIds = s.widgets.map { it.id }.toSet()
+                onDevice(store.installed().filter { it.id !in registryIds }, onOpen)
             }
         }
+    }
+}
+
+/** Widgets that live on this device but aren't in the registry (imported or from another source). */
+private fun LazyListScope.onDevice(specs: List<WidgetSpec>, onOpen: (String) -> Unit) {
+    if (specs.isEmpty()) return
+    item(key = "on-device-label") { SectionLabel("On this device") }
+    itemsIndexed(specs, key = { _, spec -> "local-${spec.id}" }) { i, spec ->
+        NothingItem(
+            title = spec.name,
+            subtitle = buildString {
+                append(listOfNotNull(spec.author, "v${spec.version}").joinToString(" · "))
+                spec.description?.let { append("\n").append(it) }
+                if (spec.categories.isNotEmpty()) append("\n").append(spec.categories.joinToString(" · "))
+            },
+            shape = groupShape(i, specs.size),
+            modifier = Modifier.pageMargin().padding(top = if (i > 0) 2.dp else 0.dp),
+            onClick = { onOpen(spec.id) },
+            trailing = {
+                Text(
+                    "Installed",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+        )
     }
 }

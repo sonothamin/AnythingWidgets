@@ -79,7 +79,7 @@ fun HomeScreen() {
                 label = "tab",
             ) { page ->
                 when (page) {
-                    0 -> LibraryPage(refreshKey = detailsId, onOpen = { detailsId = it })
+                    0 -> LibraryPage(refreshKey = detailsId, onOpen = { detailsId = it }, onExplore = { tab = 1 })
                     1 -> ExplorePage(refreshKey = detailsId, onOpen = { detailsId = it })
                     else -> SettingsPage()
                 }
