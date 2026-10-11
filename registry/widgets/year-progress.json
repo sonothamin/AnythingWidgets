@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "id": "year-progress",
+  "version": 1,
+  "name": "Year Progress",
+  "author": "AnythingWidgets",
+  "description": "How far through the year you are.",
+  "root": {
+    "type": "column",
+    "fill": "both",
+    "padding": 12,
+    "justify": "center",
+    "gap": 6,
+    "action": {
+      "type": "open_app"
+    },
+    "children": [
+      {
+        "type": "text",
+        "text": "{{date.year}}",
+        "size": 14,
+        "color": "onSurfaceVariant"
+      },
+      {
+        "type": "text",
+        "text": "{{date.year.percent}}%",
+        "size": 36,
+        "bold": true,
+        "color": "primary",
+        "maxLines": 1
+      },
+      {
+        "type": "progress",
+        "progress": "{{date.year.fraction}}",
+        "height": 8
+      },
+      {
+        "type": "text",
+        "text": "Day {{date.dayOfYear}} of {{date.daysInYear}}",
+        "size": 12,
+        "color": "onSurfaceVariant",
+        "maxLines": 1
+      }
+    ]
+  },
+  "compact": {
+    "type": "column",
+    "fill": "both",
+    "padding": 10,
+    "justify": "center",
+    "align": "center",
+    "gap": 6,
+    "action": {
+      "type": "open_app"
+    },
+    "children": [
+      {
+        "type": "text",
+        "text": "{{date.year.percent}}%",
+        "size": 32,
+        "bold": true,
+        "color": "primary",
+        "maxLines": 1
+      },
+      {
+        "type": "progress",
+        "progress": "{{date.year.fraction}}",
+        "height": 6
+      }
+    ]
+  }
+}

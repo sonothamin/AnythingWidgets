@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "id": "battery",
+  "version": 1,
+  "name": "Battery",
+  "author": "AnythingWidgets",
+  "description": "Big battery percentage with a bar. Tap to refresh.",
+  "root": {
+    "type": "column",
+    "fill": "both",
+    "padding": 12,
+    "justify": "center",
+    "gap": 6,
+    "action": {
+      "type": "refresh"
+    },
+    "children": [
+      {
+        "type": "text",
+        "text": "Battery",
+        "size": 14,
+        "color": "onSurfaceVariant"
+      },
+      {
+        "type": "text",
+        "text": "{{battery.level}}%",
+        "size": 40,
+        "bold": true,
+        "color": "primary",
+        "maxLines": 1
+      },
+      {
+        "type": "progress",
+        "progress": "{{battery.fraction}}",
+        "height": 8
+      }
+    ]
+  },
+  "compact": {
+    "type": "column",
+    "fill": "both",
+    "padding": 10,
+    "justify": "center",
+    "align": "center",
+    "gap": 6,
+    "action": {
+      "type": "refresh"
+    },
+    "children": [
+      {
+        "type": "text",
+        "text": "{{battery.level}}%",
+        "size": 32,
+        "bold": true,
+        "color": "primary",
+        "maxLines": 1
+      },
+      {
+        "type": "progress",
+        "progress": "{{battery.fraction}}",
+        "height": 6
+      }
+    ]
+  }
+}

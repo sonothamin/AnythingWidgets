@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "id": "quote",
+  "version": 1,
+  "name": "Quote",
+  "author": "AnythingWidgets",
+  "description": "A static line of text. Copy and edit it to make your own.",
+  "root": {
+    "type": "column",
+    "fill": "both",
+    "padding": 16,
+    "justify": "center",
+    "gap": 6,
+    "children": [
+      {
+        "type": "text",
+        "text": "Make it work, then make it beautiful.",
+        "size": 18,
+        "bold": true,
+        "maxLines": 4
+      },
+      {
+        "type": "text",
+        "text": "Edit this widget's JSON to change me",
+        "size": 12,
+        "color": "onSurfaceVariant",
+        "maxLines": 1
+      }
+    ]
+  },
+  "compact": {
+    "type": "column",
+    "fill": "both",
+    "padding": 12,
+    "justify": "center",
+    "children": [
+      {
+        "type": "text",
+        "text": "Make it work, then make it beautiful.",
+        "size": 14,
+        "bold": true,
+        "maxLines": 5
+      }
+    ]
+  }
+}

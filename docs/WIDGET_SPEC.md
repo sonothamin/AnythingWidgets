@@ -8,7 +8,7 @@ index.json
 widgets/<id>.json
 ```
 `index.json` lists each widget: `id, name, version, spec (relative path), sha256, author?, description?`.
-Run `registry-example/publish.sh` to regenerate it (it computes the checksums). Bump `version` in a spec whenever you change it; installed copies update automatically (hourly, and when added).
+Run `registry/publish.sh` to regenerate it (it computes the checksums). Bump `version` in a spec whenever you change it; installed copies update automatically (hourly, and when added).
 
 The registry URL is `REGISTRY_URL` in `app/build.gradle.kts` (must be HTTPS and end with `/`).
 
@@ -38,7 +38,7 @@ The registry URL is `REGISTRY_URL` in `app/build.gradle.kts` (must be HTTPS and 
 
 ## Bindings
 Use `{{key}}` inside `text` and `progress`:
-`date.weekday`, `date.weekday.short`, `date.day`, `date.month`, `date.month.long`, `date.year`, `time.short`, `battery.level`, `battery.fraction`.
+`date.weekday`, `date.weekday.short`, `date.day`, `date.month`, `date.month.long`, `date.year`, `date.dayOfYear`, `date.daysInYear`, `date.year.fraction`, `date.year.percent`, `time.short`, `battery.level`, `battery.fraction`.
 
 Widgets can't tick every minute: Android limits background updates, so values refresh on the hourly sync, when the widget is added, and on a `refresh` tap. Avoid designs that depend on a live clock.
 

@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "id": "date",
+  "version": 1,
+  "name": "Date",
+  "author": "AnythingWidgets",
+  "description": "A large, calm date.",
+  "root": {
+    "type": "row",
+    "fill": "both",
+    "padding": 14,
+    "justify": "center",
+    "align": "center",
+    "gap": 14,
+    "action": {
+      "type": "open_app"
+    },
+    "children": [
+      {
+        "type": "text",
+        "text": "{{date.day}}",
+        "size": 64,
+        "bold": true,
+        "color": "primary",
+        "maxLines": 1
+      },
+      {
+        "type": "column",
+        "gap": 2,
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.month.long}}",
+            "size": 18,
+            "bold": true,
+            "maxLines": 1
+          },
+          {
+            "type": "text",
+            "text": "{{date.weekday}}",
+            "size": 14,
+            "color": "onSurfaceVariant",
+            "maxLines": 1
+          }
+        ]
+      }
+    ]
+  },
+  "compact": {
+    "type": "column",
+    "fill": "both",
+    "padding": 8,
+    "justify": "center",
+    "align": "center",
+    "action": {
+      "type": "open_app"
+    },
+    "children": [
+      {
+        "type": "text",
+        "text": "{{date.month}}",
+        "size": 13,
+        "bold": true,
+        "color": "primary"
+      },
+      {
+        "type": "text",
+        "text": "{{date.day}}",
+        "size": 44,
+        "bold": true,
+        "maxLines": 1
+      }
+    ]
+  }
+}

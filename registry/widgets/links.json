@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "id": "links",
+  "version": 1,
+  "name": "Quick Links",
+  "author": "AnythingWidgets",
+  "description": "Two tappable shortcuts. Replace the URLs with your own.",
+  "root": {
+    "type": "row",
+    "fill": "both",
+    "padding": 12,
+    "align": "center",
+    "gap": 8,
+    "children": [
+      {
+        "type": "text",
+        "text": "sonothamin.dev",
+        "size": 14,
+        "bold": true,
+        "color": "onSecondaryContainer",
+        "background": "secondaryContainer",
+        "radius": 20,
+        "padding": 12,
+        "textAlign": "center",
+        "grow": true,
+        "maxLines": 1,
+        "action": {
+          "type": "open_url",
+          "url": "https://sonothamin.dev"
+        }
+      },
+      {
+        "type": "text",
+        "text": "GitHub",
+        "size": 14,
+        "bold": true,
+        "color": "onSecondaryContainer",
+        "background": "secondaryContainer",
+        "radius": 20,
+        "padding": 12,
+        "textAlign": "center",
+        "grow": true,
+        "maxLines": 1,
+        "action": {
+          "type": "open_url",
+          "url": "https://github.com/sonothamin"
+        }
+      }
+    ]
+  },
+  "compact": {
+    "type": "column",
+    "fill": "both",
+    "padding": 10,
+    "justify": "center",
+    "gap": 8,
+    "children": [
+      {
+        "type": "text",
+        "text": "Website",
+        "size": 12,
+        "bold": true,
+        "color": "onSecondaryContainer",
+        "background": "secondaryContainer",
+        "radius": 20,
+        "padding": 8,
+        "textAlign": "center",
+        "grow": false,
+        "maxLines": 1,
+        "action": {
+          "type": "open_url",
+          "url": "https://sonothamin.dev"
+        },
+        "fill": "width"
+      },
+      {
+        "type": "text",
+        "text": "GitHub",
+        "size": 12,
+        "bold": true,
+        "color": "onSecondaryContainer",
+        "background": "secondaryContainer",
+        "radius": 20,
+        "padding": 8,
+        "textAlign": "center",
+        "grow": false,
+        "maxLines": 1,
+        "action": {
+          "type": "open_url",
+          "url": "https://github.com/sonothamin"
+        },
+        "fill": "width"
+      }
+    ]
+  }
+}
