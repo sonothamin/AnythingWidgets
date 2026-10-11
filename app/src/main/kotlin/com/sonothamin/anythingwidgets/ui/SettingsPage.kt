@@ -13,7 +13,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.sonothamin.anythingwidgets.ui.theme.GlassCard
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.sp
+import com.sonothamin.anythingwidgets.ui.components.ChevronIcon
+import com.sonothamin.anythingwidgets.ui.components.NothingCard
+import com.sonothamin.anythingwidgets.ui.components.NothingItem
+import com.sonothamin.anythingwidgets.ui.components.NothingStack
+import com.sonothamin.anythingwidgets.ui.components.PageHeader
+import com.sonothamin.anythingwidgets.ui.components.SectionLabel
+import com.sonothamin.anythingwidgets.ui.components.pageMargin
 import androidx.glance.appwidget.updateAll
 import com.sonothamin.anythingwidgets.widget.SpecWidget
 import com.sonothamin.anythingwidgets.widget.data.RegistrySettings
@@ -45,59 +55,64 @@ fun SettingsPage() {
         }
     }
 
-    Column(
-        Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        GlassCard(Modifier.fillMaxWidth()) {
-            Text("Widget repository", style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(8.dp))
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
+        PageHeader("Settings")
 
-            RepoOption(
-                selected = source == Source.OFFICIAL,
-                title = "sonothamin.dev",
-                subtitle = RegistrySettings.OFFICIAL_URL,
-                onSelect = {
-                    RegistrySettings.useOfficial(context)
-                    source = Source.OFFICIAL
-                },
-            )
-            RepoOption(
-                selected = source == Source.CUSTOM,
-                title = "Custom repository",
-                subtitle = custom ?: "Not set",
-                onSelect = {
-                    val url = custom
-                    if (url == null) askUrl = true
-                    else {
-                        RegistrySettings.useCustom(context, url)
-                        source = Source.CUSTOM
-                    }
-                },
-                trailing = if (custom != null) {
-                    { TextButton(onClick = { askUrl = true }) { Text("Change") } }
-                } else null,
-            )
-            Text(
-                "Widgets are data only, but a repository controls what they show. Only use ones you trust.",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 8.dp),
-            )
+        SectionLabel("Widget repository")
+        NothingStack(Modifier.pageMargin()) {
+            row { shape ->
+                RepoOption(
+                    selected = source == Source.OFFICIAL,
+                    title = "sonothamin.dev",
+                    subtitle = RegistrySettings.OFFICIAL_URL,
+                    shape = shape,
+                    onSelect = {
+                        RegistrySettings.useOfficial(context)
+                        source = Source.OFFICIAL
+                    },
+                )
+            }
+            row { shape ->
+                RepoOption(
+                    selected = source == Source.CUSTOM,
+                    title = "Custom repository",
+                    subtitle = custom ?: "Not set",
+                    shape = shape,
+                    onSelect = {
+                        val url = custom
+                        if (url == null) askUrl = true
+                        else {
+                            RegistrySettings.useCustom(context, url)
+                            source = Source.CUSTOM
+                        }
+                    },
+                    trailing = if (custom != null) {
+                        { TextButton(onClick = { askUrl = true }) { Text("Change") } }
+                    } else null,
+                )
+            }
         }
+        Text(
+            "Widgets are data only, but a repository controls what they show. Only use ones you trust.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+        )
 
-        GlassCard(Modifier.fillMaxWidth()) {
-            Text("Import widgets", style = MaterialTheme.typography.titleLarge)
-            Text(
-                "Add widgets from a .zip containing index.json and a widgets/ folder of <id>.json files. " +
-                    "Existing widgets with the same id are replaced.",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(vertical = 8.dp),
-            )
-            FilledTonalButton(
-                onClick = {
-                    picker.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream"))
-                },
-            ) { Text("Choose zip") }
+        SectionLabel("Import")
+        NothingStack(Modifier.pageMargin()) {
+            row { shape ->
+                NothingItem(
+                    title = "Import widgets",
+                    subtitle = "Add widgets from a .zip containing index.json and a widgets/ folder of <id>.json files. " +
+                        "Existing widgets with the same id are replaced.",
+                    shape = shape,
+                    onClick = {
+                        picker.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream"))
+                    },
+                    trailing = { ChevronIcon() },
+                )
+            }
         }
     }
 
@@ -122,22 +137,30 @@ private fun RepoOption(
     selected: Boolean,
     title: String,
     subtitle: String,
+    shape: Shape,
     onSelect: () -> Unit,
     trailing: (@Composable () -> Unit)? = null,
 ) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .selectable(selected = selected, role = Role.RadioButton, onClick = onSelect)
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(selected = selected, onClick = null)
-        Column(Modifier.weight(1f).padding(start = 12.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, maxLines = 2)
+    NothingCard(shape, contentPadding = PaddingValues(0.dp)) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .selectable(selected = selected, role = Role.RadioButton, onClick = onSelect)
+                .padding(horizontal = 20.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RadioButton(selected = selected, onClick = null)
+            Column(Modifier.weight(1f).padding(start = 16.dp)) {
+                Text(title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp))
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                )
+            }
+            trailing?.invoke()
         }
-        trailing?.invoke()
     }
 }
 

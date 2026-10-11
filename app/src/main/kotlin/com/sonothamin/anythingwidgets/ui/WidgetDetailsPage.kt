@@ -14,29 +14,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,8 +44,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.updateAll
-import com.sonothamin.anythingwidgets.ui.theme.GlassCard
+import com.sonothamin.anythingwidgets.ui.components.CardShape
+import com.sonothamin.anythingwidgets.ui.components.NothingCard
+import com.sonothamin.anythingwidgets.ui.components.NothingItem
+import com.sonothamin.anythingwidgets.ui.components.NothingStack
+import com.sonothamin.anythingwidgets.ui.components.PageHeader
+import com.sonothamin.anythingwidgets.ui.components.SectionLabel
+import com.sonothamin.anythingwidgets.ui.components.pageMargin
 import com.sonothamin.anythingwidgets.widget.DataSnapshot
 import com.sonothamin.anythingwidgets.widget.LargeWidgetReceiver
 import com.sonothamin.anythingwidgets.widget.SmallWidgetReceiver
@@ -149,55 +149,40 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(spec?.name ?: "Widget") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
-                    }
-                },
-            )
-        },
-    ) { inner ->
+    val sizes = PreviewSize.entries
+    val size = sizes[sizeIndex.coerceIn(0, sizes.lastIndex)]
+    val addedAt = remember(installed) { installed?.let { store.addedAt(it.id) } }
+    val bytes: Long? = if (installed != null) store.sizeOf(id) else remote?.sizeBytes?.toLong()
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .navigationBarsPadding()
+            .padding(bottom = 32.dp),
+    ) {
+        PageHeader(spec?.name ?: "Widget", onBack = onBack)
+
         if (spec == null) {
-            Box(Modifier.fillMaxSize().padding(inner).padding(24.dp), Alignment.Center) {
+            Box(Modifier.fillMaxWidth().padding(48.dp), Alignment.Center) {
                 if (loading) {
                     CircularProgressIndicator()
                 } else {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(
-                            if (offline) "Couldn't reach the widget registry." else "This widget isn't available.",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                        OutlinedButton(onClick = onBack) { Text("Go back") }
-                    }
+                    Text(
+                        if (offline) "Couldn't reach the widget registry." else "This widget isn't available.",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
                 }
             }
-            return@Scaffold
-        }
+        } else {
+            val dataUsed = SpecInfo.dataUsed(spec)
+            val actions = SpecInfo.actions(spec)
 
-        val sizes = PreviewSize.entries
-        val size = sizes[sizeIndex.coerceIn(0, sizes.lastIndex)]
-        val addedAt = remember(installed) { installed?.let { store.addedAt(it.id) } }
-        val bytes: Long? = if (installed != null) store.sizeOf(id) else remote?.sizeBytes?.toLong()
-        val dataUsed = SpecInfo.dataUsed(spec)
-        val actions = SpecInfo.actions(spec)
-
-        Column(
-            Modifier
-                .padding(inner)
-                .verticalScroll(rememberScrollState())
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            // Title, author, description
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(spec.name, style = MaterialTheme.typography.headlineMedium)
+            // Author, version, description
+            Column(Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     listOfNotNull(spec.author, "v${spec.version}").joinToString(" · "),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 spec.description?.let { Text(it, style = MaterialTheme.typography.bodyLarge) }
@@ -208,20 +193,19 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 installed == null -> Button(
                     onClick = { entry?.let(::install) },
                     enabled = entry != null && !busy,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.pageMargin().padding(top = 24.dp).fillMaxWidth().height(56.dp),
                 ) { Text(if (busy) "Installing…" else "Install") }
 
                 update != null -> Button(
                     onClick = { install(update) },
                     enabled = !busy,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.pageMargin().padding(top = 24.dp).fillMaxWidth().height(56.dp),
                 ) { Text(if (busy) "Updating…" else "Update to v${update.version}") }
             }
 
             // Preview
-            GlassCard(Modifier.fillMaxWidth()) {
-                Text("Preview", style = MaterialTheme.typography.titleLarge)
-                Spacer(Modifier.height(8.dp))
+            SectionLabel("Preview")
+            NothingCard(CardShape, Modifier.pageMargin()) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     sizes.forEachIndexed { i, s ->
                         FilterChip(
@@ -231,11 +215,11 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                         )
                     }
                 }
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(20.dp))
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     SpecPreview(spec, size, data)
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(16.dp))
                 Text(
                     "${size.width} × ${size.height} dp · uses this device's live data. " +
                         "Your launcher may size widgets a little differently.",
@@ -246,128 +230,115 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
 
             // Categories and tags
             if (spec.categories.isNotEmpty() || spec.tags.isNotEmpty()) {
-                GlassCard(Modifier.fillMaxWidth()) {
-                    if (spec.categories.isNotEmpty()) {
-                        Text("Categories", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            spec.categories.forEach {
-                                Pill(it, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
-                            }
+                SectionLabel("Categories & tags")
+                NothingCard(CardShape, Modifier.pageMargin()) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        spec.categories.forEach {
+                            Pill(it, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary)
                         }
-                    }
-                    if (spec.categories.isNotEmpty() && spec.tags.isNotEmpty()) Spacer(Modifier.height(16.dp))
-                    if (spec.tags.isNotEmpty()) {
-                        Text("Tags", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(8.dp))
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            spec.tags.forEach {
-                                Pill("#$it", MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
+                        spec.tags.forEach {
+                            Pill("#$it", MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
             }
 
             // Details
-            GlassCard(Modifier.fillMaxWidth()) {
-                Text("Details", style = MaterialTheme.typography.titleLarge)
-                Spacer(Modifier.height(4.dp))
-                val rows = buildList {
-                    add("Created by" to (spec.author ?: "Unknown"))
-                    add("Created" to (spec.created?.let(::formatIsoDate) ?: "Unknown"))
-                    add("Added" to (addedAt?.let(::formatMillis) ?: "Not added yet"))
-                    add(
-                        "Version" to buildString {
-                            append("v${spec.version}")
-                            if (update != null) append(" (v${update.version} available)")
-                        },
-                    )
-                    add("File size" to (bytes?.let(::formatSize) ?: "Unknown"))
-                    add(
-                        "Layouts" to if (SpecInfo.hasCompactLayout(spec)) "Full and compact (adapts to size)" else "Single layout",
-                    )
-                    add("Data used" to (dataUsed.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None (static)"))
-                    add("Tapping" to (actions.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Does nothing"))
-                    add(
-                        "Source" to when {
-                            installed == null -> hostOf(registry.baseUrl)
-                            source == WidgetImporter.SOURCE -> "Imported from zip"
-                            source == null -> "Unknown"
-                            else -> hostOf(source)
-                        },
-                    )
-                    add("ID" to spec.id)
-                }
-                rows.forEachIndexed { i, (label, value) ->
-                    if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    InfoRow(label, value)
+            SectionLabel("Details")
+            val rows = buildList {
+                add("Created by" to (spec.author ?: "Unknown"))
+                add("Created" to (spec.created?.let(::formatIsoDate) ?: "Unknown"))
+                add("Added" to (addedAt?.let(::formatMillis) ?: "Not added yet"))
+                add(
+                    "Version" to buildString {
+                        append("v${spec.version}")
+                        if (update != null) append(" (v${update.version} available)")
+                    },
+                )
+                add("File size" to (bytes?.let(::formatSize) ?: "Unknown"))
+                add("Layouts" to if (SpecInfo.hasCompactLayout(spec)) "Full and compact (adapts to size)" else "Single layout")
+                add("Data used" to (dataUsed.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None (static)"))
+                add("Tapping" to (actions.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Does nothing"))
+                add(
+                    "Source" to when {
+                        installed == null -> hostOf(registry.baseUrl)
+                        source == WidgetImporter.SOURCE -> "Imported from zip"
+                        source == null -> "Unknown"
+                        else -> hostOf(source)
+                    },
+                )
+                add("ID" to spec.id)
+            }
+            NothingStack(Modifier.pageMargin()) {
+                rows.forEach { (label, value) ->
+                    row { shape -> NothingItem(title = label, subtitle = value, shape = shape) }
                 }
             }
 
             // Per-widget settings (only once it's on the device)
             if (installed != null) {
-                GlassCard(Modifier.fillMaxWidth()) {
-                    Text("Settings", style = MaterialTheme.typography.titleLarge)
-                    Spacer(Modifier.height(8.dp))
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text("Update automatically", style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                if (managed) "Install new versions from the registry as they're published."
-                                else "Only widgets installed from your current repository update automatically.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        Spacer(Modifier.width(12.dp))
-                        Switch(
-                            checked = managed && autoUpdate,
-                            enabled = managed,
-                            onCheckedChange = {
-                                autoUpdate = it
-                                WidgetPrefs.setAutoUpdate(context, id, it)
+                SectionLabel("Settings")
+                NothingStack(Modifier.pageMargin()) {
+                    row { shape ->
+                        NothingItem(
+                            title = "Update automatically",
+                            subtitle = if (managed) "Install new versions from the registry as they're published."
+                            else "Only widgets installed from your current repository update automatically.",
+                            shape = shape,
+                            onClick = if (managed) {
+                                {
+                                    autoUpdate = !autoUpdate
+                                    WidgetPrefs.setAutoUpdate(context, id, autoUpdate)
+                                }
+                            } else null,
+                            trailing = {
+                                Switch(checked = managed && autoUpdate, onCheckedChange = null, enabled = managed)
                             },
                         )
                     }
-
-                    HorizontalDivider(Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-
-                    Text("Add to home screen", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilledTonalButton(onClick = { pin(SmallWidgetReceiver::class.java) }) { Text("Small") }
-                        FilledTonalButton(onClick = { pin(WideWidgetReceiver::class.java) }) { Text("Wide") }
-                        FilledTonalButton(onClick = { pin(LargeWidgetReceiver::class.java) }) { Text("Large") }
+                    row { shape ->
+                        NothingCard(shape) {
+                            Text(
+                                "Add to home screen",
+                                style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
+                            )
+                            Text(
+                                "You'll pick which widget to show after placing it.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                FilledTonalButton(onClick = { pin(SmallWidgetReceiver::class.java) }) { Text("Small") }
+                                FilledTonalButton(onClick = { pin(WideWidgetReceiver::class.java) }) { Text("Wide") }
+                                FilledTonalButton(onClick = { pin(LargeWidgetReceiver::class.java) }) { Text("Large") }
+                            }
+                        }
                     }
-                    Text(
-                        "You'll pick which widget to show after placing it.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 8.dp),
-                    )
-
-                    HorizontalDivider(Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedButton(
+                    row { shape ->
+                        NothingItem(
+                            title = "Refresh widgets",
+                            subtitle = "Redraw every widget on your home screen.",
+                            shape = shape,
                             onClick = {
                                 scope.launch {
                                     SpecWidget().updateAll(context)
                                     Toast.makeText(context, "Widgets refreshed", Toast.LENGTH_SHORT).show()
                                 }
                             },
-                        ) { Text("Refresh widgets") }
-                        TextButton(onClick = { confirmRemove = true }) {
-                            Text("Remove", color = MaterialTheme.colorScheme.error)
-                        }
+                        )
+                    }
+                    row { shape ->
+                        NothingItem(
+                            title = "Remove",
+                            titleColor = MaterialTheme.colorScheme.error,
+                            subtitle = "Uninstall this widget.",
+                            shape = shape,
+                            onClick = { confirmRemove = true },
+                        )
                     }
                 }
             }
@@ -394,22 +365,6 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
             },
             dismissButton = { TextButton(onClick = { confirmRemove = false }) { Text("Cancel") } },
         )
-    }
-}
-
-@Composable
-private fun InfoRow(label: String, value: String) {
-    Row(
-        Modifier.fillMaxWidth().padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(96.dp),
-        )
-        Text(value, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
     }
 }
 

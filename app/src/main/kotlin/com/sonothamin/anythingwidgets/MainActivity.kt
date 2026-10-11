@@ -49,7 +49,6 @@ private val tabs = listOf(
     NavTab("Settings", Icons.Rounded.Settings),
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
     var tab by rememberSaveable { mutableIntStateOf(0) }
@@ -74,19 +73,16 @@ fun HomeScreen() {
             }
         },
     ) {
-        Box(Modifier.fillMaxSize()) {
-            Scaffold(topBar = { LargeTopAppBar(title = { Text("AnythingWidgets") }) }) { padding ->
-                AnimatedContent(
-                    targetState = tab,
-                    transitionSpec = { fadeIn() togetherWith fadeOut() },
-                    modifier = Modifier.padding(top = padding.calculateTopPadding()),
-                    label = "tab",
-                ) { page ->
-                    when (page) {
-                        0 -> LibraryPage(refreshKey = detailsId, onOpen = { detailsId = it })
-                        1 -> ExplorePage(refreshKey = detailsId, onOpen = { detailsId = it })
-                        else -> SettingsPage()
-                    }
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            AnimatedContent(
+                targetState = tab,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "tab",
+            ) { page ->
+                when (page) {
+                    0 -> LibraryPage(refreshKey = detailsId, onOpen = { detailsId = it })
+                    1 -> ExplorePage(refreshKey = detailsId, onOpen = { detailsId = it })
+                    else -> SettingsPage()
                 }
             }
 

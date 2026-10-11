@@ -1,52 +1,88 @@
 package com.sonothamin.anythingwidgets.ui.theme
 
-import android.os.Build
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 
-/** Material 3 Expressive theme: dynamic color on Android 12+, expressive motion scheme. */
+private val NothingRed = Color(0xFFD71921)
+
+/** Near-black canvas, charcoal cards, white as the only "accent", red reserved for attention. */
+private val NothingDark = darkColorScheme(
+    primary = Color(0xFFFFFFFF),
+    onPrimary = Color(0xFF121212),
+    primaryContainer = Color(0xFF3A3A3A),
+    onPrimaryContainer = Color(0xFFFFFFFF),
+    secondary = Color(0xFFD0D0D0),
+    onSecondary = Color(0xFF121212),
+    secondaryContainer = Color(0xFF3A3A3A),
+    onSecondaryContainer = Color(0xFFF2F2F2),
+    tertiary = NothingRed,
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFF4A1B1E),
+    onTertiaryContainer = Color(0xFFFFDAD9),
+    background = Color(0xFF1B1B1B),
+    onBackground = Color(0xFFF2F2F2),
+    surface = Color(0xFF1B1B1B),
+    onSurface = Color(0xFFF2F2F2),
+    surfaceVariant = Color(0xFF2F2F2F),
+    onSurfaceVariant = Color(0xFF9E9E9E),
+    surfaceContainerLowest = Color(0xFF121212),
+    surfaceContainerLow = Color(0xFF212121),
+    surfaceContainer = Color(0xFF262626),
+    surfaceContainerHigh = Color(0xFF2F2F2F),
+    surfaceContainerHighest = Color(0xFF3A3A3A),
+    outline = Color(0xFF6E6E6E),
+    outlineVariant = Color(0xFF404040),
+    error = Color(0xFFFF5A5F),
+    onError = Color(0xFF121212),
+)
+
+private val NothingLight = lightColorScheme(
+    primary = Color(0xFF111111),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFE2E2E2),
+    onPrimaryContainer = Color(0xFF111111),
+    secondary = Color(0xFF3A3A3A),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFE2E2E2),
+    onSecondaryContainer = Color(0xFF111111),
+    tertiary = NothingRed,
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFFFDAD9),
+    onTertiaryContainer = Color(0xFF410004),
+    background = Color(0xFFEFEFEF),
+    onBackground = Color(0xFF111111),
+    surface = Color(0xFFEFEFEF),
+    onSurface = Color(0xFF111111),
+    surfaceVariant = Color(0xFFE6E6E6),
+    onSurfaceVariant = Color(0xFF6B6B6B),
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color(0xFFF7F7F7),
+    surfaceContainer = Color(0xFFF2F2F2),
+    surfaceContainerHigh = Color.White,
+    surfaceContainerHighest = Color(0xFFE6E6E6),
+    outline = Color(0xFF8A8A8A),
+    outlineVariant = Color(0xFFD0D0D0),
+    error = NothingRed,
+    onError = Color.White,
+)
+
+/**
+ * Nothing-style Material 3 Expressive theme: a fixed monochrome palette (instead of wallpaper colors),
+ * dot-matrix titles, expressive motion. Widgets themselves still follow the system's dynamic colors.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AnythingWidgetsTheme(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
-    val ctx = LocalContext.current
-    val colors = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
-            if (dark) dynamicDarkColorScheme(ctx) else dynamicLightColorScheme(ctx)
-        dark -> darkColorScheme()
-        else -> lightColorScheme()
-    }
     MaterialExpressiveTheme(
-        colorScheme = colors,
+        colorScheme = if (isSystemInDarkTheme()) NothingDark else NothingLight,
         motionScheme = MotionScheme.expressive(),
         typography = AppTypography,
         content = content,
     )
-}
-
-/**
- * Subtle "frosted" surface: translucent container tint + hairline highlight border.
- * Cheap and works on every API level. True backdrop blur can be layered on later
- * (e.g. with the Haze library) for API 31+ without changing call sites.
- */
-@Composable
-fun GlassCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    val scheme = MaterialTheme.colorScheme
-    Surface(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.extraLarge,
-        color = scheme.surfaceContainerHigh.copy(alpha = 0.6f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f)),
-    ) {
-        Column(Modifier.padding(20.dp), content = content)
-    }
 }

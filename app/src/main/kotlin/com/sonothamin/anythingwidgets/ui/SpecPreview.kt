@@ -1,6 +1,8 @@
 package com.sonothamin.anythingwidgets.ui
 
+import android.os.Build
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,11 +22,14 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,13 +58,24 @@ fun SpecPreview(
     modifier: Modifier = Modifier,
 ) {
     val node = if (size.width < 180) spec.compact ?: spec.root else spec.root
-    Surface(
-        modifier = modifier.size(size.width.dp, size.height.dp),
-        shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-    ) {
-        Box(Modifier.fillMaxSize()) { PreviewNode(node, data, Modifier.fillMaxSize()) }
+    // The app uses a fixed Nothing palette, but real widgets follow the wallpaper (dynamic color),
+    // so preview with the same scheme the home screen would use.
+    val context = LocalContext.current
+    val dark = isSystemInDarkTheme()
+    val scheme = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+            if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        else -> MaterialTheme.colorScheme
+    }
+    MaterialTheme(colorScheme = scheme) {
+        Surface(
+            modifier = modifier.size(size.width.dp, size.height.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = scheme.surface,
+            border = BorderStroke(1.dp, scheme.outlineVariant),
+        ) {
+            Box(Modifier.fillMaxSize()) { PreviewNode(node, data, Modifier.fillMaxSize()) }
+        }
     }
 }
 

@@ -9,7 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,6 +18,10 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.lifecycle.lifecycleScope
 import com.sonothamin.anythingwidgets.MainActivity
+import com.sonothamin.anythingwidgets.ui.components.NothingItem
+import com.sonothamin.anythingwidgets.ui.components.PageHeader
+import com.sonothamin.anythingwidgets.ui.components.groupShape
+import com.sonothamin.anythingwidgets.ui.components.pageMargin
 import com.sonothamin.anythingwidgets.ui.theme.AnythingWidgetsTheme
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
@@ -47,6 +51,7 @@ class WidgetConfigActivity : ComponentActivity() {
                     installed = installed,
                     onPick = { choose(appWidgetId, it) },
                     onBrowse = { startActivity(Intent(this, MainActivity::class.java)) },
+                    onBack = { finish() },
                 )
             }
         }
@@ -64,26 +69,31 @@ class WidgetConfigActivity : ComponentActivity() {
 }
 
 @Composable
-private fun ConfigScreen(installed: List<WidgetSpec>, onPick: (WidgetSpec) -> Unit, onBrowse: () -> Unit) {
+private fun ConfigScreen(
+    installed: List<WidgetSpec>,
+    onPick: (WidgetSpec) -> Unit,
+    onBrowse: () -> Unit,
+    onBack: () -> Unit,
+) {
     Surface(Modifier.fillMaxSize()) {
-        Column(
-            Modifier.systemBarsPadding().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text("Choose a widget", style = MaterialTheme.typography.headlineMedium)
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
+            item { PageHeader("Choose a widget", onBack = onBack) }
             if (installed.isEmpty()) {
-                Text("You haven't installed any widgets yet.", style = MaterialTheme.typography.bodyMedium)
-                Button(onClick = onBrowse) { Text("Open Explore") }
-            } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(installed, key = { it.id }) { spec ->
-                        Card(onClick = { onPick(spec) }, modifier = Modifier.fillMaxWidth()) {
-                            Column(Modifier.padding(16.dp)) {
-                                Text(spec.name, style = MaterialTheme.typography.titleMedium)
-                                spec.description?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
-                            }
-                        }
+                item {
+                    Column(Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text("You haven't installed any widgets yet.", style = MaterialTheme.typography.bodyLarge)
+                        Button(onClick = onBrowse) { Text("Open Explore") }
                     }
+                }
+            } else {
+                itemsIndexed(installed, key = { _, spec -> spec.id }) { i, spec ->
+                    NothingItem(
+                        title = spec.name,
+                        subtitle = spec.description,
+                        shape = groupShape(i, installed.size),
+                        modifier = Modifier.pageMargin().padding(top = if (i > 0) 2.dp else 0.dp),
+                        onClick = { onPick(spec) },
+                    )
                 }
             }
         }
