@@ -28,6 +28,7 @@ fun AnythingWidgetsTheme(content: @Composable () -> Unit) {
     MaterialExpressiveTheme(
         colorScheme = colors,
         motionScheme = MotionScheme.expressive(),
+        typography = AppTypography,
         content = content,
     )
 }
