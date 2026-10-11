@@ -32,7 +32,11 @@ fun ExplorePage() {
     val scope = rememberCoroutineScope()
 
     var state by remember { mutableStateOf<ExploreState>(ExploreState.Loading) }
-    var installed by remember { mutableStateOf(store.installed().associate { it.id to it.version }) }
+    var installed by remember {
+        mutableStateOf(
+            store.installed().filter { store.sourceOf(it.id) == registry.baseUrl }.associate { it.id to it.version },
+        )
+    }
     var busy by remember { mutableStateOf(emptySet<String>()) }
 
     fun load() {

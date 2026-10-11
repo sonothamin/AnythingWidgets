@@ -10,11 +10,19 @@ import java.io.File
 class SpecStore(context: Context) {
     private val dir = File(context.filesDir, "widget_specs").apply { mkdirs() }
 
-    fun save(spec: WidgetSpec, raw: String) {
+    fun save(spec: WidgetSpec, raw: String, source: String) {
         require(SpecValidator.ID.matches(spec.id))
         val tmp = File(dir, "${spec.id}.json.tmp")
         tmp.writeText(raw)
         check(tmp.renameTo(File(dir, "${spec.id}.json"))) { "Could not save spec" }
+        File(dir, "${spec.id}.src").writeText(source)
+    }
+
+    /** Base URL of the registry this widget was installed from (null if unknown). */
+    fun sourceOf(id: String): String? {
+        if (!SpecValidator.ID.matches(id)) return null
+        val f = File(dir, "$id.src")
+        return if (f.exists()) f.readText() else null
     }
 
     fun load(id: String): WidgetSpec? {
@@ -31,6 +39,9 @@ class SpecStore(context: Context) {
             .sortedBy { it.name.lowercase() }
 
     fun delete(id: String) {
-        if (SpecValidator.ID.matches(id)) File(dir, "$id.json").delete()
+        if (SpecValidator.ID.matches(id)) {
+            File(dir, "$id.json").delete()
+            File(dir, "$id.src").delete()
+        }
     }
 }

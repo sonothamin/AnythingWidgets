@@ -12,8 +12,8 @@ android {
         applicationId = "com.sonothamin.anythingwidgets"
         minSdk = 26
         targetSdk = 36
-        // Central widget registry (must end with "/"). Serves index.json + widget specs over HTTPS.
-        buildConfigField("String", "REGISTRY_URL", "\"https://raw.githubusercontent.com/sonothamin/AnythingWidgets-Registry/main/\"")
+        // Official sonothamin.dev widget registry (must end with "/"). Serves index.json + widget specs over HTTPS.
+        buildConfigField("String", "REGISTRY_URL", "\"https://sonothamin.dev/widgets/\"")
         versionCode = (System.getenv("VERSION_CODE") ?: "1").toInt()
         versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
     }

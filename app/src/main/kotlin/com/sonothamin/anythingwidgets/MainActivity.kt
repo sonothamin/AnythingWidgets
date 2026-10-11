@@ -27,11 +27,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.sonothamin.anythingwidgets.ui.ExplorePage
 import com.sonothamin.anythingwidgets.ui.LibraryPage
+import com.sonothamin.anythingwidgets.ui.SettingsPage
 import com.sonothamin.anythingwidgets.ui.components.GlassHost
 import com.sonothamin.anythingwidgets.ui.components.GlassNavBar
 import com.sonothamin.anythingwidgets.ui.components.NavTab
 import com.sonothamin.anythingwidgets.ui.theme.AnythingWidgetsTheme
-import com.sonothamin.anythingwidgets.ui.theme.GlassCard
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,12 +76,7 @@ fun HomeScreen() {
                 when (page) {
                     0 -> LibraryPage()
                     1 -> ExplorePage()
-                    else -> Box(Modifier.padding(16.dp)) {
-                        GlassCard(Modifier.fillMaxWidth()) {
-                            Text(tabs[page].label, style = MaterialTheme.typography.titleLarge)
-                            Text("Coming soon.", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
+                    else -> SettingsPage()
                 }
             }
         }

@@ -1,7 +1,6 @@
 package com.sonothamin.anythingwidgets.widget.data
 
 import android.content.Context
-import com.sonothamin.anythingwidgets.BuildConfig
 import com.sonothamin.anythingwidgets.widget.spec.IndexEntry
 import com.sonothamin.anythingwidgets.widget.spec.RegistryIndex
 import com.sonothamin.anythingwidgets.widget.spec.SpecCodec
@@ -15,11 +14,11 @@ import java.security.MessageDigest
 /** Talks to the central registry. Only data is downloaded, never code. */
 class Registry(
     private val context: Context,
-    private val baseUrl: String = BuildConfig.REGISTRY_URL,
+    val baseUrl: String = RegistrySettings.baseUrl(context),
 ) {
     suspend fun fetchIndex(): RegistryIndex = withContext(Dispatchers.IO) {
-        val cache = File(context.cacheDir, "registry_index.json")
-        val etagFile = File(context.cacheDir, "registry_index.etag")
+        val cache = File(context.cacheDir, CACHE_INDEX)
+        val etagFile = File(context.cacheDir, CACHE_ETAG)
         val etag = if (cache.exists() && etagFile.exists()) etagFile.readText() else null
         val res = Http.get(baseUrl + "index.json", etag)
         val raw = if (res.code == 304) {
@@ -41,7 +40,7 @@ class Registry(
         val raw = bytes.decodeToString()
         val spec = SpecCodec.parseSpec(raw)
         check(spec.id == entry.id && spec.version == entry.version) { "Spec does not match index" }
-        SpecStore(context).save(spec, raw)
+        SpecStore(context).save(spec, raw, baseUrl)
         spec
     }
 
@@ -49,6 +48,8 @@ class Registry(
     suspend fun updateInstalled(store: SpecStore) {
         val index = fetchIndex()
         for (local in store.installed()) {
+            // Only auto-update from the repository the widget was installed from.
+            if (store.sourceOf(local.id) != baseUrl) continue
             val remote = index.widgets.firstOrNull { it.id == local.id } ?: continue
             if (remote.version > local.version) {
                 try {
@@ -59,6 +60,16 @@ class Registry(
                     // Keep the working local copy.
                 }
             }
+        }
+    }
+
+    companion object {
+        private const val CACHE_INDEX = "registry_index.json"
+        private const val CACHE_ETAG = "registry_index.etag"
+
+        fun clearCache(context: Context) {
+            File(context.cacheDir, CACHE_INDEX).delete()
+            File(context.cacheDir, CACHE_ETAG).delete()
         }
     }
 
