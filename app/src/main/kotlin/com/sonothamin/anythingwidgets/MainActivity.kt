@@ -2,6 +2,7 @@ package com.sonothamin.anythingwidgets
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.sonothamin.anythingwidgets.ui.ExplorePage
 import com.sonothamin.anythingwidgets.ui.LibraryPage
 import com.sonothamin.anythingwidgets.ui.SettingsPage
+import com.sonothamin.anythingwidgets.ui.WidgetDetailsPage
 import com.sonothamin.anythingwidgets.ui.components.GlassHost
 import com.sonothamin.anythingwidgets.ui.components.GlassNavBar
 import com.sonothamin.anythingwidgets.ui.components.NavTab
@@ -51,32 +53,52 @@ private val tabs = listOf(
 @Composable
 fun HomeScreen() {
     var tab by rememberSaveable { mutableIntStateOf(0) }
+    // Id of the widget whose details are open, or null. Kept above the tabs so their state survives.
+    var detailsId by rememberSaveable { mutableStateOf<String?>(null) }
+
+    BackHandler(enabled = detailsId != null) { detailsId = null }
 
     GlassHost(
         overlay = { backdrop ->
-            GlassNavBar(
-                tabs = tabs,
-                selectedIndex = tab,
-                onSelect = { tab = it },
-                backdrop = backdrop,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(bottom = 16.dp),
-            )
+            if (detailsId == null) {
+                GlassNavBar(
+                    tabs = tabs,
+                    selectedIndex = tab,
+                    onSelect = { tab = it },
+                    backdrop = backdrop,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(bottom = 16.dp),
+                )
+            }
         },
     ) {
-        Scaffold(topBar = { LargeTopAppBar(title = { Text("AnythingWidgets") }) }) { padding ->
+        Box(Modifier.fillMaxSize()) {
+            Scaffold(topBar = { LargeTopAppBar(title = { Text("AnythingWidgets") }) }) { padding ->
+                AnimatedContent(
+                    targetState = tab,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    modifier = Modifier.padding(top = padding.calculateTopPadding()),
+                    label = "tab",
+                ) { page ->
+                    when (page) {
+                        0 -> LibraryPage(refreshKey = detailsId, onOpen = { detailsId = it })
+                        1 -> ExplorePage(refreshKey = detailsId, onOpen = { detailsId = it })
+                        else -> SettingsPage()
+                    }
+                }
+            }
+
             AnimatedContent(
-                targetState = tab,
+                targetState = detailsId,
                 transitionSpec = { fadeIn() togetherWith fadeOut() },
-                modifier = Modifier.padding(top = padding.calculateTopPadding()),
-                label = "tab",
-            ) { page ->
-                when (page) {
-                    0 -> LibraryPage()
-                    1 -> ExplorePage()
-                    else -> SettingsPage()
+                label = "details",
+            ) { id ->
+                if (id != null) {
+                    Surface(Modifier.fillMaxSize()) {
+                        WidgetDetailsPage(id = id, onBack = { detailsId = null })
+                    }
                 }
             }
         }

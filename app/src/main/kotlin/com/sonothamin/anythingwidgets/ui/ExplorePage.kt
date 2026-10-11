@@ -25,14 +25,14 @@ private sealed interface ExploreState {
 }
 
 @Composable
-fun ExplorePage() {
+fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
     val context = LocalContext.current.applicationContext
     val registry = remember { Registry(context) }
     val store = remember { SpecStore(context) }
     val scope = rememberCoroutineScope()
 
     var state by remember { mutableStateOf<ExploreState>(ExploreState.Loading) }
-    var installed by remember {
+    var installed by remember(refreshKey) {
         mutableStateOf(
             store.installed().filter { store.sourceOf(it.id) == registry.baseUrl }.associate { it.id to it.version },
         )
@@ -72,7 +72,7 @@ fun ExplorePage() {
         ) {
             items(s.widgets, key = { it.id }) { entry ->
                 val local = installed[entry.id]
-                Card(Modifier.fillMaxWidth()) {
+                Card(onClick = { onOpen(entry.id) }, modifier = Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(entry.name, style = MaterialTheme.typography.titleLarge)
                         Text(
@@ -80,6 +80,9 @@ fun ExplorePage() {
                             style = MaterialTheme.typography.labelMedium,
                         )
                         entry.description?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+                        if (entry.categories.isNotEmpty()) {
+                            Text(entry.categories.joinToString(" · "), style = MaterialTheme.typography.labelMedium)
+                        }
                         Spacer(Modifier.height(4.dp))
                         val upToDate = local != null && local >= entry.version
                         Button(

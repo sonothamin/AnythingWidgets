@@ -16,6 +16,22 @@ class SpecStore(context: Context) {
         tmp.writeText(raw)
         check(tmp.renameTo(File(dir, "${spec.id}.json"))) { "Could not save spec" }
         File(dir, "${spec.id}.src").writeText(source)
+        // Remember when it was first added; updates keep the original date.
+        val added = File(dir, "${spec.id}.added")
+        if (!added.exists()) added.writeText(System.currentTimeMillis().toString())
+    }
+
+    /** Epoch millis when the widget was first added (falls back to the file's age for older installs). */
+    fun addedAt(id: String): Long? {
+        if (!SpecValidator.ID.matches(id)) return null
+        File(dir, "$id.added").takeIf { it.exists() }?.readText()?.trim()?.toLongOrNull()?.let { return it }
+        return File(dir, "$id.json").takeIf { it.exists() }?.lastModified()
+    }
+
+    /** Size of the stored spec file in bytes (0 if not installed). */
+    fun sizeOf(id: String): Long {
+        if (!SpecValidator.ID.matches(id)) return 0L
+        return File(dir, "$id.json").takeIf { it.exists() }?.length() ?: 0L
     }
 
     /** Base URL of the registry this widget was installed from (null if unknown). */
@@ -42,6 +58,7 @@ class SpecStore(context: Context) {
         if (SpecValidator.ID.matches(id)) {
             File(dir, "$id.json").delete()
             File(dir, "$id.src").delete()
+            File(dir, "$id.added").delete()
         }
     }
 }

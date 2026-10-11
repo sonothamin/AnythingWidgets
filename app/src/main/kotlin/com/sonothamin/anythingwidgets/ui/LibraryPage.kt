@@ -19,9 +19,9 @@ import com.sonothamin.anythingwidgets.widget.data.SpecStore
 
 /** Installed widgets + one-tap "add to home screen" (pin) for each provider size. */
 @Composable
-fun LibraryPage() {
+fun LibraryPage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
     val context = LocalContext.current
-    val installed = remember { SpecStore(context).installed() }
+    val installed = remember(refreshKey) { SpecStore(context).installed() }
     val manager = remember { AppWidgetManager.getInstance(context) }
 
     fun pin(receiver: Class<*>) {
@@ -53,10 +53,17 @@ fun LibraryPage() {
             item { Text("Nothing installed yet. Head to Explore.", style = MaterialTheme.typography.bodyMedium) }
         } else {
             items(installed, key = { it.id }) { spec ->
-                Card(Modifier.fillMaxWidth()) {
+                Card(onClick = { onOpen(spec.id) }, modifier = Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp)) {
                         Text(spec.name, style = MaterialTheme.typography.titleLarge)
                         spec.description?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+                        if (spec.categories.isNotEmpty()) {
+                            Text(
+                                spec.categories.joinToString(" · "),
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(top = 4.dp),
+                            )
+                        }
                     }
                 }
             }

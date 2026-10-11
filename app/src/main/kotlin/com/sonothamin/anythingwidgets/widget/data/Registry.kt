@@ -33,15 +33,26 @@ class Registry(
         SpecCodec.parseIndex(raw)
     }
 
-    /** Download, verify checksum, validate, then store. */
-    suspend fun install(entry: IndexEntry): WidgetSpec = withContext(Dispatchers.IO) {
+    /** A verified, validated spec that has been downloaded but not necessarily installed. */
+    class Fetched(val spec: WidgetSpec, val raw: String, val sizeBytes: Int)
+
+    private fun download(entry: IndexEntry): Fetched {
         val bytes = Http.get(baseUrl + entry.spec).bytes
         check(sha256(bytes).equals(entry.sha256, ignoreCase = true)) { "Checksum mismatch" }
         val raw = bytes.decodeToString()
         val spec = SpecCodec.parseSpec(raw)
         check(spec.id == entry.id && spec.version == entry.version) { "Spec does not match index" }
-        SpecStore(context).save(spec, raw, baseUrl)
-        spec
+        return Fetched(spec, raw, bytes.size)
+    }
+
+    /** Download and verify without installing (used to preview a widget before adding it). */
+    suspend fun fetchSpec(entry: IndexEntry): Fetched = withContext(Dispatchers.IO) { download(entry) }
+
+    /** Download, verify checksum, validate, then store. */
+    suspend fun install(entry: IndexEntry): WidgetSpec = withContext(Dispatchers.IO) {
+        val fetched = download(entry)
+        SpecStore(context).save(fetched.spec, fetched.raw, baseUrl)
+        fetched.spec
     }
 
     /** Upgrades installed widgets whose registry version is newer. */
@@ -50,6 +61,7 @@ class Registry(
         for (local in store.installed()) {
             // Only auto-update from the repository the widget was installed from.
             if (store.sourceOf(local.id) != baseUrl) continue
+            if (!WidgetPrefs.autoUpdate(context, local.id)) continue
             val remote = index.widgets.firstOrNull { it.id == local.id } ?: continue
             if (remote.version > local.version) {
                 try {

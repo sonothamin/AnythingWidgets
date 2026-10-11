@@ -1,10 +1,19 @@
 {
   "schema": 1,
   "id": "year-progress",
-  "version": 1,
+  "version": 2,
   "name": "Year Progress",
   "author": "AnythingWidgets",
   "description": "How far through the year you are.",
+  "created": "2026-10-11",
+  "categories": [
+    "Time & Date"
+  ],
+  "tags": [
+    "year",
+    "progress",
+    "countdown"
+  ],
   "root": {
     "type": "column",
     "fill": "both",

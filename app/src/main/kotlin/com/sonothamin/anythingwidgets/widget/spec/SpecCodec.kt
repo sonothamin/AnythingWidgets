@@ -6,6 +6,9 @@ object SpecValidator {
     const val SUPPORTED_SCHEMA = 1
     const val MAX_NODES = 100
     const val MAX_DEPTH = 10
+    const val MAX_TAGS = 10
+    const val MAX_CATEGORIES = 5
+    const val MAX_LABEL = 24
 
     val ID = Regex("[a-z0-9][a-z0-9._-]{0,63}")
     private val SPEC_PATH = Regex("[A-Za-z0-9][A-Za-z0-9._/-]{0,127}")
@@ -13,12 +16,21 @@ object SpecValidator {
     private val CONTAINERS = setOf("row", "column", "box")
     private val TYPES = CONTAINERS + setOf("text", "spacer", "progress")
     private val ACTIONS = setOf("open_app", "open_url", "refresh")
+    private val DATE = Regex("\\d{4}-\\d{2}-\\d{2}")
+
+    private fun metaError(created: String?, tags: List<String>, categories: List<String>): String? {
+        if (created != null && !DATE.matches(created)) return "Invalid created date"
+        if (tags.size > MAX_TAGS || categories.size > MAX_CATEGORIES) return "Too many tags or categories"
+        if ((tags + categories).any { it.isBlank() || it.length > MAX_LABEL }) return "Invalid tag or category"
+        return null
+    }
 
     fun validate(spec: WidgetSpec): String? {
         if (spec.schema > SUPPORTED_SCHEMA) return "Unsupported schema ${spec.schema}"
         if (!ID.matches(spec.id)) return "Invalid id"
         if (spec.version < 1) return "Invalid version"
         if (spec.name.isBlank() || spec.name.length > 60) return "Invalid name"
+        metaError(spec.created, spec.tags, spec.categories)?.let { return it }
         var count = 0
         fun walk(n: Node, depth: Int): String? {
             if (++count > MAX_NODES) return "Too many nodes"
@@ -50,6 +62,7 @@ object SpecValidator {
             if (!ID.matches(e.id) || e.version < 1) return "Bad entry '${e.id}'"
             if (!SPEC_PATH.matches(e.spec) || ".." in e.spec) return "Bad spec path for '${e.id}'"
             if (!SHA256.matches(e.sha256)) return "Bad checksum for '${e.id}'"
+            metaError(e.created, e.tags, e.categories)?.let { return "Bad metadata for '${e.id}'" }
         }
         return null
     }

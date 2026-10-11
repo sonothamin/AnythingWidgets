@@ -14,6 +14,10 @@ data class WidgetSpec(
     val name: String,
     val description: String? = null,
     val author: String? = null,
+    /** Creation date, ISO yyyy-MM-dd. */
+    val created: String? = null,
+    val tags: List<String> = emptyList(),
+    val categories: List<String> = emptyList(),
     val root: Node,
     /** Optional layout used when the widget is resized below ~180dp wide. */
     val compact: Node? = null,
@@ -71,4 +75,7 @@ data class IndexEntry(
     val sha256: String,
     val author: String? = null,
     val description: String? = null,
+    val created: String? = null,
+    val tags: List<String> = emptyList(),
+    val categories: List<String> = emptyList(),
 )

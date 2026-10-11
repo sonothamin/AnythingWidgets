@@ -1,10 +1,19 @@
 {
   "schema": 1,
   "id": "battery",
-  "version": 1,
+  "version": 2,
   "name": "Battery",
   "author": "AnythingWidgets",
   "description": "Big battery percentage with a bar. Tap to refresh.",
+  "created": "2026-10-11",
+  "categories": [
+    "System"
+  ],
+  "tags": [
+    "battery",
+    "status",
+    "progress"
+  ],
   "root": {
     "type": "column",
     "fill": "both",

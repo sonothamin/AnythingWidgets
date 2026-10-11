@@ -1,10 +1,19 @@
 {
   "schema": 1,
   "id": "date",
-  "version": 1,
+  "version": 2,
   "name": "Date",
   "author": "AnythingWidgets",
   "description": "A large, calm date.",
+  "created": "2026-10-11",
+  "categories": [
+    "Time & Date"
+  ],
+  "tags": [
+    "date",
+    "calendar",
+    "minimal"
+  ],
   "root": {
     "type": "row",
     "fill": "both",

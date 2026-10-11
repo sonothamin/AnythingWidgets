@@ -6,54 +6,107 @@
       "name": "Battery",
       "author": "AnythingWidgets",
       "description": "Big battery percentage with a bar. Tap to refresh.",
-      "version": 1,
+      "version": 2,
+      "created": "2026-10-11",
+      "categories": [
+        "System"
+      ],
+      "tags": [
+        "battery",
+        "status",
+        "progress"
+      ],
       "spec": "widgets/battery.json",
-      "sha256": "8f403b5fd4e3d8eaac5df4e88fc20a7f43e3e78e3d30850caf490f96abae74e6"
+      "sha256": "4a499343c3f28c46d2bc0fcdfc00a01663b3673c2fcb60c3ad778c8af6d41bb6"
     },
     {
       "id": "date",
       "name": "Date",
       "author": "AnythingWidgets",
       "description": "A large, calm date.",
-      "version": 1,
+      "version": 2,
+      "created": "2026-10-11",
+      "categories": [
+        "Time & Date"
+      ],
+      "tags": [
+        "date",
+        "calendar",
+        "minimal"
+      ],
       "spec": "widgets/date.json",
-      "sha256": "884e9ebefa8bd9ea0fb1a134cc65f59db581bf5402bed1424f81026d94d1d65f"
+      "sha256": "a16899e9e6eaaf9fcacfb2969618230d6f691e1c7a57f5d680a02304f899ee5f"
     },
     {
       "id": "links",
       "name": "Quick Links",
       "author": "AnythingWidgets",
       "description": "Two tappable shortcuts. Replace the URLs with your own.",
-      "version": 1,
+      "version": 2,
+      "created": "2026-10-11",
+      "categories": [
+        "Utilities"
+      ],
+      "tags": [
+        "shortcuts",
+        "links"
+      ],
       "spec": "widgets/links.json",
-      "sha256": "22105371cf77f6b9cb949bdbc5a472b6226a62d76969b4332544cb9c87198968"
+      "sha256": "436aac7c661f64f1ddbbed2328ef1c84abd00f29c72fe36b87f913413bca3050"
     },
     {
       "id": "quote",
       "name": "Quote",
       "author": "AnythingWidgets",
       "description": "A static line of text. Copy and edit it to make your own.",
-      "version": 1,
+      "version": 2,
+      "created": "2026-10-11",
+      "categories": [
+        "Text"
+      ],
+      "tags": [
+        "quote",
+        "text",
+        "customizable"
+      ],
       "spec": "widgets/quote.json",
-      "sha256": "219ba2921b4c2603b3f4f8223b14cf9522663ac1358ed091d889f9122cc3cf3e"
+      "sha256": "b12ba7330f791839cd9c6de00c85658621b0427dd2214944fa382d3c237ea726"
     },
     {
       "id": "today",
       "name": "Today",
       "author": "AnythingWidgets",
       "description": "Weekday and date, with battery level.",
-      "version": 1,
+      "version": 2,
+      "created": "2026-10-11",
+      "categories": [
+        "Time & Date"
+      ],
+      "tags": [
+        "date",
+        "battery",
+        "daily"
+      ],
       "spec": "widgets/today.json",
-      "sha256": "12dc3cfa8b2ca499bcb28ac5f122d9ed29d21a62e86c525ca04d02a49adfbc7c"
+      "sha256": "b4063e370f399282859bad5ed22d8dacf74383d40b7ef1adf90a59152e048773"
     },
     {
       "id": "year-progress",
       "name": "Year Progress",
       "author": "AnythingWidgets",
       "description": "How far through the year you are.",
-      "version": 1,
+      "version": 2,
+      "created": "2026-10-11",
+      "categories": [
+        "Time & Date"
+      ],
+      "tags": [
+        "year",
+        "progress",
+        "countdown"
+      ],
       "spec": "widgets/year-progress.json",
-      "sha256": "aa13e54f19b0697afc3da089527e3366c3a6480c620c95339211ba4ffff0d6b2"
+      "sha256": "560c76c9ef75adcc2182d1f0d5b010915615c153abc0bf26cdd42b7bd3162b22"
     }
   ]
 }

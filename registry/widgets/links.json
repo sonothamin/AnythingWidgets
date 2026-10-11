@@ -1,10 +1,18 @@
 {
   "schema": 1,
   "id": "links",
-  "version": 1,
+  "version": 2,
   "name": "Quick Links",
   "author": "AnythingWidgets",
   "description": "Two tappable shortcuts. Replace the URLs with your own.",
+  "created": "2026-10-11",
+  "categories": [
+    "Utilities"
+  ],
+  "tags": [
+    "shortcuts",
+    "links"
+  ],
   "root": {
     "type": "row",
     "fill": "both",

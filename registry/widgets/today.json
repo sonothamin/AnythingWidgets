@@ -1,10 +1,19 @@
 {
   "schema": 1,
   "id": "today",
-  "version": 1,
+  "version": 2,
   "name": "Today",
   "author": "AnythingWidgets",
   "description": "Weekday and date, with battery level.",
+  "created": "2026-10-11",
+  "categories": [
+    "Time & Date"
+  ],
+  "tags": [
+    "date",
+    "battery",
+    "daily"
+  ],
   "root": {
     "type": "column",
     "fill": "both",

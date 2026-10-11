@@ -1,10 +1,19 @@
 {
   "schema": 1,
   "id": "quote",
-  "version": 1,
+  "version": 2,
   "name": "Quote",
   "author": "AnythingWidgets",
   "description": "A static line of text. Copy and edit it to make your own.",
+  "created": "2026-10-11",
+  "categories": [
+    "Text"
+  ],
+  "tags": [
+    "quote",
+    "text",
+    "customizable"
+  ],
   "root": {
     "type": "column",
     "fill": "both",
