@@ -18,12 +18,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -156,7 +159,7 @@ fun NothingItem(
                 Text(
                     title,
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
-                    color = titleColor,
+                    color = if (titleColor == Color.Unspecified) MaterialTheme.colorScheme.onSurface else titleColor,
                 )
                 if (subtitle != null) {
                     Text(
@@ -174,6 +177,60 @@ fun NothingItem(
             }
         }
     }
+}
+
+/** Read-only label/value row: muted label on top, the value itself at full contrast. */
+@Composable
+fun NothingField(label: String, value: String, shape: Shape, modifier: Modifier = Modifier) {
+    NothingCard(shape, modifier, contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(2.dp))
+        Text(value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+    }
+}
+
+/**
+ * Dialog in the app's own language: charcoal card, dot-matrix title, body text muted unless
+ * the content sets its own color, and a clear primary action.
+ */
+@Composable
+fun NothingDialog(
+    title: String,
+    onDismiss: () -> Unit,
+    confirmText: String,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier,
+    dismissText: String? = null,
+    destructive: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    val scheme = MaterialTheme.colorScheme
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = modifier,
+        shape = CardShape,
+        containerColor = scheme.surfaceContainerHigh,
+        titleContentColor = scheme.onSurface,
+        textContentColor = scheme.onSurfaceVariant,
+        title = { Text(title, style = MaterialTheme.typography.headlineSmall) },
+        text = content,
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    confirmText,
+                    color = if (destructive) scheme.error else scheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        },
+        dismissButton = dismissText?.let {
+            { TextButton(onClick = onDismiss) { Text(it, color = scheme.onSurfaceVariant) } }
+        },
+    )
 }
 
 @Composable
@@ -197,7 +254,11 @@ fun NothingTile(
     NothingCard(CardShape, modifier, onClick, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 18.dp)) {
         Box(Modifier.height(32.dp), contentAlignment = Alignment.CenterStart) { icon() }
         Spacer(Modifier.height(28.dp))
-        Text(title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp))
+        Text(
+            title,
+            style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         if (subtitle != null) {
             Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

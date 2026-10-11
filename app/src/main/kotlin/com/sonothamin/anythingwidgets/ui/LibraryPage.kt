@@ -57,9 +57,10 @@ fun LibraryPage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                 Text(
                     installed.size.toString().padStart(2, '0'),
                     style = MaterialTheme.typography.displayLarge.copy(fontSize = 88.sp, lineHeight = 96.sp),
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    if (installed.isEmpty()) "Nothing installed yet. Head to Explore."
+                    if (installed.isEmpty()) "No widgets yet. Find some in Explore."
                     else if (installed.size == 1) "widget installed" else "widgets installed",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -83,7 +84,7 @@ fun LibraryPage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
         }
         item {
             Text(
-                "You'll pick which widget to show after placing it.",
+                "Place one, then choose which widget it shows.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
