@@ -49,3 +49,15 @@ Widgets can't tick every minute: Android limits background updates, so values re
 - HTTPS only; each spec is verified against the SHA-256 in `index.json` before install.
 - Specs are re-validated every time they're loaded from disk.
 - No scripts, no HTML, no remote images, no arbitrary intents.
+
+## Importing from a zip (development and bring-your-own widgets)
+Settings -> Import widgets -> Choose zip. The zip uses the same layout as a registry:
+```
+index.json
+widgets/<id>.json
+```
+Zipping the registry folder itself (so everything sits in one wrapper folder) also works. Only `.json` files are read.
+- `index.json` is used as the list of spec paths; checksums are ignored (you chose the file). If it's missing, every `widgets/*.json` is imported.
+- Every spec still passes full validation; invalid ones are skipped and reported.
+- Same-id widgets are replaced, whatever their version. Imported widgets are never auto-updated from a registry.
+- Limits: 300 files, 256 KB per file, 8 MB total, no `..` or absolute paths.
