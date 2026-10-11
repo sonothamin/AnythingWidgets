@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "id": "bento-red",
+  "version": 1,
+  "name": "Bento Red",
+  "author": "AnythingWidgets",
+  "description": "Dark bento tile: a red date orb with battery and year-progress pills. Tap to refresh.",
+  "created": "2026-10-12",
+  "categories": [
+    "Time & Date",
+    "System"
+  ],
+  "tags": [
+    "bento",
+    "red",
+    "dark",
+    "date",
+    "battery",
+    "year"
+  ],
+  "root": {
+    "type": "row",
+    "fill": "both",
+    "background": "#0A0A0A",
+    "padding": 8,
+    "gap": 8,
+    "action": {
+      "type": "refresh"
+    },
+    "children": [
+      {
+        "type": "column",
+        "grow": true,
+        "fill": "height",
+        "background": "#D71921",
+        "radius": 48,
+        "padding": 10,
+        "justify": "center",
+        "align": "center",
+        "gap": 0,
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.weekday.short}}",
+            "size": 13,
+            "color": "#B3FFFFFF",
+            "bold": true,
+            "maxLines": 1
+          },
+          {
+            "type": "text",
+            "text": "{{date.day}}",
+            "size": 60,
+            "color": "#FFFFFF",
+            "bold": true,
+            "maxLines": 1
+          },
+          {
+            "type": "text",
+            "text": "{{date.month}}",
+            "size": 13,
+            "color": "#B3FFFFFF",
+            "bold": true,
+            "maxLines": 1
+          },
+          {
+            "type": "spacer",
+            "height": 6
+          },
+          {
+            "type": "text",
+            "text": "Day {{date.dayOfYear}}",
+            "size": 11,
+            "color": "#B3FFFFFF",
+            "maxLines": 1
+          }
+        ]
+      },
+      {
+        "type": "column",
+        "grow": true,
+        "fill": "height",
+        "justify": "center",
+        "gap": 8,
+        "children": [
+          {
+            "type": "column",
+            "fill": "width",
+            "background": "#1C1C1E",
+            "radius": 24,
+            "padding": 12,
+            "gap": 8,
+            "children": [
+              {
+                "type": "row",
+                "fill": "width",
+                "align": "center",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "●",
+                    "size": 10,
+                    "color": "#D71921",
+                    "maxLines": 1
+                  },
+                  {
+                    "type": "text",
+                    "text": "  Battery",
+                    "size": 11,
+                    "color": "#8E8E93",
+                    "maxLines": 1,
+                    "grow": true
+                  },
+                  {
+                    "type": "text",
+                    "text": "{{battery.level}}%",
+                    "size": 22,
+                    "color": "#FFFFFF",
+                    "bold": true,
+                    "maxLines": 1
+                  }
+                ]
+              },
+              {
+                "type": "progress",
+                "progress": "{{battery.fraction}}",
+                "height": 8,
+                "color": "#D71921",
+                "track": "#2C2C2E",
+                "fill": "width"
+              }
+            ]
+          },
+          {
+            "type": "column",
+            "fill": "width",
+            "background": "#1C1C1E",
+            "radius": 24,
+            "padding": 12,
+            "gap": 8,
+            "children": [
+              {
+                "type": "row",
+                "fill": "width",
+                "align": "center",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "{{date.year}}",
+                    "size": 11,
+                    "color": "#8E8E93",
+                    "maxLines": 1,
+                    "grow": true
+                  },
+                  {
+                    "type": "text",
+                    "text": "{{date.year.percent}}%",
+                    "size": 22,
+                    "color": "#FFFFFF",
+                    "bold": true,
+                    "maxLines": 1
+                  }
+                ]
+              },
+              {
+                "type": "progress",
+                "progress": "{{date.year.fraction}}",
+                "height": 8,
+                "color": "#FFFFFF",
+                "track": "#2C2C2E",
+                "fill": "width"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "compact": {
+    "type": "column",
+    "fill": "both",
+    "background": "#0A0A0A",
+    "padding": 8,
+    "gap": 6,
+    "justify": "center",
+    "align": "center",
+    "action": {
+      "type": "refresh"
+    },
+    "children": [
+      {
+        "type": "column",
+        "fill": "width",
+        "background": "#D71921",
+        "radius": 40,
+        "padding": 6,
+        "align": "center",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.weekday.short}}",
+            "size": 11,
+            "color": "#B3FFFFFF",
+            "bold": true,
+            "maxLines": 1
+          },
+          {
+            "type": "text",
+            "text": "{{date.day}}",
+            "size": 38,
+            "color": "#FFFFFF",
+            "bold": true,
+            "maxLines": 1
+          }
+        ]
+      },
+      {
+        "type": "progress",
+        "progress": "{{battery.fraction}}",
+        "height": 8,
+        "color": "#D71921",
+        "track": "#2C2C2E",
+        "fill": "width"
+      }
+    ]
+  }
+}
