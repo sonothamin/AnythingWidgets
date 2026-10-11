@@ -81,8 +81,12 @@ private fun ConfigScreen(
             if (installed.isEmpty()) {
                 item {
                     Column(Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("You haven't installed any widgets yet.", style = MaterialTheme.typography.bodyLarge)
-                        Button(onClick = onBrowse) { Text("Open Explore") }
+                        Text(
+                            "No widgets installed yet.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Button(onClick = onBrowse) { Text("Browse Explore") }
                     }
                 }
             } else {

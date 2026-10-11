@@ -56,8 +56,8 @@ fun GlassNavBar(
     val dark = isSystemInDarkTheme()
     var origin by remember { mutableStateOf(Offset.Zero) }
 
-    val tint = if (dark) Color(0xFF1A1A1A).copy(alpha = 0.45f) else Color.White.copy(alpha = 0.50f)
-    val indicator = if (dark) Color.Black.copy(alpha = 0.55f) else Color.Black.copy(alpha = 0.10f)
+    val tint = if (dark) Color(0xFF1A1A1A).copy(alpha = 0.78f) else Color.White.copy(alpha = 0.82f)
+    val indicator = if (dark) Color.Black.copy(alpha = 0.55f) else Color.Black.copy(alpha = 0.12f)
     val stroke = Brush.verticalGradient(
         listOf(Color.White.copy(alpha = if (dark) 0.28f else 0.70f), Color.White.copy(alpha = 0.06f)),
     )
@@ -96,7 +96,7 @@ fun GlassNavBar(
                     spring(stiffness = Spring.StiffnessMediumLow), label = "bg",
                 )
                 val fg by animateColorAsState(
-                    if (selected) scheme.onSurface else scheme.onSurface.copy(alpha = 0.7f),
+                    if (selected) scheme.onSurface else scheme.onSurfaceVariant,
                     spring(stiffness = Spring.StiffnessMediumLow), label = "fg",
                 )
                 Row(

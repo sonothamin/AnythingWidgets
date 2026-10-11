@@ -90,8 +90,14 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("Couldn't reach the widget registry.", style = MaterialTheme.typography.bodyLarge)
-                Spacer(Modifier.height(12.dp))
+                Text("Can't reach the registry", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Check your connection and try again.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(16.dp))
                 Button(onClick = { load() }) { Text("Retry") }
             }
 
@@ -117,9 +123,14 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                         modifier = Modifier.pageMargin().padding(top = if (i > 0) 2.dp else 0.dp),
                         onClick = { onOpen(entry.id) },
                         trailing = {
-                            FilledTonalButton(
-                                enabled = !upToDate && entry.id !in busy,
-                                onClick = {
+                            if (upToDate) {
+                                Text(
+                                    "Installed",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            } else {
+                                val action: () -> Unit = {
                                     scope.launch {
                                         busy = busy + entry.id
                                         try {
@@ -129,21 +140,22 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                                         } catch (e: CancellationException) {
                                             throw e
                                         } catch (_: Exception) {
-                                            Toast.makeText(context, "Couldn't install ${entry.name}", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "Couldn't install ${entry.name}. Try again.", Toast.LENGTH_SHORT).show()
                                         } finally {
                                             busy = busy - entry.id
                                         }
                                     }
-                                },
-                            ) {
-                                Text(
-                                    when {
-                                        entry.id in busy -> "Installing…"
-                                        local == null -> "Install"
-                                        upToDate -> "Installed"
-                                        else -> "Update"
-                                    },
-                                )
+                                }
+                                val label = when {
+                                    entry.id in busy -> if (local == null) "Installing…" else "Updating…"
+                                    local == null -> "Install"
+                                    else -> "Update"
+                                }
+                                if (local == null) {
+                                    Button(enabled = entry.id !in busy, onClick = action) { Text(label) }
+                                } else {
+                                    FilledTonalButton(enabled = entry.id !in busy, onClick = action) { Text(label) }
+                                }
                             }
                         },
                     )

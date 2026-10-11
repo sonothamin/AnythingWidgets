@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.sp
 import com.sonothamin.anythingwidgets.ui.components.ChevronIcon
 import com.sonothamin.anythingwidgets.ui.components.NothingCard
+import com.sonothamin.anythingwidgets.ui.components.NothingDialog
 import com.sonothamin.anythingwidgets.ui.components.NothingItem
 import com.sonothamin.anythingwidgets.ui.components.NothingStack
 import com.sonothamin.anythingwidgets.ui.components.PageHeader
@@ -50,7 +51,7 @@ fun SettingsPage() {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                ImportOutcome.Failed(e.message ?: "Import failed")
+                ImportOutcome.Failed(e.message ?: "That file couldn't be read as a widget pack.")
             }
         }
     }
@@ -58,7 +59,7 @@ fun SettingsPage() {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
         PageHeader("Settings")
 
-        SectionLabel("Widget repository")
+        SectionLabel("Widget source")
         NothingStack(Modifier.pageMargin()) {
             row { shape ->
                 RepoOption(
@@ -75,8 +76,8 @@ fun SettingsPage() {
             row { shape ->
                 RepoOption(
                     selected = source == Source.CUSTOM,
-                    title = "Custom repository",
-                    subtitle = custom ?: "Not set",
+                    title = "Custom source",
+                    subtitle = custom ?: "Not set up yet",
                     shape = shape,
                     onSelect = {
                         val url = custom
@@ -93,7 +94,7 @@ fun SettingsPage() {
             }
         }
         Text(
-            "Widgets are data only, but a repository controls what they show. Only use ones you trust.",
+            "Widgets only describe what to show, but the source decides what that is. Stick to sources you trust.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
@@ -103,9 +104,8 @@ fun SettingsPage() {
         NothingStack(Modifier.pageMargin()) {
             row { shape ->
                 NothingItem(
-                    title = "Import widgets",
-                    subtitle = "Add widgets from a .zip containing index.json and a widgets/ folder of <id>.json files. " +
-                        "Existing widgets with the same id are replaced.",
+                    title = "Import from zip",
+                    subtitle = "Needs an index.json and a widgets/ folder. Widgets with the same ID get replaced.",
                     shape = shape,
                     onClick = {
                         picker.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream"))
@@ -151,7 +151,11 @@ private fun RepoOption(
         ) {
             RadioButton(selected = selected, onClick = null)
             Column(Modifier.weight(1f).padding(start = 16.dp)) {
-                Text(title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp))
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
                 Text(
                     subtitle,
                     style = MaterialTheme.typography.bodySmall,
@@ -169,35 +173,33 @@ private fun CustomRepoDialog(initial: String, onDismiss: () -> Unit, onSave: (St
     var text by remember { mutableStateOf(initial) }
     var showError by remember { mutableStateOf(false) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Custom repository") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    "Enter the HTTPS URL of the folder that contains index.json.",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it; showError = false },
-                    singleLine = true,
-                    label = { Text("Repository URL") },
-                    placeholder = { Text("https://example.com/widgets/") },
-                    isError = showError,
-                    supportingText = { if (showError) Text("Enter a valid https:// URL") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-                )
-            }
+    NothingDialog(
+        title = "Custom source",
+        onDismiss = onDismiss,
+        confirmText = "Save",
+        dismissText = "Cancel",
+        onConfirm = {
+            val url = RegistrySettings.normalize(text)
+            if (url != null) onSave(url) else showError = true
         },
-        confirmButton = {
-            TextButton(onClick = {
-                val url = RegistrySettings.normalize(text)
-                if (url != null) onSave(url) else showError = true
-            }) { Text("Save") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
-    )
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(
+                "Paste the https link to the folder that holds your index.json.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it; showError = false },
+                singleLine = true,
+                label = { Text("Source URL") },
+                placeholder = { Text("https://example.com/widgets/") },
+                isError = showError,
+                supportingText = { if (showError) Text("That needs to be a valid https:// link.") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            )
+        }
+    }
 }
 
 private sealed interface ImportOutcome {
@@ -207,27 +209,53 @@ private sealed interface ImportOutcome {
 
 @Composable
 private fun ImportResultDialog(outcome: ImportOutcome, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (outcome is ImportOutcome.Failed) "Import failed" else "Import finished") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                when (outcome) {
-                    is ImportOutcome.Failed -> Text(outcome.message)
-                    is ImportOutcome.Done -> {
-                        val r = outcome.result
-                        Text("Imported ${r.imported.size} widget${if (r.imported.size == 1) "" else "s"}.")
-                        r.imported.forEach { Text("• ${it.name} (v${it.version})", style = MaterialTheme.typography.bodySmall) }
-                        if (r.skipped.isNotEmpty()) {
-                            Text("Skipped ${r.skipped.size}:", style = MaterialTheme.typography.labelLarge)
-                            r.skipped.forEach { (file, why) ->
-                                Text("• $file: $why", style = MaterialTheme.typography.bodySmall)
+    val scheme = MaterialTheme.colorScheme
+    NothingDialog(
+        title = if (outcome is ImportOutcome.Failed) "Couldn't import" else "Widgets imported",
+        onDismiss = onDismiss,
+        confirmText = "Done",
+        onConfirm = onDismiss,
+    ) {
+        Column(
+            Modifier.verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            when (outcome) {
+                is ImportOutcome.Failed -> Text(outcome.message, style = MaterialTheme.typography.bodyMedium)
+                is ImportOutcome.Done -> {
+                    val r = outcome.result
+                    Text(
+                        if (r.imported.isEmpty()) "Nothing new was added."
+                        else "${r.imported.size} widget${if (r.imported.size == 1) "" else "s"} added.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    r.imported.forEach {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                it.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = scheme.onSurface,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Text("v${it.version}", style = MaterialTheme.typography.labelLarge, color = scheme.onSurfaceVariant)
+                        }
+                    }
+                    if (r.skipped.isNotEmpty()) {
+                        Text(
+                            "Skipped (${r.skipped.size})",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = scheme.error,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                        r.skipped.forEach { (file, why) ->
+                            Column {
+                                Text(file, style = MaterialTheme.typography.bodyMedium, color = scheme.onSurface)
+                                Text(why, style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant)
                             }
                         }
                     }
                 }
             }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } },
-    )
+        }
+    }
 }

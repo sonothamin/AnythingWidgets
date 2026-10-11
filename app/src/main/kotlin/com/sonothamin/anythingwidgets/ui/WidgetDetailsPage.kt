@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +28,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +46,8 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.updateAll
 import com.sonothamin.anythingwidgets.ui.components.CardShape
 import com.sonothamin.anythingwidgets.ui.components.NothingCard
+import com.sonothamin.anythingwidgets.ui.components.NothingDialog
+import com.sonothamin.anythingwidgets.ui.components.NothingField
 import com.sonothamin.anythingwidgets.ui.components.NothingItem
 import com.sonothamin.anythingwidgets.ui.components.NothingStack
 import com.sonothamin.anythingwidgets.ui.components.PageHeader
@@ -133,7 +133,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
             } catch (c: CancellationException) {
                 throw c
             } catch (_: Exception) {
-                Toast.makeText(context, "Couldn't install ${e.name}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Couldn't install ${e.name}. Try again.", Toast.LENGTH_SHORT).show()
             } finally {
                 busy = false
             }
@@ -145,7 +145,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
         if (manager.isRequestPinAppWidgetSupported) {
             manager.requestPinAppWidget(ComponentName(context, receiver), null, null)
         } else {
-            Toast.makeText(context, "Your launcher can't add widgets from here", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Your launcher doesn't support adding widgets from here", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -169,7 +169,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                     CircularProgressIndicator()
                 } else {
                     Text(
-                        if (offline) "Couldn't reach the widget registry." else "This widget isn't available.",
+                        if (offline) "Can't reach the registry. Check your connection." else "This widget isn't available.",
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
@@ -185,7 +185,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                spec.description?.let { Text(it, style = MaterialTheme.typography.bodyLarge) }
+                spec.description?.let { Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface) }
             }
 
             // Install / update
@@ -221,8 +221,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 }
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    "${size.width} × ${size.height} dp · uses this device's live data. " +
-                        "Your launcher may size widgets a little differently.",
+                    "${size.width} × ${size.height} dp · live data from this device. Your launcher may size it slightly differently.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -251,7 +250,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
             val rows = buildList {
                 add("Created by" to (spec.author ?: "Unknown"))
                 add("Created" to (spec.created?.let(::formatIsoDate) ?: "Unknown"))
-                add("Added" to (addedAt?.let(::formatMillis) ?: "Not added yet"))
+                add("Added" to (addedAt?.let(::formatMillis) ?: "Not installed"))
                 add(
                     "Version" to buildString {
                         append("v${spec.version}")
@@ -259,9 +258,9 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                     },
                 )
                 add("File size" to (bytes?.let(::formatSize) ?: "Unknown"))
-                add("Layouts" to if (SpecInfo.hasCompactLayout(spec)) "Full and compact (adapts to size)" else "Single layout")
-                add("Data used" to (dataUsed.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None (static)"))
-                add("Tapping" to (actions.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Does nothing"))
+                add("Layouts" to if (SpecInfo.hasCompactLayout(spec)) "Full and compact, adapts to size" else "Single layout")
+                add("Data used" to (dataUsed.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Nothing, fully static"))
+                add("Tapping" to (actions.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Nothing"))
                 add(
                     "Source" to when {
                         installed == null -> hostOf(registry.baseUrl)
@@ -274,7 +273,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
             }
             NothingStack(Modifier.pageMargin()) {
                 rows.forEach { (label, value) ->
-                    row { shape -> NothingItem(title = label, subtitle = value, shape = shape) }
+                    row { shape -> NothingField(label = label, value = value, shape = shape) }
                 }
             }
 
@@ -285,8 +284,8 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                     row { shape ->
                         NothingItem(
                             title = "Update automatically",
-                            subtitle = if (managed) "Install new versions from the registry as they're published."
-                            else "Only widgets installed from your current repository update automatically.",
+                            subtitle = if (managed) "Get new versions from the registry as they're published."
+                            else "Only for widgets installed from your current source.",
                             shape = shape,
                             onClick = if (managed) {
                                 {
@@ -304,9 +303,10 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                             Text(
                                 "Add to home screen",
                                 style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
                             Text(
-                                "You'll pick which widget to show after placing it.",
+                                "Place one, then choose which widget it shows.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -335,7 +335,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                         NothingItem(
                             title = "Remove",
                             titleColor = MaterialTheme.colorScheme.error,
-                            subtitle = "Uninstall this widget.",
+                            subtitle = "Uninstall from this device.",
                             shape = shape,
                             onClick = { confirmRemove = true },
                         )
@@ -346,25 +346,27 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
     }
 
     if (confirmRemove) {
-        AlertDialog(
-            onDismissRequest = { confirmRemove = false },
-            title = { Text("Remove ${spec?.name ?: "widget"}?") },
-            text = {
-                Text("Copies already on your home screen will ask you to pick another widget. You can install it again from Explore.")
+        NothingDialog(
+            title = "Remove ${spec?.name ?: "widget"}?",
+            onDismiss = { confirmRemove = false },
+            confirmText = "Remove",
+            dismissText = "Keep",
+            destructive = true,
+            onConfirm = {
+                confirmRemove = false
+                scope.launch {
+                    store.delete(id)
+                    WidgetPrefs.clear(context, id)
+                    SpecWidget().updateAll(context)
+                    onBack()
+                }
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmRemove = false
-                    scope.launch {
-                        store.delete(id)
-                        WidgetPrefs.clear(context, id)
-                        SpecWidget().updateAll(context)
-                        onBack()
-                    }
-                }) { Text("Remove", color = MaterialTheme.colorScheme.error) }
-            },
-            dismissButton = { TextButton(onClick = { confirmRemove = false }) { Text("Cancel") } },
-        )
+        ) {
+            Text(
+                "Copies on your home screen will ask you to pick another widget. You can reinstall it anytime from Explore.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 
