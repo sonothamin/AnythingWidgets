@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -11,6 +12,8 @@ android {
         applicationId = "com.sonothamin.anythingwidgets"
         minSdk = 26
         targetSdk = 36
+        // Central widget registry (must end with "/"). Serves index.json + widget specs over HTTPS.
+        buildConfigField("String", "REGISTRY_URL", "\"https://raw.githubusercontent.com/sonothamin/AnythingWidgets-Registry/main/\"")
         versionCode = (System.getenv("VERSION_CODE") ?: "1").toInt()
         versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
     }
@@ -45,7 +48,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 }
 
 kotlin {
@@ -60,5 +66,10 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.icons)
     implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.kotlinx.serialization.json)
     debugImplementation(libs.compose.ui.tooling)
 }

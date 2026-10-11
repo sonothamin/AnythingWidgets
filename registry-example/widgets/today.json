@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "id": "today",
+  "version": 1,
+  "name": "Today",
+  "author": "AnythingWidgets",
+  "description": "Weekday and date, with battery level.",
+  "root": {
+    "type": "column", "fill": "both", "padding": 14, "justify": "center", "gap": 4,
+    "action": { "type": "open_app" },
+    "children": [
+      { "type": "text", "text": "{{date.weekday}}", "size": 14, "color": "onSurfaceVariant" },
+      { "type": "text", "text": "{{date.day}} {{date.month}}", "size": 40, "bold": true, "maxLines": 1 },
+      { "type": "progress", "progress": "{{battery.fraction}}", "height": 6 }
+    ]
+  },
+  "compact": {
+    "type": "column", "fill": "both", "padding": 10, "justify": "center", "align": "center",
+    "action": { "type": "open_app" },
+    "children": [
+      { "type": "text", "text": "{{date.weekday.short}}", "size": 12, "color": "onSurfaceVariant" },
+      { "type": "text", "text": "{{date.day}}", "size": 36, "bold": true, "maxLines": 1 }
+    ]
+  }
+}

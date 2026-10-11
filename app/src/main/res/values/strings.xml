@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">AnythingWidgets</string>
+    <string name="widget_label_small">AnythingWidgets · Small</string>
+    <string name="widget_label_wide">AnythingWidgets · Wide</string>
+    <string name="widget_label_large">AnythingWidgets · Large</string>
+    <string name="widget_description">Pick any widget from your AnythingWidgets library.</string>
 </resources>

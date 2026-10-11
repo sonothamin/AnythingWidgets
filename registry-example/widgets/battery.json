@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "id": "battery",
+  "version": 1,
+  "name": "Battery",
+  "author": "AnythingWidgets",
+  "description": "Big battery percentage with a bar.",
+  "root": {
+    "type": "column", "fill": "both", "padding": 14, "justify": "center", "gap": 8,
+    "action": { "type": "refresh" },
+    "children": [
+      { "type": "text", "text": "Battery", "size": 14, "color": "onSurfaceVariant" },
+      { "type": "text", "text": "{{battery.level}}%", "size": 44, "bold": true, "color": "primary", "maxLines": 1 },
+      { "type": "progress", "progress": "{{battery.fraction}}", "height": 8 }
+    ]
+  }
+}

@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import com.sonothamin.anythingwidgets.ui.ExplorePage
+import com.sonothamin.anythingwidgets.ui.LibraryPage
 import com.sonothamin.anythingwidgets.ui.components.GlassHost
 import com.sonothamin.anythingwidgets.ui.components.GlassNavBar
 import com.sonothamin.anythingwidgets.ui.components.NavTab
@@ -72,7 +74,8 @@ fun HomeScreen() {
                 label = "tab",
             ) { page ->
                 when (page) {
-                    0 -> WidgetList()
+                    0 -> LibraryPage()
+                    1 -> ExplorePage()
                     else -> Box(Modifier.padding(16.dp)) {
                         GlassCard(Modifier.fillMaxWidth()) {
                             Text(tabs[page].label, style = MaterialTheme.typography.titleLarge)
@@ -80,35 +83,6 @@ fun HomeScreen() {
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun WidgetList() {
-    val scheme = MaterialTheme.colorScheme
-    val names = listOf("Clock", "Weather", "Battery", "Notes", "Calendar", "Music", "Steps")
-    val brushes = listOf(
-        listOf(scheme.primary, scheme.tertiary),
-        listOf(scheme.tertiary, scheme.secondary),
-        listOf(scheme.secondary, scheme.primary),
-    )
-    LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        items(names.size) { i ->
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(32.dp))
-                    .background(Brush.linearGradient(brushes[i % brushes.size]))
-                    .padding(20.dp),
-                contentAlignment = Alignment.BottomStart,
-            ) {
-                Text(names[i], style = MaterialTheme.typography.headlineSmall, color = scheme.onPrimary)
             }
         }
     }
