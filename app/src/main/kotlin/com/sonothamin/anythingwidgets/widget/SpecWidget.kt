@@ -17,7 +17,6 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
-import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -31,7 +30,6 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
-import com.sonothamin.anythingwidgets.MainActivity
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
 import kotlinx.coroutines.Dispatchers
@@ -73,7 +71,7 @@ private fun WidgetContent(spec: WidgetSpec?, data: Map<String, String>) {
 
     if (spec == null) {
         Box(
-            shape.clickable(actionStartActivity<MainActivity>()).padding(12.dp),
+            shape.clickable(openAppAction()).padding(12.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(

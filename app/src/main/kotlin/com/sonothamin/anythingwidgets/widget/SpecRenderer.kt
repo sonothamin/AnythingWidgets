@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.LocalContext
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.LinearProgressIndicator
@@ -141,9 +142,14 @@ private fun colorOf(ref: String?, fallback: ColorProvider): ColorProvider {
     }
 }
 
+/** Opens the app. (Intent-based: the reified actionStartActivity<T>() lives in a different package.) */
+@Composable
+internal fun openAppAction(): Action =
+    actionStartActivity(Intent(LocalContext.current, MainActivity::class.java))
+
 @Composable
 private fun actionOf(a: ActionSpec?): Action? = when (a?.type) {
-    "open_app" -> actionStartActivity<MainActivity>()
+    "open_app" -> openAppAction()
     "open_url" -> a.url?.takeIf { it.startsWith("https://") }?.let {
         actionStartActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)).addCategory(Intent.CATEGORY_BROWSABLE))
     }
