@@ -34,10 +34,26 @@ jobs:
           name: app-debug
           path: app/build/outputs/apk/debug/*.apk
 
+  widgets:
+    name: Widgets zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Regenerate index.json and zip (ready for Settings > Import widgets)"
+        run: |
+          bash registry/publish.sh
+          mkdir -p dist
+          cd registry
+          zip -r -X ../dist/anythingwidgets-widgets.zip index.json widgets
+      - uses: actions/upload-artifact@v4
+        with:
+          name: widgets
+          path: dist/anythingwidgets-widgets.zip
+
   release:
     name: Release APK
     runs-on: ubuntu-latest
-    needs: debug
+    needs: [debug, widgets]
     if: github.event_name != 'pull_request'
     permissions:
       contents: write
@@ -70,6 +86,10 @@ jobs:
           fi
       - name: Build release
         run: gradle :app:assembleRelease --stacktrace
+      - uses: actions/download-artifact@v4
+        with:
+          name: widgets
+          path: dist
       - uses: actions/upload-artifact@v4
         with:
           name: app-release
@@ -78,5 +98,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: app/build/outputs/apk/release/*.apk
+          files: |
+            app/build/outputs/apk/release/*.apk
+            dist/anythingwidgets-widgets.zip
           generate_release_notes: true

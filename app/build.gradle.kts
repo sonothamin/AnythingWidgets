@@ -18,9 +18,17 @@ android {
         versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
     }
 
-    // Release signing is optional: it is only configured when CI (or you) provides these env vars.
+    // The production key is optional: it is only configured when CI (or you) provides these env vars.
     val keystorePath = System.getenv("KEYSTORE_PATH")
     signingConfigs {
+        // Placeholder key committed to the repo (see signing/README.md) so CI release APKs are always signed.
+        create("dev") {
+            storeFile = rootProject.file("signing/dev.p12")
+            storeType = "pkcs12"
+            storePassword = "devkey-placeholder"
+            keyAlias = "dev"
+            keyPassword = "devkey-placeholder"
+        }
         if (keystorePath != null && file(keystorePath).exists()) {
             create("release") {
                 storeFile = file(keystorePath)
@@ -40,7 +48,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfigs.findByName("release")?.let { signingConfig = it }
+            // Real key when CI provides one, otherwise the placeholder.
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("dev")
         }
     }
 
