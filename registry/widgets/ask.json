@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "id": "ask",
+  "version": 1,
+  "name": "Ask",
+  "description": "Think of a question. Tap for an answer.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Fun"
+  ],
+  "tags": [
+    "random",
+    "tap",
+    "decide"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "text",
+            "text": "ASK ANYTHING",
+            "size": 12,
+            "color": "n.ash",
+            "grow": true,
+            "bold": true
+          },
+          {
+            "type": "box",
+            "children": [],
+            "width": 8,
+            "height": 8,
+            "radius": 4,
+            "background": "n.red"
+          }
+        ],
+        "align": "center",
+        "fill": "width"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "pool": [
+          "YES",
+          "NO",
+          "MAYBE",
+          "LATER",
+          "SURE",
+          "NOPE",
+          "DO IT",
+          "WAIT",
+          "ASK AGAIN"
+        ],
+        "size": 38,
+        "color": "n.white",
+        "maxLines": 2,
+        "rotate": "random"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "text",
+        "text": "TAP TO ASK AGAIN",
+        "size": 10,
+        "color": "n.ash",
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 18,
+    "gap": 6,
+    "action": {
+      "type": "refresh"
+    }
+  },
+  "compact": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "spacer",
+            "grow": true
+          },
+          {
+            "type": "box",
+            "children": [],
+            "width": 8,
+            "height": 8,
+            "radius": 4,
+            "background": "n.red"
+          }
+        ],
+        "fill": "width"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "pool": [
+          "YES",
+          "NO",
+          "MAYBE",
+          "LATER",
+          "SURE",
+          "NOPE",
+          "DO IT",
+          "WAIT",
+          "ASK AGAIN"
+        ],
+        "size": 20,
+        "color": "n.white",
+        "maxLines": 3,
+        "rotate": "random"
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 14,
+    "gap": 6,
+    "action": {
+      "type": "refresh"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "text",
+            "text": "ASK ANYTHING",
+            "size": 13,
+            "color": "n.ash",
+            "grow": true,
+            "bold": true
+          },
+          {
+            "type": "box",
+            "children": [],
+            "width": 10,
+            "height": 10,
+            "radius": 5,
+            "background": "n.red"
+          }
+        ],
+        "align": "center",
+        "fill": "width"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "pool": [
+          "YES",
+          "NO",
+          "MAYBE",
+          "LATER",
+          "SURE",
+          "NOPE",
+          "DO IT",
+          "WAIT",
+          "ASK AGAIN"
+        ],
+        "size": 56,
+        "color": "n.white",
+        "maxLines": 3,
+        "rotate": "random"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "text",
+        "text": "TAP TO ASK AGAIN",
+        "size": 11,
+        "color": "n.ash",
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 40,
+    "padding": 22,
+    "gap": 8,
+    "action": {
+      "type": "refresh"
+    }
+  }
+}

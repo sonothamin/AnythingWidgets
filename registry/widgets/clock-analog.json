@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "id": "clock-analog",
+  "version": 1,
+  "name": "Analog",
+  "description": "A live analog clock with a red second hand.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Clock"
+  ],
+  "tags": [
+    "clock",
+    "analog",
+    "live"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "clock",
+        "variant": "analog-dark",
+        "width": 110,
+        "height": 110,
+        "color": "n.white"
+      },
+      {
+        "type": "column",
+        "children": [
+          {
+            "type": "glyph",
+            "text": "{{date.weekday.short.upper}}",
+            "size": 30,
+            "color": "n.white"
+          },
+          {
+            "type": "glyph",
+            "text": "{{date.day.pad}} {{date.month.upper}}",
+            "size": 18,
+            "color": "n.red"
+          }
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 8,
+        "padding": 16
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 55,
+    "padding": 0,
+    "align": "center",
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "compact": {
+    "type": "box",
+    "children": [
+      {
+        "type": "clock",
+        "variant": "analog-dark",
+        "fill": "both",
+        "color": "n.white"
+      }
+    ],
+    "fill": "both",
+    "align": "center",
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "clock",
+        "variant": "analog-dark",
+        "width": 184,
+        "height": 184,
+        "color": "n.white"
+      },
+      {
+        "type": "glyph",
+        "text": "{{date.weekday.upper}} {{date.day.pad}}",
+        "size": 20,
+        "color": "n.white",
+        "textAlign": "center"
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 40,
+    "padding": 14,
+    "align": "center",
+    "justify": "center",
+    "gap": 10,
+    "action": {
+      "type": "open_app"
+    }
+  }
+}

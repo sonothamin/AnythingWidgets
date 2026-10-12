@@ -4,13 +4,19 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.ContentScale
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
+import androidx.glance.LocalSize
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
@@ -35,6 +41,7 @@ import androidx.glance.unit.ColorProvider
 import com.sonothamin.anythingwidgets.MainActivity
 import com.sonothamin.anythingwidgets.widget.spec.ActionSpec
 import com.sonothamin.anythingwidgets.widget.spec.Node
+import com.sonothamin.anythingwidgets.widget.spec.NothingPalette
 
 /** Maps a validated [Node] tree onto Glance composables. Unknown input is never executed. */
 @Composable
@@ -68,7 +75,7 @@ fun RenderNode(node: Node, data: Map<String, String>, extra: GlanceModifier = Gl
         }
 
         "text" -> Text(
-            text = DataSnapshot.apply(node.text.orEmpty(), data),
+            text = DataSnapshot.textOf(node, data),
             modifier = m,
             style = TextStyle(
                 color = colorOf(node.color, GlanceTheme.colors.onSurface),
@@ -84,6 +91,62 @@ fun RenderNode(node: Node, data: Map<String, String>, extra: GlanceModifier = Gl
         )
 
         "spacer" -> Spacer(m)
+
+        "glyph" -> {
+            val context = LocalContext.current
+            val text = DataSnapshot.textOf(node, data)
+            if (text.isNotEmpty()) {
+                val maxWidth = node.width?.toFloat() ?: (LocalSize.current.width.value - 16f)
+                val bitmap = DotArt.glyph(
+                    context = context,
+                    text = text,
+                    font = node.font,
+                    bold = node.bold,
+                    sizeDp = node.size.toFloat(),
+                    argb = argbOf(node.color, GlanceTheme.colors.onSurface),
+                    align = node.textAlign,
+                    maxWidthDp = maxWidth,
+                    maxLines = node.maxLines ?: Int.MAX_VALUE,
+                )
+                Image(
+                    provider = ImageProvider(bitmap),
+                    contentDescription = text.replace('\n', ' '),
+                    modifier = m,
+                    contentScale = ContentScale.Fit,
+                )
+            }
+        }
+
+        "dotgrid" -> {
+            val context = LocalContext.current
+            val on = argbOf(node.color, GlanceTheme.colors.onSurface)
+            val bitmap = DotArt.dotGrid(
+                context = context,
+                widthDp = (node.width ?: 120).toFloat(),
+                heightDp = (node.height ?: 40).toFloat(),
+                columns = node.columns,
+                rows = node.rows,
+                pattern = node.pattern?.let { DataSnapshot.apply(it, data) },
+                fraction = DataSnapshot.apply(node.progress.orEmpty(), data).toFloatOrNull() ?: 0f,
+                on = on,
+                off = node.track?.let { argbOf(it, GlanceTheme.colors.outline) } ?: ((on and 0x00FFFFFF) or 0x30000000),
+                accent = argbOf(node.accent, GlanceTheme.colors.error),
+            )
+            Image(
+                provider = ImageProvider(bitmap),
+                contentDescription = null,
+                modifier = m,
+                contentScale = ContentScale.Fit,
+            )
+        }
+
+        "clock" -> {
+            val context = LocalContext.current
+            AndroidRemoteViews(
+                remoteViews = ClockViews.build(context, node, argbOf(node.color, GlanceTheme.colors.onSurface)),
+                modifier = m,
+            )
+        }
 
         "progress" -> LinearProgressIndicator(
             progress = DataSnapshot.apply(node.progress.orEmpty(), data).toFloatOrNull()?.coerceIn(0f, 1f) ?: 0f,
@@ -112,7 +175,11 @@ private fun Node.toModifier(extra: GlanceModifier): GlanceModifier {
     return m
 }
 
-/** Material token ("primary", "onSurface", ...) or "#RRGGBB" / "#AARRGGBB". */
+@Composable
+private fun argbOf(ref: String?, fallback: ColorProvider): Int =
+    colorOf(ref, fallback).getColor(LocalContext.current).toArgb()
+
+/** Material token ("primary", "onSurface", ...), Nothing palette name ("n.red", ...) or "#RRGGBB" / "#AARRGGBB". */
 @Composable
 private fun colorOf(ref: String?, fallback: ColorProvider): ColorProvider {
     if (ref == null) return fallback
@@ -138,7 +205,7 @@ private fun colorOf(ref: String?, fallback: ColorProvider): ColorProvider {
         "onBackground" -> c.onBackground
         "error" -> c.error
         "outline" -> c.outline
-        else -> runCatching { ColorProvider(Color(android.graphics.Color.parseColor(ref))) }.getOrDefault(fallback)
+        else -> NothingPalette.argb(ref)?.let { ColorProvider(Color(it)) } ?: fallback
     }
 }
 

@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "id": "mood",
+  "version": 1,
+  "name": "Mood",
+  "description": "A little dot face that feels how your battery feels.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "System"
+  ],
+  "tags": [
+    "battery",
+    "face",
+    "fun"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "dotgrid",
+        "columns": 9,
+        "rows": 9,
+        "width": 80,
+        "height": 80,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "pattern": "{{battery.face}}"
+      },
+      {
+        "type": "column",
+        "children": [
+          {
+            "type": "glyph",
+            "text": "{{battery.level}}%",
+            "size": 36,
+            "color": "n.white"
+          },
+          {
+            "type": "text",
+            "text": "{{battery.mood}}",
+            "size": 12,
+            "color": "n.ash",
+            "bold": true
+          }
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 6
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 16,
+    "align": "center",
+    "gap": 18,
+    "action": {
+      "type": "refresh"
+    }
+  },
+  "compact": {
+    "type": "column",
+    "children": [
+      {
+        "type": "dotgrid",
+        "columns": 9,
+        "rows": 9,
+        "width": 58,
+        "height": 58,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "pattern": "{{battery.face}}"
+      },
+      {
+        "type": "text",
+        "text": "{{battery.mood}}",
+        "size": 10,
+        "color": "n.ash",
+        "maxLines": 1,
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 14,
+    "align": "center",
+    "justify": "center",
+    "gap": 8,
+    "action": {
+      "type": "refresh"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "dotgrid",
+        "columns": 9,
+        "rows": 9,
+        "width": 120,
+        "height": 120,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "pattern": "{{battery.face}}"
+      },
+      {
+        "type": "glyph",
+        "text": "{{battery.level}}%",
+        "size": 36,
+        "color": "n.white"
+      },
+      {
+        "type": "text",
+        "text": "{{battery.mood}}",
+        "size": 13,
+        "color": "n.ash",
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 40,
+    "padding": 20,
+    "align": "center",
+    "justify": "center",
+    "gap": 10,
+    "action": {
+      "type": "refresh"
+    }
+  }
+}

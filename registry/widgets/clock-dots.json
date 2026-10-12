@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "id": "clock-dots",
+  "version": 1,
+  "name": "Dot Face",
+  "description": "A live analog clock marked with dots, one of them red.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Clock"
+  ],
+  "tags": [
+    "clock",
+    "analog",
+    "dots",
+    "live"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "box",
+    "children": [
+      {
+        "type": "clock",
+        "variant": "analog-dots",
+        "fill": "both"
+      }
+    ],
+    "fill": "both",
+    "align": "center",
+    "action": {
+      "type": "open_app"
+    }
+  }
+}

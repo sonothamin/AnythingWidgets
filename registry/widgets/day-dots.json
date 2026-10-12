@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "id": "day-dots",
+  "version": 1,
+  "name": "Day Dots",
+  "description": "Twenty-four dots, one per hour. The current hour is red.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Time & Date"
+  ],
+  "tags": [
+    "day",
+    "progress",
+    "dots"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "column",
+        "children": [
+          {
+            "type": "text",
+            "text": "THE DAY SO FAR",
+            "size": 12,
+            "color": "n.graphite",
+            "bold": true
+          },
+          {
+            "type": "glyph",
+            "text": "{{day.percent}}%",
+            "size": 54,
+            "color": "n.black"
+          }
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 4
+      },
+      {
+        "type": "dotgrid",
+        "columns": 6,
+        "rows": 4,
+        "width": 108,
+        "height": 72,
+        "color": "n.black",
+        "track": "n.mist",
+        "accent": "n.red",
+        "pattern": "{{day.pattern}}"
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 32,
+    "padding": 16,
+    "align": "center",
+    "gap": 12,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "compact": {
+    "type": "column",
+    "children": [
+      {
+        "type": "glyph",
+        "text": "{{day.percent}}%",
+        "size": 30,
+        "color": "n.black"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "dotgrid",
+        "columns": 6,
+        "rows": 4,
+        "width": 82,
+        "height": 44,
+        "color": "n.black",
+        "track": "n.mist",
+        "accent": "n.red",
+        "pattern": "{{day.pattern}}"
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 32,
+    "padding": 14,
+    "gap": 4,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "text",
+        "text": "THE DAY SO FAR",
+        "size": 14,
+        "color": "n.graphite",
+        "bold": true
+      },
+      {
+        "type": "glyph",
+        "text": "{{day.percent}}%",
+        "size": 84,
+        "color": "n.black"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "dotgrid",
+        "columns": 12,
+        "rows": 2,
+        "width": 206,
+        "height": 62,
+        "color": "n.black",
+        "track": "n.mist",
+        "accent": "n.red",
+        "pattern": "{{day.pattern}}"
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 40,
+    "padding": 22,
+    "gap": 8,
+    "action": {
+      "type": "open_app"
+    }
+  }
+}

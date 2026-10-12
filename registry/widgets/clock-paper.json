@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "id": "clock-paper",
+  "version": 1,
+  "name": "Paper Analog",
+  "description": "A live analog clock, black on paper white.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Clock"
+  ],
+  "tags": [
+    "clock",
+    "analog",
+    "live"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "clock",
+        "variant": "analog-light",
+        "width": 110,
+        "height": 110,
+        "color": "n.black"
+      },
+      {
+        "type": "column",
+        "children": [
+          {
+            "type": "glyph",
+            "text": "{{date.weekday.short.upper}}",
+            "size": 30,
+            "color": "n.black"
+          },
+          {
+            "type": "glyph",
+            "text": "{{date.day.pad}} {{date.month.upper}}",
+            "size": 18,
+            "color": "n.red"
+          }
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 8,
+        "padding": 16
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 55,
+    "padding": 0,
+    "align": "center",
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "compact": {
+    "type": "box",
+    "children": [
+      {
+        "type": "clock",
+        "variant": "analog-light",
+        "fill": "both",
+        "color": "n.black"
+      }
+    ],
+    "fill": "both",
+    "align": "center",
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "clock",
+        "variant": "analog-light",
+        "width": 184,
+        "height": 184,
+        "color": "n.black"
+      },
+      {
+        "type": "glyph",
+        "text": "{{date.weekday.upper}} {{date.day.pad}}",
+        "size": 20,
+        "color": "n.black",
+        "textAlign": "center"
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 40,
+    "padding": 14,
+    "align": "center",
+    "justify": "center",
+    "gap": 10,
+    "action": {
+      "type": "open_app"
+    }
+  }
+}

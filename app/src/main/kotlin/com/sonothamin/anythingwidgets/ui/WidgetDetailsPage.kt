@@ -264,7 +264,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Pill(
-                        if (SpecInfo.hasCompactLayout(spec)) "Adapts to size" else "Single layout",
+                        if (SpecInfo.hasSizeLayouts(spec)) "Adapts to small, wide and large" else "Single layout",
                         quiet, onQuiet,
                     )
                     if (dataUsed.isEmpty()) {

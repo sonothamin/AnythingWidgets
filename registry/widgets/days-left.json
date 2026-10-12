@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "id": "days-left",
+  "version": 1,
+  "name": "Days Left",
+  "description": "How many days until the year runs out. Bold red.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Time & Date"
+  ],
+  "tags": [
+    "year",
+    "countdown",
+    "red"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "glyph",
+        "text": "{{date.year.daysLeft}}",
+        "size": 76,
+        "color": "n.white"
+      },
+      {
+        "type": "column",
+        "children": [
+          {
+            "type": "text",
+            "text": "DAYS LEFT",
+            "size": 14,
+            "color": "n.white",
+            "bold": true
+          },
+          {
+            "type": "text",
+            "text": "IN {{date.year}}",
+            "size": 12,
+            "color": "n.white"
+          }
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 2
+      }
+    ],
+    "fill": "both",
+    "background": "n.red",
+    "radius": 32,
+    "padding": 18,
+    "align": "center",
+    "gap": 14,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "compact": {
+    "type": "column",
+    "children": [
+      {
+        "type": "text",
+        "text": "DAYS LEFT",
+        "size": 11,
+        "color": "n.white",
+        "bold": true
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "text": "{{date.year.daysLeft}}",
+        "size": 38,
+        "color": "n.white"
+      },
+      {
+        "type": "text",
+        "text": "IN {{date.year}}",
+        "size": 11,
+        "color": "n.white"
+      }
+    ],
+    "fill": "both",
+    "background": "n.red",
+    "radius": 32,
+    "padding": 14,
+    "gap": 4,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "text",
+        "text": "DAYS LEFT",
+        "size": 16,
+        "color": "n.white",
+        "bold": true
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "text": "{{date.year.daysLeft}}",
+        "size": 100,
+        "color": "n.white"
+      },
+      {
+        "type": "text",
+        "text": "IN {{date.year}}",
+        "size": 16,
+        "color": "n.white"
+      }
+    ],
+    "fill": "both",
+    "background": "n.red",
+    "radius": 40,
+    "padding": 22,
+    "gap": 6,
+    "action": {
+      "type": "open_app"
+    }
+  }
+}

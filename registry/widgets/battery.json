@@ -1,74 +1,168 @@
 {
   "schema": 1,
   "id": "battery",
-  "version": 2,
+  "version": 1,
   "name": "Battery",
+  "description": "Battery level in dots. Tap to refresh.",
   "author": "AnythingWidgets",
-  "description": "Big battery percentage with a bar. Tap to refresh.",
-  "created": "2026-10-11",
+  "created": "2026-10-12",
   "categories": [
     "System"
   ],
   "tags": [
     "battery",
     "status",
-    "progress"
+    "dots"
   ],
+  "chrome": "none",
   "root": {
-    "type": "column",
-    "fill": "both",
-    "padding": 12,
-    "justify": "center",
-    "gap": 6,
-    "action": {
-      "type": "refresh"
-    },
+    "type": "row",
     "children": [
       {
-        "type": "text",
-        "text": "Battery",
-        "size": 14,
-        "color": "onSurfaceVariant"
+        "type": "column",
+        "children": [
+          {
+            "type": "text",
+            "text": "BATTERY",
+            "size": 12,
+            "color": "n.ash",
+            "bold": true
+          },
+          {
+            "type": "glyph",
+            "text": "{{battery.level}}",
+            "size": 56,
+            "color": "n.white"
+          },
+          {
+            "type": "text",
+            "text": "{{battery.status}}",
+            "size": 12,
+            "color": "n.red",
+            "bold": true
+          }
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 5
       },
       {
-        "type": "text",
-        "text": "{{battery.level}}%",
-        "size": 40,
-        "bold": true,
-        "color": "primary",
-        "maxLines": 1
-      },
-      {
-        "type": "progress",
-        "progress": "{{battery.fraction}}",
-        "height": 8
+        "type": "dotgrid",
+        "columns": 10,
+        "rows": 6,
+        "width": 100,
+        "height": 76,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "progress": "{{battery.fraction}}"
       }
-    ]
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 16,
+    "align": "center",
+    "gap": 12,
+    "action": {
+      "type": "refresh"
+    }
   },
   "compact": {
     "type": "column",
-    "fill": "both",
-    "padding": 10,
-    "justify": "center",
-    "align": "center",
-    "gap": 6,
-    "action": {
-      "type": "refresh"
-    },
     "children": [
       {
         "type": "text",
-        "text": "{{battery.level}}%",
-        "size": 32,
-        "bold": true,
-        "color": "primary",
-        "maxLines": 1
+        "text": "BATTERY",
+        "size": 11,
+        "color": "n.ash",
+        "bold": true
       },
       {
-        "type": "progress",
-        "progress": "{{battery.fraction}}",
-        "height": 6
+        "type": "glyph",
+        "text": "{{battery.level}}",
+        "size": 40,
+        "color": "n.white"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "dotgrid",
+        "columns": 10,
+        "rows": 2,
+        "width": 82,
+        "height": 16,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "progress": "{{battery.fraction}}"
       }
-    ]
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 14,
+    "gap": 5,
+    "action": {
+      "type": "refresh"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "text",
+            "text": "BATTERY",
+            "size": 13,
+            "color": "n.ash",
+            "grow": true,
+            "bold": true
+          },
+          {
+            "type": "text",
+            "text": "{{battery.status}}",
+            "size": 13,
+            "color": "n.red",
+            "textAlign": "end",
+            "bold": true
+          }
+        ],
+        "fill": "width"
+      },
+      {
+        "type": "glyph",
+        "text": "{{battery.level}}",
+        "size": 80,
+        "color": "n.white"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "dotgrid",
+        "columns": 20,
+        "rows": 8,
+        "width": 210,
+        "height": 104,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "progress": "{{battery.fraction}}"
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 40,
+    "padding": 20,
+    "gap": 8,
+    "action": {
+      "type": "refresh"
+    }
   }
 }
