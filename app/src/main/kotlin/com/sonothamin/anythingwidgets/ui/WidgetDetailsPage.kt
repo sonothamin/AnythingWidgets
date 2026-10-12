@@ -258,7 +258,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                     },
                 )
                 add("File size" to (bytes?.let(::formatSize) ?: "Unknown"))
-                add("Layouts" to if (SpecInfo.hasCompactLayout(spec)) "Full and compact, adapts to size" else "Single layout")
+                add("Layouts" to if (SpecInfo.hasSizeLayouts(spec)) "Adapts to small, wide and large" else "Single layout")
                 add("Data used" to (dataUsed.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Nothing, fully static"))
                 add("Tapping" to (actions.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Nothing"))
                 add(

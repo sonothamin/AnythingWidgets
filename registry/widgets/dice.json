@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "id": "dice",
+  "version": 1,
+  "name": "Dice",
+  "description": "Tap to roll. Pure chance, in dots.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Fun"
+  ],
+  "tags": [
+    "dice",
+    "random",
+    "tap"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "dotgrid",
+        "columns": 3,
+        "rows": 3,
+        "width": 80,
+        "height": 80,
+        "color": "n.white",
+        "track": "#59FFFFFF",
+        "accent": "n.white",
+        "pattern": "{{random.dice.pattern}}"
+      },
+      {
+        "type": "column",
+        "children": [
+          {
+            "type": "glyph",
+            "text": "{{random.dice}}",
+            "size": 58,
+            "color": "n.white"
+          },
+          {
+            "type": "text",
+            "text": "TAP TO ROLL",
+            "size": 12,
+            "color": "n.white",
+            "bold": true
+          }
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 6
+      }
+    ],
+    "fill": "both",
+    "background": "n.red",
+    "radius": 32,
+    "padding": 16,
+    "align": "center",
+    "gap": 20,
+    "action": {
+      "type": "refresh"
+    }
+  },
+  "compact": {
+    "type": "box",
+    "children": [
+      {
+        "type": "dotgrid",
+        "columns": 3,
+        "rows": 3,
+        "width": 66,
+        "height": 66,
+        "color": "n.white",
+        "track": "#59FFFFFF",
+        "accent": "n.white",
+        "pattern": "{{random.dice.pattern}}"
+      }
+    ],
+    "fill": "both",
+    "background": "n.red",
+    "radius": 32,
+    "padding": 14,
+    "align": "center",
+    "action": {
+      "type": "refresh"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "dotgrid",
+        "columns": 3,
+        "rows": 3,
+        "width": 150,
+        "height": 150,
+        "color": "n.white",
+        "track": "#59FFFFFF",
+        "accent": "n.white",
+        "pattern": "{{random.dice.pattern}}"
+      },
+      {
+        "type": "text",
+        "text": "TAP TO ROLL",
+        "size": 14,
+        "color": "n.white",
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.red",
+    "radius": 40,
+    "padding": 20,
+    "align": "center",
+    "justify": "center",
+    "gap": 16,
+    "action": {
+      "type": "refresh"
+    }
+  }
+}

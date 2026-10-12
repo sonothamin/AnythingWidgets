@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "id": "fact",
+  "version": 1,
+  "name": "Daily Fact",
+  "description": "A new little fact every day, on paper white.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Fun"
+  ],
+  "tags": [
+    "fact",
+    "daily",
+    "trivia"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "column",
+    "children": [
+      {
+        "type": "text",
+        "pool": [
+          "Honey found in ancient tombs was still edible.",
+          "Octopuses have three hearts.",
+          "Bananas are berries. Strawberries are not.",
+          "A day on Venus is longer than its year.",
+          "Wombat droppings are cube-shaped.",
+          "Antarctica is the largest desert on Earth.",
+          "Crows can remember human faces.",
+          "Sharks are older than trees.",
+          "The Moon drifts about 3.8 cm farther every year.",
+          "Sunlight takes about 8 minutes to reach Earth.",
+          "A group of flamingos is called a flamboyance.",
+          "Cleopatra lived nearer to us than to the first pyramids.",
+          "Butterflies taste with their feet.",
+          "A teaspoon of neutron star weighs billions of tons.",
+          "Sea otters hold hands while they sleep.",
+          "Venus spins backwards compared to most planets.",
+          "Scotland’s national animal is the unicorn."
+        ],
+        "size": 15,
+        "color": "n.black",
+        "maxLines": 3,
+        "bold": true
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "box",
+        "children": [],
+        "width": 36,
+        "height": 2,
+        "background": "n.red"
+      },
+      {
+        "type": "glyph",
+        "text": "TODAY'S FACT",
+        "size": 14,
+        "color": "n.black"
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 32,
+    "padding": 18,
+    "gap": 8,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "compact": {
+    "type": "column",
+    "children": [
+      {
+        "type": "text",
+        "pool": [
+          "Honey found in ancient tombs was still edible.",
+          "Octopuses have three hearts.",
+          "Bananas are berries. Strawberries are not.",
+          "A day on Venus is longer than its year.",
+          "Wombat droppings are cube-shaped.",
+          "Antarctica is the largest desert on Earth.",
+          "Crows can remember human faces.",
+          "Sharks are older than trees.",
+          "The Moon drifts about 3.8 cm farther every year.",
+          "Sunlight takes about 8 minutes to reach Earth.",
+          "A group of flamingos is called a flamboyance.",
+          "Cleopatra lived nearer to us than to the first pyramids.",
+          "Butterflies taste with their feet.",
+          "A teaspoon of neutron star weighs billions of tons.",
+          "Sea otters hold hands while they sleep.",
+          "Venus spins backwards compared to most planets.",
+          "Scotland’s national animal is the unicorn."
+        ],
+        "size": 11,
+        "color": "n.black",
+        "maxLines": 6,
+        "bold": true
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "box",
+        "children": [],
+        "width": 28,
+        "height": 2,
+        "background": "n.red"
+      },
+      {
+        "type": "glyph",
+        "text": "FACT",
+        "size": 13,
+        "color": "n.black"
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 32,
+    "padding": 14,
+    "gap": 6,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "text",
+        "pool": [
+          "Honey found in ancient tombs was still edible.",
+          "Octopuses have three hearts.",
+          "Bananas are berries. Strawberries are not.",
+          "A day on Venus is longer than its year.",
+          "Wombat droppings are cube-shaped.",
+          "Antarctica is the largest desert on Earth.",
+          "Crows can remember human faces.",
+          "Sharks are older than trees.",
+          "The Moon drifts about 3.8 cm farther every year.",
+          "Sunlight takes about 8 minutes to reach Earth.",
+          "A group of flamingos is called a flamboyance.",
+          "Cleopatra lived nearer to us than to the first pyramids.",
+          "Butterflies taste with their feet.",
+          "A teaspoon of neutron star weighs billions of tons.",
+          "Sea otters hold hands while they sleep.",
+          "Venus spins backwards compared to most planets.",
+          "Scotland’s national animal is the unicorn."
+        ],
+        "size": 22,
+        "color": "n.black",
+        "maxLines": 6,
+        "bold": true
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "box",
+        "children": [],
+        "width": 44,
+        "height": 3,
+        "background": "n.red"
+      },
+      {
+        "type": "glyph",
+        "text": "TODAY'S FACT",
+        "size": 18,
+        "color": "n.black"
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 40,
+    "padding": 22,
+    "gap": 10,
+    "action": {
+      "type": "open_app"
+    }
+  }
+}

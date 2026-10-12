@@ -60,14 +60,20 @@ class SpecWidget : GlanceAppWidget() {
 @Composable
 private fun WidgetContent(spec: WidgetSpec?, data: Map<String, String>) {
     // Follow the system's widget corner radius on Android 12+ (Google design guidance).
-    val shape = GlanceModifier
-        .fillMaxSize()
-        .appWidgetBackground()
-        .background(GlanceTheme.colors.widgetBackground)
-        .let {
-            if (Build.VERSION.SDK_INT >= 31) it.cornerRadius(android.R.dimen.system_app_widget_background_radius)
-            else it.cornerRadius(16.dp)
-        }
+    // Specs with chrome "none" draw their own shape, so no card goes behind them.
+    val bare = spec?.chrome == "none"
+    val shape = if (bare) {
+        GlanceModifier.fillMaxSize()
+    } else {
+        GlanceModifier
+            .fillMaxSize()
+            .appWidgetBackground()
+            .background(GlanceTheme.colors.widgetBackground)
+            .let {
+                if (Build.VERSION.SDK_INT >= 31) it.cornerRadius(android.R.dimen.system_app_widget_background_radius)
+                else it.cornerRadius(16.dp)
+            }
+    }
 
     if (spec == null) {
         Box(
@@ -86,8 +92,8 @@ private fun WidgetContent(spec: WidgetSpec?, data: Map<String, String>) {
         return
     }
 
-    val compact = LocalSize.current.width < 180.dp
-    val node = if (compact) spec.compact ?: spec.root else spec.root
+    val size = LocalSize.current
+    val node = spec.layoutFor(size.width.value, size.height.value)
     Box(shape) { RenderNode(node, data, GlanceModifier.fillMaxSize()) }
 }
 
