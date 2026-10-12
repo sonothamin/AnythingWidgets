@@ -65,16 +65,9 @@
     "type": "column",
     "children": [
       {
-        "type": "text",
-        "text": "TODAY",
-        "size": 11,
-        "color": "n.graphite",
-        "bold": true
-      },
-      {
         "type": "glyph",
         "text": "{{day.percent}}%",
-        "size": 32,
+        "size": 30,
         "color": "n.black"
       },
       {
@@ -86,7 +79,7 @@
         "columns": 6,
         "rows": 4,
         "width": 82,
-        "height": 54,
+        "height": 44,
         "color": "n.black",
         "track": "n.mist",
         "accent": "n.red",

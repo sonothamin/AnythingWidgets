@@ -110,7 +110,8 @@
             "background": "n.red"
           }
         ],
-        "align": "center"
+        "align": "center",
+        "fill": "width"
       },
       {
         "type": "spacer",
@@ -118,7 +119,7 @@
       },
       {
         "type": "clock",
-        "size": 84,
+        "size": 68,
         "color": "n.black",
         "textAlign": "start",
         "text": "{hh}\nmm"

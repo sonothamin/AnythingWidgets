@@ -125,7 +125,8 @@
             "textAlign": "end",
             "bold": true
           }
-        ]
+        ],
+        "fill": "width"
       },
       {
         "type": "glyph",

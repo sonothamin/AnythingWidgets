@@ -17,7 +17,7 @@
         "decide"
       ],
       "spec": "widgets/ask.json",
-      "sha256": "18713bf91db6f026f44b67eeb06c03488a3553891a687db53e2a6c6f2691e53f"
+      "sha256": "fb4b4bda91fdbc4c39261cb4b8eb6f8a482ef9e95ffd870588bfa023100da1b7"
     },
     {
       "id": "battery",
@@ -35,7 +35,7 @@
         "dots"
       ],
       "spec": "widgets/battery.json",
-      "sha256": "2e64e962d7ba3d14dab124be4d1092683e3a88bcbf7d29a00a6c31864e8f682e"
+      "sha256": "66fb15f235b479237dbb74b2af94ec8dbdaf2a2b8814ff2137fe3ef8a0fb678a"
     },
     {
       "id": "clock-analog",
@@ -126,7 +126,7 @@
         "minimal"
       ],
       "spec": "widgets/date.json",
-      "sha256": "2cdfcea0b9592dd924408c0016c6a7dc1869ecf0d61f0f4dd7a7150d925d0fa1"
+      "sha256": "17567863b6d23b83f3c4cdb56ba84f21e7e1a246471a9c9131da041789dcf37d"
     },
     {
       "id": "day-dots",
@@ -144,7 +144,7 @@
         "dots"
       ],
       "spec": "widgets/day-dots.json",
-      "sha256": "d14566de31ca9fbb8bc7188f01e4a3436b8d6754c4521ce937e37c35606c4391"
+      "sha256": "a3aa362bf00f934cc8ee5568594c74066e3d9d4f53be121ccfda092bc58a2d15"
     },
     {
       "id": "days-left",
@@ -198,7 +198,7 @@
         "dots"
       ],
       "spec": "widgets/dot-clock.json",
-      "sha256": "2438a0c2d847ad932a254b9509c3b92c88672b2cf3748ccf8b130a5661603d2a"
+      "sha256": "beeec37702b240354e0e299f5254af6df98724c764c49c511478376a25376e58"
     },
     {
       "id": "dot-time",
@@ -216,7 +216,7 @@
         "minimal"
       ],
       "spec": "widgets/dot-time.json",
-      "sha256": "c618268372ffee045965d5e8173066cd32ea981e35dd18be2f27b7cb8181efe0"
+      "sha256": "401938dc1e402b2ffba7d560ee4a47273d2d9aaa61abd793f0810036b8a53584"
     },
     {
       "id": "fact",
@@ -270,7 +270,7 @@
         "dots"
       ],
       "spec": "widgets/month-dots.json",
-      "sha256": "5fda7b95fb159dcb383ef87216342a6c90e61c11330259995df893583c020763"
+      "sha256": "895746cf032773752ffe0b5cd7eb1387b287217a22e5f861c82e802dd160e123"
     },
     {
       "id": "mood",
@@ -324,7 +324,7 @@
         "dots"
       ],
       "spec": "widgets/today.json",
-      "sha256": "7a6a34cfd56583b458e3c78fdec3ec6438fcce153649a2945af8074b0dbecfcd"
+      "sha256": "c9327a8dcbbd4f9474dac4cef632f42451ae78b7c92404a72db8847747c4168f"
     },
     {
       "id": "year-progress",
@@ -342,7 +342,7 @@
         "dots"
       ],
       "spec": "widgets/year-progress.json",
-      "sha256": "cd0a1ace17df48088eef3aee9522ae12f8a321c2bdd59b6f8cb66db8766ddc43"
+      "sha256": "9f94839cd78f3b1fef2aadacde7f7a0b670e50f57ecf0a0daad4abd4ab35a297"
     }
   ]
 }

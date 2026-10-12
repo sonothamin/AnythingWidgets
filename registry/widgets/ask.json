@@ -38,7 +38,8 @@
             "background": "n.red"
           }
         ],
-        "align": "center"
+        "align": "center",
+        "fill": "width"
       },
       {
         "type": "spacer",
@@ -101,7 +102,8 @@
             "radius": 4,
             "background": "n.red"
           }
-        ]
+        ],
+        "fill": "width"
       },
       {
         "type": "spacer",
@@ -158,7 +160,8 @@
             "background": "n.red"
           }
         ],
-        "align": "center"
+        "align": "center",
+        "fill": "width"
       },
       {
         "type": "spacer",
