@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "id": "dot-time",
+  "version": 1,
+  "name": "Dot Time",
+  "description": "Huge floating dot-matrix time with no card behind it.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Clock"
+  ],
+  "tags": [
+    "clock",
+    "live",
+    "minimal"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "column",
+    "children": [
+      {
+        "type": "text",
+        "text": "{{date.weekday.short}}, {{date.day}} {{date.month}}",
+        "size": 16,
+        "color": "onBackground",
+        "bold": true
+      },
+      {
+        "type": "clock",
+        "size": 66,
+        "color": "onBackground",
+        "textAlign": "start",
+        "text": "{hh}mm"
+      }
+    ],
+    "fill": "both",
+    "justify": "center",
+    "padding": 6,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "compact": {
+    "type": "column",
+    "children": [
+      {
+        "type": "clock",
+        "size": 42,
+        "color": "onBackground",
+        "textAlign": "center",
+        "text": "{hh}\nmm"
+      }
+    ],
+    "fill": "both",
+    "justify": "center",
+    "align": "center",
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "text",
+        "text": "{{date.weekday.short}}, {{date.day}} {{date.month}}",
+        "size": 18,
+        "color": "onBackground",
+        "bold": true
+      },
+      {
+        "type": "clock",
+        "size": 100,
+        "color": "onBackground",
+        "textAlign": "start",
+        "text": "{hh}\nmm"
+      }
+    ],
+    "fill": "both",
+    "justify": "center",
+    "gap": 4,
+    "padding": 10,
+    "action": {
+      "type": "open_app"
+    }
+  }
+}

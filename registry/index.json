@@ -2,111 +2,347 @@
   "schema": 1,
   "widgets": [
     {
+      "id": "ask",
+      "name": "Ask",
+      "author": "AnythingWidgets",
+      "description": "Think of a question. Tap for an answer.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Fun"
+      ],
+      "tags": [
+        "random",
+        "tap",
+        "decide"
+      ],
+      "spec": "widgets/ask.json",
+      "sha256": "18713bf91db6f026f44b67eeb06c03488a3553891a687db53e2a6c6f2691e53f"
+    },
+    {
       "id": "battery",
       "name": "Battery",
       "author": "AnythingWidgets",
-      "description": "Big battery percentage with a bar. Tap to refresh.",
-      "version": 2,
-      "created": "2026-10-11",
+      "description": "Battery level in dots. Tap to refresh.",
+      "version": 1,
+      "created": "2026-10-12",
       "categories": [
         "System"
       ],
       "tags": [
         "battery",
         "status",
-        "progress"
+        "dots"
       ],
       "spec": "widgets/battery.json",
-      "sha256": "4a499343c3f28c46d2bc0fcdfc00a01663b3673c2fcb60c3ad778c8af6d41bb6"
+      "sha256": "2e64e962d7ba3d14dab124be4d1092683e3a88bcbf7d29a00a6c31864e8f682e"
+    },
+    {
+      "id": "clock-analog",
+      "name": "Analog",
+      "author": "AnythingWidgets",
+      "description": "A live analog clock with a red second hand.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Clock"
+      ],
+      "tags": [
+        "clock",
+        "analog",
+        "live"
+      ],
+      "spec": "widgets/clock-analog.json",
+      "sha256": "17270a49800a48edb6bf75bbf17766d830f5c4d1a5187ff45653e8236dad1a88"
+    },
+    {
+      "id": "clock-dots",
+      "name": "Dot Face",
+      "author": "AnythingWidgets",
+      "description": "A live analog clock marked with dots, one of them red.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Clock"
+      ],
+      "tags": [
+        "clock",
+        "analog",
+        "dots",
+        "live"
+      ],
+      "spec": "widgets/clock-dots.json",
+      "sha256": "efaecb0607ed961aacaeb5f20d6d4b21bf6cff3a61ae11b6f4ff7f53ffc41151"
+    },
+    {
+      "id": "clock-paper",
+      "name": "Paper Analog",
+      "author": "AnythingWidgets",
+      "description": "A live analog clock, black on paper white.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Clock"
+      ],
+      "tags": [
+        "clock",
+        "analog",
+        "live"
+      ],
+      "spec": "widgets/clock-paper.json",
+      "sha256": "dda10a8332ed1c85462018ab18c1ff1da56ae0be120f009d3dc413860032ba26"
+    },
+    {
+      "id": "coin",
+      "name": "Coin Flip",
+      "author": "AnythingWidgets",
+      "description": "Heads or tails. Tap to flip.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Fun"
+      ],
+      "tags": [
+        "coin",
+        "random",
+        "tap"
+      ],
+      "spec": "widgets/coin.json",
+      "sha256": "979861d0d5035c80610d8e03401f07742585d3a9c34cbc7563e9f49656173657"
     },
     {
       "id": "date",
       "name": "Date",
       "author": "AnythingWidgets",
-      "description": "A large, calm date.",
-      "version": 2,
-      "created": "2026-10-11",
+      "description": "A big serif number on paper white. Calm and quiet.",
+      "version": 1,
+      "created": "2026-10-12",
       "categories": [
         "Time & Date"
       ],
       "tags": [
         "date",
-        "calendar",
+        "serif",
         "minimal"
       ],
       "spec": "widgets/date.json",
-      "sha256": "a16899e9e6eaaf9fcacfb2969618230d6f691e1c7a57f5d680a02304f899ee5f"
+      "sha256": "2cdfcea0b9592dd924408c0016c6a7dc1869ecf0d61f0f4dd7a7150d925d0fa1"
+    },
+    {
+      "id": "day-dots",
+      "name": "Day Dots",
+      "author": "AnythingWidgets",
+      "description": "Twenty-four dots, one per hour. The current hour is red.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Time & Date"
+      ],
+      "tags": [
+        "day",
+        "progress",
+        "dots"
+      ],
+      "spec": "widgets/day-dots.json",
+      "sha256": "d14566de31ca9fbb8bc7188f01e4a3436b8d6754c4521ce937e37c35606c4391"
+    },
+    {
+      "id": "days-left",
+      "name": "Days Left",
+      "author": "AnythingWidgets",
+      "description": "How many days until the year runs out. Bold red.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Time & Date"
+      ],
+      "tags": [
+        "year",
+        "countdown",
+        "red"
+      ],
+      "spec": "widgets/days-left.json",
+      "sha256": "3c9bd6f1bb1251b679554f859c3e28f4b6ef54523d1a29159a0e1dfe36514604"
+    },
+    {
+      "id": "dice",
+      "name": "Dice",
+      "author": "AnythingWidgets",
+      "description": "Tap to roll. Pure chance, in dots.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Fun"
+      ],
+      "tags": [
+        "dice",
+        "random",
+        "tap"
+      ],
+      "spec": "widgets/dice.json",
+      "sha256": "8c6d28fdbddb5cda7fb5d83105c5dba4312bbd044583aa5ea117314014518687"
+    },
+    {
+      "id": "dot-clock",
+      "name": "Dot Clock",
+      "author": "AnythingWidgets",
+      "description": "A live clock in dot-matrix digits on a paper-white card.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Clock"
+      ],
+      "tags": [
+        "clock",
+        "live",
+        "dots"
+      ],
+      "spec": "widgets/dot-clock.json",
+      "sha256": "2438a0c2d847ad932a254b9509c3b92c88672b2cf3748ccf8b130a5661603d2a"
+    },
+    {
+      "id": "dot-time",
+      "name": "Dot Time",
+      "author": "AnythingWidgets",
+      "description": "Huge floating dot-matrix time with no card behind it.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Clock"
+      ],
+      "tags": [
+        "clock",
+        "live",
+        "minimal"
+      ],
+      "spec": "widgets/dot-time.json",
+      "sha256": "c618268372ffee045965d5e8173066cd32ea981e35dd18be2f27b7cb8181efe0"
+    },
+    {
+      "id": "fact",
+      "name": "Daily Fact",
+      "author": "AnythingWidgets",
+      "description": "A new little fact every day, on paper white.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Fun"
+      ],
+      "tags": [
+        "fact",
+        "daily",
+        "trivia"
+      ],
+      "spec": "widgets/fact.json",
+      "sha256": "3557c0388d2ee4e9a601aac6f18794a600bb705afae58ca796c88975797b89cc"
     },
     {
       "id": "links",
-      "name": "Quick Links",
+      "name": "Dot Links",
       "author": "AnythingWidgets",
-      "description": "Two tappable shortcuts. Replace the URLs with your own.",
-      "version": 2,
-      "created": "2026-10-11",
+      "description": "Four tappable dots. Swap the URLs and letters for your own.",
+      "version": 1,
+      "created": "2026-10-12",
       "categories": [
-        "Utilities"
+        "Tools"
       ],
       "tags": [
+        "links",
         "shortcuts",
-        "links"
+        "dots"
       ],
       "spec": "widgets/links.json",
-      "sha256": "436aac7c661f64f1ddbbed2328ef1c84abd00f29c72fe36b87f913413bca3050"
+      "sha256": "b3e1614fa007904d2f99131bc93f2bc01b89d9652a477269eb7757552399851d"
+    },
+    {
+      "id": "month-dots",
+      "name": "Month Dots",
+      "author": "AnythingWidgets",
+      "description": "The month as a calendar of dots. Days left are bright.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Time & Date"
+      ],
+      "tags": [
+        "calendar",
+        "month",
+        "dots"
+      ],
+      "spec": "widgets/month-dots.json",
+      "sha256": "5fda7b95fb159dcb383ef87216342a6c90e61c11330259995df893583c020763"
+    },
+    {
+      "id": "mood",
+      "name": "Mood",
+      "author": "AnythingWidgets",
+      "description": "A little dot face that feels how your battery feels.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "System"
+      ],
+      "tags": [
+        "battery",
+        "face",
+        "fun"
+      ],
+      "spec": "widgets/mood.json",
+      "sha256": "e183b27187c2d5f3faa769ca1482fd5468961ad197a9c67e998e0ff3430e2310"
     },
     {
       "id": "quote",
       "name": "Quote",
       "author": "AnythingWidgets",
-      "description": "A static line of text. Copy and edit it to make your own.",
-      "version": 2,
-      "created": "2026-10-11",
+      "description": "A short line to start the day. A new one every morning.",
+      "version": 1,
+      "created": "2026-10-12",
       "categories": [
-        "Text"
+        "Fun"
       ],
       "tags": [
         "quote",
-        "text",
-        "customizable"
+        "daily",
+        "dots"
       ],
       "spec": "widgets/quote.json",
-      "sha256": "b12ba7330f791839cd9c6de00c85658621b0427dd2214944fa382d3c237ea726"
+      "sha256": "905fea2b30c78a27e5e6944f706e3622d9ef81bed8ee50f56852b75b9b7b85f1"
     },
     {
       "id": "today",
       "name": "Today",
       "author": "AnythingWidgets",
-      "description": "Weekday and date, with battery level.",
-      "version": 2,
-      "created": "2026-10-11",
+      "description": "The day in big dots, with battery dots along the bottom.",
+      "version": 1,
+      "created": "2026-10-12",
       "categories": [
         "Time & Date"
       ],
       "tags": [
         "date",
         "battery",
-        "daily"
+        "dots"
       ],
       "spec": "widgets/today.json",
-      "sha256": "b4063e370f399282859bad5ed22d8dacf74383d40b7ef1adf90a59152e048773"
+      "sha256": "7a6a34cfd56583b458e3c78fdec3ec6438fcce153649a2945af8074b0dbecfcd"
     },
     {
       "id": "year-progress",
-      "name": "Year Progress",
+      "name": "Year in Dots",
       "author": "AnythingWidgets",
-      "description": "How far through the year you are.",
-      "version": 2,
-      "created": "2026-10-11",
+      "description": "Every day of the year as a dot. Today glows red.",
+      "version": 1,
+      "created": "2026-10-12",
       "categories": [
         "Time & Date"
       ],
       "tags": [
         "year",
         "progress",
-        "countdown"
+        "dots"
       ],
       "spec": "widgets/year-progress.json",
-      "sha256": "560c76c9ef75adcc2182d1f0d5b010915615c153abc0bf26cdd42b7bd3162b22"
+      "sha256": "cd0a1ace17df48088eef3aee9522ae12f8a321c2bdd59b6f8cb66db8766ddc43"
     }
   ]
 }

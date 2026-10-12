@@ -1,72 +1,204 @@
 {
   "schema": 1,
   "id": "today",
-  "version": 2,
+  "version": 1,
   "name": "Today",
+  "description": "The day in big dots, with battery dots along the bottom.",
   "author": "AnythingWidgets",
-  "description": "Weekday and date, with battery level.",
-  "created": "2026-10-11",
+  "created": "2026-10-12",
   "categories": [
     "Time & Date"
   ],
   "tags": [
     "date",
     "battery",
-    "daily"
+    "dots"
   ],
+  "chrome": "none",
   "root": {
-    "type": "column",
-    "fill": "both",
-    "padding": 12,
-    "justify": "center",
-    "gap": 4,
-    "action": {
-      "type": "open_app"
-    },
+    "type": "row",
     "children": [
       {
-        "type": "text",
-        "text": "{{date.weekday}}",
-        "size": 14,
-        "color": "onSurfaceVariant"
+        "type": "column",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.weekday.upper}}",
+            "size": 13,
+            "color": "n.ash",
+            "bold": true
+          },
+          {
+            "type": "glyph",
+            "text": "{{date.day.pad}}",
+            "size": 64,
+            "color": "n.white"
+          }
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 4
       },
       {
-        "type": "text",
-        "text": "{{date.day}} {{date.month}}",
-        "size": 34,
-        "bold": true,
-        "maxLines": 1
-      },
-      {
-        "type": "progress",
-        "progress": "{{battery.fraction}}",
-        "height": 6
+        "type": "column",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.month.long.upper}}",
+            "size": 12,
+            "color": "n.ash",
+            "textAlign": "end",
+            "bold": true
+          },
+          {
+            "type": "glyph",
+            "text": "{{date.year}}",
+            "size": 20,
+            "color": "n.white"
+          },
+          {
+            "type": "spacer",
+            "grow": true
+          },
+          {
+            "type": "dotgrid",
+            "columns": 10,
+            "rows": 1,
+            "width": 92,
+            "height": 9,
+            "color": "n.white",
+            "track": "n.dot",
+            "accent": "n.red",
+            "progress": "{{battery.fraction}}"
+          },
+          {
+            "type": "text",
+            "text": "{{battery.level}}% BATTERY",
+            "size": 10,
+            "color": "n.ash",
+            "bold": true
+          }
+        ],
+        "align": "end",
+        "justify": "end",
+        "gap": 4
       }
-    ]
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 16,
+    "align": "center",
+    "gap": 12,
+    "action": {
+      "type": "open_app"
+    }
   },
   "compact": {
     "type": "column",
-    "fill": "both",
-    "padding": 10,
-    "justify": "center",
-    "align": "center",
-    "action": {
-      "type": "open_app"
-    },
     "children": [
       {
         "type": "text",
-        "text": "{{date.weekday.short}}",
+        "text": "{{date.weekday.upper}}",
         "size": 12,
-        "color": "onSurfaceVariant"
+        "color": "n.ash",
+        "bold": true
+      },
+      {
+        "type": "glyph",
+        "text": "{{date.day.pad}}",
+        "size": 56,
+        "color": "n.white"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "dotgrid",
+        "columns": 10,
+        "rows": 1,
+        "width": 82,
+        "height": 8,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "progress": "{{battery.fraction}}"
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 14,
+    "gap": 4,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.weekday.upper}}",
+            "size": 14,
+            "color": "n.ash",
+            "grow": true,
+            "bold": true
+          },
+          {
+            "type": "text",
+            "text": "{{date.month.long.upper}}",
+            "size": 14,
+            "color": "n.ash",
+            "textAlign": "end",
+            "bold": true
+          }
+        ]
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "text": "{{date.day.pad}}",
+        "size": 120,
+        "color": "n.white"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "dotgrid",
+        "columns": 20,
+        "rows": 2,
+        "width": 210,
+        "height": 22,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "progress": "{{battery.fraction}}"
       },
       {
         "type": "text",
-        "text": "{{date.day}}",
-        "size": 36,
-        "bold": true,
-        "maxLines": 1
+        "text": "{{battery.level}}% BATTERY",
+        "size": 11,
+        "color": "n.ash",
+        "bold": true
       }
-    ]
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 40,
+    "padding": 20,
+    "gap": 8,
+    "action": {
+      "type": "open_app"
+    }
   }
 }

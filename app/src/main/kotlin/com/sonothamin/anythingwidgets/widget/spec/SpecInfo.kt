@@ -14,19 +14,27 @@ object SpecInfo {
         }
         walk(spec.root)
         spec.compact?.let(::walk)
+        spec.large?.let(::walk)
         return out
     }
 
     /** Human-readable names for the device data the widget binds to; empty for a static widget. */
     fun dataUsed(spec: WidgetSpec): List<String> =
         nodes(spec)
-            .flatMap { listOfNotNull(it.text, it.progress) }
-            .flatMap { t -> TOKEN.findAll(t).map { it.groupValues[1] }.toList() }
+            .flatMap { n ->
+                val keys = (listOfNotNull(n.text, n.progress, n.pattern) + n.pool)
+                    .flatMap { t -> TOKEN.findAll(t).map { it.groupValues[1] }.toList() }
+                keys + listOfNotNull(
+                    "time.live".takeIf { n.type == "clock" },
+                    "random.pool".takeIf { n.rotate == "random" && n.pool.isNotEmpty() },
+                )
+            }
             .map {
                 when {
                     it.startsWith("battery.") -> "Battery level"
-                    it.startsWith("time.") -> "Time"
-                    it.startsWith("date.") -> "Date"
+                    it.startsWith("time.") || it.startsWith("day.") -> "Time"
+                    it.startsWith("date.") || it.startsWith("year.") || it.startsWith("month.") -> "Date"
+                    it.startsWith("random.") -> "Chance"
                     else -> it
                 }
             }
@@ -49,5 +57,5 @@ object SpecInfo {
             }
             .distinct()
 
-    fun hasCompactLayout(spec: WidgetSpec): Boolean = spec.compact != null
+    fun hasSizeLayouts(spec: WidgetSpec): Boolean = spec.compact != null || spec.large != null
 }

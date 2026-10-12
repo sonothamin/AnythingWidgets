@@ -3,6 +3,7 @@ package com.sonothamin.anythingwidgets.ui
 import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,13 +30,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sonothamin.anythingwidgets.widget.ClockViews
 import com.sonothamin.anythingwidgets.widget.DataSnapshot
+import com.sonothamin.anythingwidgets.widget.DotArt
+import com.sonothamin.anythingwidgets.widget.spec.NothingPalette
 import com.sonothamin.anythingwidgets.widget.spec.Node
 import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
 
@@ -57,7 +67,8 @@ fun SpecPreview(
     data: Map<String, String>,
     modifier: Modifier = Modifier,
 ) {
-    val node = if (size.width < 180) spec.compact ?: spec.root else spec.root
+    val node = spec.layoutFor(size.width.toFloat(), size.height.toFloat())
+    val bare = spec.chrome == "none"
     // The app uses a fixed Nothing palette, but real widgets follow the wallpaper (dynamic color),
     // so preview with the same scheme the home screen would use.
     val context = LocalContext.current
@@ -71,8 +82,8 @@ fun SpecPreview(
         Surface(
             modifier = modifier.size(size.width.dp, size.height.dp),
             shape = RoundedCornerShape(24.dp),
-            color = scheme.surface,
-            border = BorderStroke(1.dp, scheme.outlineVariant),
+            color = if (bare) Color.Transparent else scheme.surface,
+            border = if (bare) null else BorderStroke(1.dp, scheme.outlineVariant),
         ) {
             Box(Modifier.fillMaxSize()) { PreviewNode(node, data, Modifier.fillMaxSize()) }
         }
@@ -109,7 +120,7 @@ private fun PreviewNode(node: Node, data: Map<String, String>, extra: Modifier =
         }
 
         "text" -> Text(
-            text = DataSnapshot.apply(node.text.orEmpty(), data),
+            text = DataSnapshot.textOf(node, data),
             modifier = m,
             color = colorOf(node.color, scheme.onSurface, scheme),
             fontSize = node.size.sp,
@@ -125,6 +136,55 @@ private fun PreviewNode(node: Node, data: Map<String, String>, extra: Modifier =
         )
 
         "spacer" -> Spacer(m)
+
+        "glyph" -> {
+            val context = LocalContext.current
+            val text = DataSnapshot.textOf(node, data)
+            val color = colorOf(node.color, scheme.onSurface, scheme).toArgb()
+            val bitmap = remember(text, node, color) {
+                if (text.isEmpty()) null
+                else DotArt.glyph(
+                    context, text, node.font, node.bold, node.size.toFloat(), color, node.textAlign,
+                    node.width?.toFloat() ?: 240f, node.maxLines ?: Int.MAX_VALUE,
+                )
+            }
+            if (bitmap != null) {
+                val density = LocalDensity.current.density
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = text,
+                    modifier = m.then(
+                        if (node.width == null) Modifier.size((bitmap.width / density).dp, (bitmap.height / density).dp)
+                        else Modifier,
+                    ),
+                    contentScale = ContentScale.Fit,
+                )
+            }
+        }
+
+        "dotgrid" -> {
+            val context = LocalContext.current
+            val on = colorOf(node.color, scheme.onSurface, scheme).toArgb()
+            val off = node.track?.let { colorOf(it, scheme.outline, scheme).toArgb() } ?: ((on and 0x00FFFFFF) or 0x30000000)
+            val accent = colorOf(node.accent, scheme.error, scheme).toArgb()
+            val pattern = node.pattern?.let { DataSnapshot.apply(it, data) }
+            val fraction = DataSnapshot.apply(node.progress.orEmpty(), data).toFloatOrNull() ?: 0f
+            val bitmap = remember(node, pattern, fraction, on, off, accent) {
+                DotArt.dotGrid(
+                    context, (node.width ?: 120).toFloat(), (node.height ?: 40).toFloat(),
+                    node.columns, node.rows, pattern, fraction, on, off, accent,
+                )
+            }
+            Image(bitmap = bitmap.asImageBitmap(), contentDescription = null, modifier = m, contentScale = ContentScale.Fit)
+        }
+
+        "clock" -> {
+            val color = colorOf(node.color, scheme.onSurface, scheme).toArgb()
+            AndroidView(
+                factory = { ctx -> ClockViews.inflate(ctx, node, color) },
+                modifier = m,
+            )
+        }
 
         "progress" -> LinearProgressIndicator(
             progress = {
@@ -177,7 +237,7 @@ private fun colorOf(ref: String?, fallback: Color, s: ColorScheme): Color {
         "onBackground" -> s.onBackground
         "error" -> s.error
         "outline" -> s.outline
-        else -> runCatching { Color(android.graphics.Color.parseColor(ref)) }.getOrDefault(fallback)
+        else -> NothingPalette.argb(ref)?.let { Color(it) } ?: fallback
     }
 }
 

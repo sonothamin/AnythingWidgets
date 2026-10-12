@@ -14,7 +14,12 @@ object SpecValidator {
     private val SPEC_PATH = Regex("[A-Za-z0-9][A-Za-z0-9._/-]{0,127}")
     private val SHA256 = Regex("[a-f0-9]{64}")
     private val CONTAINERS = setOf("row", "column", "box")
-    private val TYPES = CONTAINERS + setOf("text", "spacer", "progress")
+    private val TYPES = CONTAINERS + setOf("text", "spacer", "progress", "glyph", "dotgrid", "clock")
+    private val FONTS = setOf("dots", "serif", "sans", "mono")
+    private val CLOCKS = setOf("digital", "analog-dark", "analog-light", "analog-dots")
+    private val ROTATE = setOf("day", "hour", "random")
+    private val PATTERN = Regex("[#r._/\\s]*")
+    private val CLOCK_FORMAT = Regex("[A-Za-z0-9 :,./'\\-\\n{}]{1,40}")
     private val ACTIONS = setOf("open_app", "open_url", "refresh")
     private val DATE = Regex("\\d{4}-\\d{2}-\\d{2}")
 
@@ -37,8 +42,8 @@ object SpecValidator {
             if (depth > MAX_DEPTH) return "Nesting too deep"
             if (n.type !in TYPES) return "Unknown node type '${n.type}'"
             if (n.children.isNotEmpty() && n.type !in CONTAINERS) return "'${n.type}' cannot have children"
-            if (n.padding !in 0..48 || n.gap !in 0..32 || n.radius !in 0..48) return "Spacing out of range"
-            if (n.size !in 8..96) return "Text size out of range"
+            if (n.padding !in 0..48 || n.gap !in 0..32 || n.radius !in 0..200) return "Spacing out of range"
+            if (n.size !in 8..200) return "Text size out of range"
             if ((n.width ?: 1) !in 1..400 || (n.height ?: 1) !in 1..400) return "Dimension out of range"
             if ((n.text?.length ?: 0) > 200 || (n.progress?.length ?: 0) > 64) return "Text too long"
             if (n.fill != null && n.fill !in setOf("width", "height", "both")) return "Invalid fill"
@@ -48,11 +53,26 @@ object SpecValidator {
                     return "open_url requires an https URL"
                 }
             }
+            if (n.type == "glyph" && n.font != null && n.font !in FONTS) return "Unknown font '${n.font}'"
+            if (n.type == "clock") {
+                if (n.variant != null && n.variant !in CLOCKS) return "Unknown clock '${n.variant}'"
+                if (n.text != null && !CLOCK_FORMAT.matches(n.text)) return "Invalid clock format"
+            }
+            if (n.rotate != null && n.rotate !in ROTATE) return "Unknown rotate '${n.rotate}'"
+            if (n.pool.size > 32 || n.pool.any { it.length > 160 }) return "Pool too large"
+            if (n.type == "dotgrid") {
+                if (n.columns !in 1..80 || n.rows !in 1..80 || n.columns * n.rows > 800) return "Invalid dot grid"
+                if ((n.pattern?.length ?: 0) > 1024) return "Pattern too long"
+                if (n.pattern != null && !n.pattern.contains("{{") && !PATTERN.matches(n.pattern)) return "Invalid pattern"
+            }
             n.children.forEach { c -> walk(c, depth + 1)?.let { return it } }
             return null
         }
         walk(spec.root, 1)?.let { return it }
-        spec.compact?.let { c -> walk(c, 1)?.let { return it } }
+        // The node limit applies to each layout separately.
+        spec.compact?.let { c -> count = 0; walk(c, 1)?.let { return it } }
+        spec.large?.let { c -> count = 0; walk(c, 1)?.let { return it } }
+        if (spec.chrome != null && spec.chrome != "none" && spec.chrome != "default") return "Unknown chrome '${spec.chrome}'"
         return null
     }
 

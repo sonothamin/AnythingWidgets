@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AnalogClock xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:dial="@drawable/clock_dial_dots"
+    android:hand_hour="@drawable/clock_hand_hour_dark"
+    android:hand_minute="@drawable/clock_hand_minute_dark"
+    android:hand_second="@drawable/clock_hand_second" />

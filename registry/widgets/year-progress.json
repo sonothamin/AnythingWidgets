@@ -1,81 +1,167 @@
 {
   "schema": 1,
   "id": "year-progress",
-  "version": 2,
-  "name": "Year Progress",
+  "version": 1,
+  "name": "Year in Dots",
+  "description": "Every day of the year as a dot. Today glows red.",
   "author": "AnythingWidgets",
-  "description": "How far through the year you are.",
-  "created": "2026-10-11",
+  "created": "2026-10-12",
   "categories": [
     "Time & Date"
   ],
   "tags": [
     "year",
     "progress",
-    "countdown"
+    "dots"
   ],
+  "chrome": "none",
   "root": {
-    "type": "column",
+    "type": "row",
+    "children": [
+      {
+        "type": "column",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.year}}",
+            "size": 13,
+            "color": "n.ash",
+            "bold": true
+          },
+          {
+            "type": "glyph",
+            "text": "{{date.year.percent}}%",
+            "size": 44,
+            "color": "n.white"
+          },
+          {
+            "type": "text",
+            "text": "{{date.year.daysLeft}} DAYS LEFT",
+            "size": 11,
+            "color": "n.ash",
+            "bold": true
+          }
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 4
+      },
+      {
+        "type": "dotgrid",
+        "columns": 31,
+        "rows": 12,
+        "width": 126,
+        "height": 78,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "pattern": "{{year.pattern}}"
+      }
+    ],
     "fill": "both",
-    "padding": 12,
-    "justify": "center",
-    "gap": 6,
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 16,
+    "align": "center",
+    "gap": 12,
     "action": {
       "type": "open_app"
-    },
+    }
+  },
+  "compact": {
+    "type": "column",
     "children": [
       {
         "type": "text",
         "text": "{{date.year}}",
-        "size": 14,
-        "color": "onSurfaceVariant"
-      },
-      {
-        "type": "text",
-        "text": "{{date.year.percent}}%",
-        "size": 36,
-        "bold": true,
-        "color": "primary",
-        "maxLines": 1
-      },
-      {
-        "type": "progress",
-        "progress": "{{date.year.fraction}}",
-        "height": 8
-      },
-      {
-        "type": "text",
-        "text": "Day {{date.dayOfYear}} of {{date.daysInYear}}",
         "size": 12,
-        "color": "onSurfaceVariant",
-        "maxLines": 1
-      }
-    ]
-  },
-  "compact": {
-    "type": "column",
-    "fill": "both",
-    "padding": 10,
-    "justify": "center",
-    "align": "center",
-    "gap": 6,
-    "action": {
-      "type": "open_app"
-    },
-    "children": [
+        "color": "n.ash",
+        "bold": true
+      },
       {
-        "type": "text",
+        "type": "glyph",
         "text": "{{date.year.percent}}%",
         "size": 32,
-        "bold": true,
-        "color": "primary",
-        "maxLines": 1
+        "color": "n.white"
       },
       {
-        "type": "progress",
-        "progress": "{{date.year.fraction}}",
-        "height": 6
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "dotgrid",
+        "columns": 31,
+        "rows": 12,
+        "width": 82,
+        "height": 56,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "pattern": "{{year.pattern}}"
       }
-    ]
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 14,
+    "gap": 4,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.year}}",
+            "size": 14,
+            "color": "n.ash",
+            "grow": true,
+            "bold": true
+          },
+          {
+            "type": "text",
+            "text": "{{date.year.daysLeft}} DAYS LEFT",
+            "size": 13,
+            "color": "n.ash",
+            "textAlign": "end",
+            "bold": true
+          }
+        ]
+      },
+      {
+        "type": "glyph",
+        "text": "{{date.year.percent}}%",
+        "size": 72,
+        "color": "n.white"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "dotgrid",
+        "columns": 31,
+        "rows": 12,
+        "width": 210,
+        "height": 108,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "pattern": "{{year.pattern}}"
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 40,
+    "padding": 20,
+    "gap": 8,
+    "action": {
+      "type": "open_app"
+    }
   }
 }

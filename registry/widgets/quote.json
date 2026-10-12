@@ -1,55 +1,180 @@
 {
   "schema": 1,
   "id": "quote",
-  "version": 2,
+  "version": 1,
   "name": "Quote",
+  "description": "A short line to start the day. A new one every morning.",
   "author": "AnythingWidgets",
-  "description": "A static line of text. Copy and edit it to make your own.",
-  "created": "2026-10-11",
+  "created": "2026-10-12",
   "categories": [
-    "Text"
+    "Fun"
   ],
   "tags": [
     "quote",
-    "text",
-    "customizable"
+    "daily",
+    "dots"
   ],
+  "chrome": "none",
   "root": {
     "type": "column",
-    "fill": "both",
-    "padding": 16,
-    "justify": "center",
-    "gap": 6,
     "children": [
       {
-        "type": "text",
-        "text": "Make it work, then make it beautiful.",
-        "size": 18,
-        "bold": true,
-        "maxLines": 4
+        "type": "glyph",
+        "text": "“",
+        "size": 36,
+        "color": "n.red"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "pool": [
+          "Small steps still count.",
+          "Make today a little lighter.",
+          "Do the next right thing.",
+          "Quiet days build loud years.",
+          "Be the calm in the room.",
+          "Less noise. More signal.",
+          "Nothing is ordinary if you look closely.",
+          "Finish what you started yesterday.",
+          "Rest is part of the work.",
+          "Curiosity beats certainty.",
+          "Make it simple, then make it good.",
+          "Today is a blank page.",
+          "Be kind. Be brief. Be bold.",
+          "Good things take time.",
+          "Progress, not perfection.",
+          "Look up from the screen.",
+          "One thing at a time.",
+          "Let it be easy."
+        ],
+        "size": 17,
+        "color": "n.white",
+        "maxLines": 3
       },
       {
         "type": "text",
-        "text": "Edit this widget's JSON to change me",
-        "size": 12,
-        "color": "onSurfaceVariant",
-        "maxLines": 1
+        "text": "TODAY’S LINE",
+        "size": 10,
+        "color": "n.ash",
+        "bold": true
       }
-    ]
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 18,
+    "gap": 6,
+    "action": {
+      "type": "open_app"
+    }
   },
   "compact": {
     "type": "column",
-    "fill": "both",
-    "padding": 12,
-    "justify": "center",
     "children": [
       {
-        "type": "text",
-        "text": "Make it work, then make it beautiful.",
-        "size": 14,
-        "bold": true,
-        "maxLines": 5
+        "type": "glyph",
+        "text": "“",
+        "size": 30,
+        "color": "n.red"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "pool": [
+          "Small steps still count.",
+          "Make today a little lighter.",
+          "Do the next right thing.",
+          "Quiet days build loud years.",
+          "Be the calm in the room.",
+          "Less noise. More signal.",
+          "Nothing is ordinary if you look closely.",
+          "Finish what you started yesterday.",
+          "Rest is part of the work.",
+          "Curiosity beats certainty.",
+          "Make it simple, then make it good.",
+          "Today is a blank page.",
+          "Be kind. Be brief. Be bold.",
+          "Good things take time.",
+          "Progress, not perfection.",
+          "Look up from the screen.",
+          "One thing at a time.",
+          "Let it be easy."
+        ],
+        "size": 13,
+        "color": "n.white",
+        "maxLines": 5,
+        "font": "sans"
       }
-    ]
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 14,
+    "gap": 4,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "glyph",
+        "text": "“",
+        "size": 48,
+        "color": "n.red"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "pool": [
+          "Small steps still count.",
+          "Make today a little lighter.",
+          "Do the next right thing.",
+          "Quiet days build loud years.",
+          "Be the calm in the room.",
+          "Less noise. More signal.",
+          "Nothing is ordinary if you look closely.",
+          "Finish what you started yesterday.",
+          "Rest is part of the work.",
+          "Curiosity beats certainty.",
+          "Make it simple, then make it good.",
+          "Today is a blank page.",
+          "Be kind. Be brief. Be bold.",
+          "Good things take time.",
+          "Progress, not perfection.",
+          "Look up from the screen.",
+          "One thing at a time.",
+          "Let it be easy."
+        ],
+        "size": 25,
+        "color": "n.white",
+        "maxLines": 6
+      },
+      {
+        "type": "text",
+        "text": "TODAY’S LINE",
+        "size": 11,
+        "color": "n.ash",
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 40,
+    "padding": 22,
+    "gap": 8,
+    "action": {
+      "type": "open_app"
+    }
   }
 }

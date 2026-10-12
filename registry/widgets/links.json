@@ -1,104 +1,309 @@
 {
   "schema": 1,
   "id": "links",
-  "version": 2,
-  "name": "Quick Links",
+  "version": 1,
+  "name": "Dot Links",
+  "description": "Four tappable dots. Swap the URLs and letters for your own.",
   "author": "AnythingWidgets",
-  "description": "Two tappable shortcuts. Replace the URLs with your own.",
-  "created": "2026-10-11",
+  "created": "2026-10-12",
   "categories": [
-    "Utilities"
+    "Tools"
   ],
   "tags": [
+    "links",
     "shortcuts",
-    "links"
+    "dots"
   ],
+  "chrome": "none",
   "root": {
     "type": "row",
-    "fill": "both",
-    "padding": 12,
-    "align": "center",
-    "gap": 8,
     "children": [
       {
-        "type": "text",
-        "text": "sonothamin.dev",
-        "size": 14,
-        "bold": true,
-        "color": "onSecondaryContainer",
-        "background": "secondaryContainer",
-        "radius": 20,
-        "padding": 12,
-        "textAlign": "center",
-        "grow": true,
-        "maxLines": 1,
+        "type": "box",
+        "children": [
+          {
+            "type": "glyph",
+            "text": "G",
+            "size": 25,
+            "color": "n.black"
+          }
+        ],
+        "width": 56,
+        "height": 56,
+        "radius": 28,
+        "background": "n.white",
+        "align": "center",
         "action": {
           "type": "open_url",
-          "url": "https://sonothamin.dev"
+          "url": "https://github.com"
         }
       },
       {
-        "type": "text",
-        "text": "GitHub",
-        "size": 14,
-        "bold": true,
-        "color": "onSecondaryContainer",
-        "background": "secondaryContainer",
-        "radius": 20,
-        "padding": 12,
-        "textAlign": "center",
-        "grow": true,
-        "maxLines": 1,
+        "type": "box",
+        "children": [
+          {
+            "type": "glyph",
+            "text": "W",
+            "size": 25,
+            "color": "n.black"
+          }
+        ],
+        "width": 56,
+        "height": 56,
+        "radius": 28,
+        "background": "n.white",
+        "align": "center",
         "action": {
           "type": "open_url",
-          "url": "https://github.com/sonothamin"
+          "url": "https://wikipedia.org"
+        }
+      },
+      {
+        "type": "box",
+        "children": [
+          {
+            "type": "glyph",
+            "text": "Y",
+            "size": 25,
+            "color": "n.black"
+          }
+        ],
+        "width": 56,
+        "height": 56,
+        "radius": 28,
+        "background": "n.white",
+        "align": "center",
+        "action": {
+          "type": "open_url",
+          "url": "https://youtube.com"
+        }
+      },
+      {
+        "type": "box",
+        "children": [
+          {
+            "type": "glyph",
+            "text": "M",
+            "size": 25,
+            "color": "n.white"
+          }
+        ],
+        "width": 56,
+        "height": 56,
+        "radius": 28,
+        "background": "n.red",
+        "align": "center",
+        "action": {
+          "type": "open_url",
+          "url": "https://maps.google.com"
         }
       }
-    ]
+    ],
+    "fill": "both",
+    "justify": "center",
+    "align": "center",
+    "gap": 8
   },
   "compact": {
     "type": "column",
-    "fill": "both",
-    "padding": 10,
-    "justify": "center",
-    "gap": 8,
     "children": [
       {
-        "type": "text",
-        "text": "Website",
-        "size": 12,
-        "bold": true,
-        "color": "onSecondaryContainer",
-        "background": "secondaryContainer",
-        "radius": 20,
-        "padding": 8,
-        "textAlign": "center",
-        "grow": false,
-        "maxLines": 1,
-        "action": {
-          "type": "open_url",
-          "url": "https://sonothamin.dev"
-        },
-        "fill": "width"
+        "type": "row",
+        "children": [
+          {
+            "type": "box",
+            "children": [
+              {
+                "type": "glyph",
+                "text": "G",
+                "size": 22,
+                "color": "n.black"
+              }
+            ],
+            "width": 48,
+            "height": 48,
+            "radius": 24,
+            "background": "n.white",
+            "align": "center",
+            "action": {
+              "type": "open_url",
+              "url": "https://github.com"
+            }
+          },
+          {
+            "type": "box",
+            "children": [
+              {
+                "type": "glyph",
+                "text": "W",
+                "size": 22,
+                "color": "n.black"
+              }
+            ],
+            "width": 48,
+            "height": 48,
+            "radius": 24,
+            "background": "n.white",
+            "align": "center",
+            "action": {
+              "type": "open_url",
+              "url": "https://wikipedia.org"
+            }
+          }
+        ],
+        "gap": 8
       },
       {
-        "type": "text",
-        "text": "GitHub",
-        "size": 12,
-        "bold": true,
-        "color": "onSecondaryContainer",
-        "background": "secondaryContainer",
-        "radius": 20,
-        "padding": 8,
-        "textAlign": "center",
-        "grow": false,
-        "maxLines": 1,
-        "action": {
-          "type": "open_url",
-          "url": "https://github.com/sonothamin"
-        },
-        "fill": "width"
+        "type": "row",
+        "children": [
+          {
+            "type": "box",
+            "children": [
+              {
+                "type": "glyph",
+                "text": "Y",
+                "size": 22,
+                "color": "n.black"
+              }
+            ],
+            "width": 48,
+            "height": 48,
+            "radius": 24,
+            "background": "n.white",
+            "align": "center",
+            "action": {
+              "type": "open_url",
+              "url": "https://youtube.com"
+            }
+          },
+          {
+            "type": "box",
+            "children": [
+              {
+                "type": "glyph",
+                "text": "M",
+                "size": 22,
+                "color": "n.white"
+              }
+            ],
+            "width": 48,
+            "height": 48,
+            "radius": 24,
+            "background": "n.red",
+            "align": "center",
+            "action": {
+              "type": "open_url",
+              "url": "https://maps.google.com"
+            }
+          }
+        ],
+        "gap": 8
       }
-    ]
+    ],
+    "fill": "both",
+    "justify": "center",
+    "align": "center",
+    "gap": 8
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "box",
+            "children": [
+              {
+                "type": "glyph",
+                "text": "G",
+                "size": 47,
+                "color": "n.black"
+              }
+            ],
+            "width": 104,
+            "height": 104,
+            "radius": 52,
+            "background": "n.white",
+            "align": "center",
+            "action": {
+              "type": "open_url",
+              "url": "https://github.com"
+            }
+          },
+          {
+            "type": "box",
+            "children": [
+              {
+                "type": "glyph",
+                "text": "W",
+                "size": 47,
+                "color": "n.black"
+              }
+            ],
+            "width": 104,
+            "height": 104,
+            "radius": 52,
+            "background": "n.white",
+            "align": "center",
+            "action": {
+              "type": "open_url",
+              "url": "https://wikipedia.org"
+            }
+          }
+        ],
+        "gap": 12
+      },
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "box",
+            "children": [
+              {
+                "type": "glyph",
+                "text": "Y",
+                "size": 47,
+                "color": "n.black"
+              }
+            ],
+            "width": 104,
+            "height": 104,
+            "radius": 52,
+            "background": "n.white",
+            "align": "center",
+            "action": {
+              "type": "open_url",
+              "url": "https://youtube.com"
+            }
+          },
+          {
+            "type": "box",
+            "children": [
+              {
+                "type": "glyph",
+                "text": "M",
+                "size": 47,
+                "color": "n.white"
+              }
+            ],
+            "width": 104,
+            "height": 104,
+            "radius": 52,
+            "background": "n.red",
+            "align": "center",
+            "action": {
+              "type": "open_url",
+              "url": "https://maps.google.com"
+            }
+          }
+        ],
+        "gap": 12
+      }
+    ],
+    "fill": "both",
+    "justify": "center",
+    "align": "center",
+    "gap": 12
   }
 }

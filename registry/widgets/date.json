@@ -1,84 +1,181 @@
 {
   "schema": 1,
   "id": "date",
-  "version": 2,
+  "version": 1,
   "name": "Date",
+  "description": "A big serif number on paper white. Calm and quiet.",
   "author": "AnythingWidgets",
-  "description": "A large, calm date.",
-  "created": "2026-10-11",
+  "created": "2026-10-12",
   "categories": [
     "Time & Date"
   ],
   "tags": [
     "date",
-    "calendar",
+    "serif",
     "minimal"
   ],
+  "chrome": "none",
   "root": {
     "type": "row",
-    "fill": "both",
-    "padding": 14,
-    "justify": "center",
-    "align": "center",
-    "gap": 14,
-    "action": {
-      "type": "open_app"
-    },
     "children": [
       {
-        "type": "text",
+        "type": "glyph",
         "text": "{{date.day}}",
-        "size": 64,
-        "bold": true,
-        "color": "primary",
-        "maxLines": 1
+        "size": 84,
+        "color": "n.black",
+        "font": "serif",
+        "bold": true
       },
       {
         "type": "column",
-        "gap": 2,
         "children": [
           {
             "type": "text",
-            "text": "{{date.month.long}}",
-            "size": 18,
-            "bold": true,
-            "maxLines": 1
+            "text": "{{date.weekday.upper}}",
+            "size": 13,
+            "color": "n.graphite",
+            "bold": true
           },
           {
             "type": "text",
-            "text": "{{date.weekday}}",
-            "size": 14,
-            "color": "onSurfaceVariant",
-            "maxLines": 1
+            "text": "{{date.month.long.upper}}",
+            "size": 16,
+            "color": "n.black",
+            "bold": true
+          },
+          {
+            "type": "text",
+            "text": "{{date.year}}",
+            "size": 12,
+            "color": "n.graphite"
           }
-        ]
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 3
       }
-    ]
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 32,
+    "padding": 18,
+    "align": "center",
+    "gap": 16,
+    "action": {
+      "type": "open_app"
+    }
   },
   "compact": {
     "type": "column",
-    "fill": "both",
-    "padding": 8,
-    "justify": "center",
-    "align": "center",
-    "action": {
-      "type": "open_app"
-    },
     "children": [
       {
-        "type": "text",
-        "text": "{{date.month}}",
-        "size": 13,
-        "bold": true,
-        "color": "primary"
+        "type": "row",
+        "children": [
+          {
+            "type": "box",
+            "children": [],
+            "width": 8,
+            "height": 8,
+            "radius": 4,
+            "background": "n.red"
+          },
+          {
+            "type": "spacer",
+            "grow": true
+          },
+          {
+            "type": "text",
+            "text": "{{date.weekday.short.upper}}",
+            "size": 11,
+            "color": "n.graphite",
+            "bold": true
+          }
+        ],
+        "align": "center"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "text": "{{date.day}}",
+        "size": 68,
+        "color": "n.black",
+        "font": "serif",
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 32,
+    "padding": 14,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "box",
+            "children": [],
+            "width": 8,
+            "height": 8,
+            "radius": 4,
+            "background": "n.red"
+          },
+          {
+            "type": "spacer",
+            "grow": true
+          },
+          {
+            "type": "text",
+            "text": "{{date.year}}",
+            "size": 13,
+            "color": "n.graphite",
+            "bold": true
+          }
+        ],
+        "align": "center"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "glyph",
+        "text": "{{date.day}}",
+        "size": 150,
+        "color": "n.black",
+        "font": "serif",
+        "bold": true
       },
       {
         "type": "text",
-        "text": "{{date.day}}",
-        "size": 44,
-        "bold": true,
-        "maxLines": 1
+        "text": "{{date.weekday.upper}}",
+        "size": 14,
+        "color": "n.graphite",
+        "bold": true
+      },
+      {
+        "type": "text",
+        "text": "{{date.month.long.upper}}",
+        "size": 18,
+        "color": "n.black",
+        "bold": true
       }
-    ]
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 40,
+    "padding": 22,
+    "gap": 2,
+    "action": {
+      "type": "open_app"
+    }
   }
 }

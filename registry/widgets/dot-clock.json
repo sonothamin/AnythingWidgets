@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "id": "dot-clock",
+  "version": 1,
+  "name": "Dot Clock",
+  "description": "A live clock in dot-matrix digits on a paper-white card.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Clock"
+  ],
+  "tags": [
+    "clock",
+    "live",
+    "dots"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "clock",
+        "size": 54,
+        "color": "n.black",
+        "textAlign": "start",
+        "text": "{h}:mm"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "column",
+        "children": [
+          {
+            "type": "glyph",
+            "text": "{{date.day.pad}}",
+            "size": 26,
+            "color": "n.red"
+          },
+          {
+            "type": "text",
+            "text": "{{date.month.upper}}",
+            "size": 12,
+            "color": "n.graphite",
+            "bold": true
+          },
+          {
+            "type": "text",
+            "text": "{{date.weekday.short.upper}}",
+            "size": 12,
+            "color": "n.graphite",
+            "bold": true
+          }
+        ],
+        "align": "end",
+        "justify": "center",
+        "gap": 4
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 32,
+    "padding": 18,
+    "align": "center",
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "compact": {
+    "type": "box",
+    "children": [
+      {
+        "type": "clock",
+        "size": 40,
+        "color": "n.black",
+        "textAlign": "center",
+        "text": "{hh}\nmm"
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 32,
+    "padding": 14,
+    "align": "center",
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.weekday.upper}}",
+            "size": 14,
+            "color": "n.graphite",
+            "grow": true,
+            "bold": true
+          },
+          {
+            "type": "box",
+            "children": [],
+            "width": 8,
+            "height": 8,
+            "radius": 4,
+            "background": "n.red"
+          }
+        ],
+        "align": "center"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "clock",
+        "size": 84,
+        "color": "n.black",
+        "textAlign": "start",
+        "text": "{hh}\nmm"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "text",
+        "text": "{{date.day}} {{date.month.long.upper}}",
+        "size": 14,
+        "color": "n.graphite",
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 40,
+    "padding": 22,
+    "action": {
+      "type": "open_app"
+    }
+  }
+}

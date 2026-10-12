@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "id": "coin",
+  "version": 1,
+  "name": "Coin Flip",
+  "description": "Heads or tails. Tap to flip.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Fun"
+  ],
+  "tags": [
+    "coin",
+    "random",
+    "tap"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "column",
+    "children": [
+      {
+        "type": "box",
+        "children": [],
+        "width": 8,
+        "height": 8,
+        "radius": 4,
+        "background": "n.red"
+      },
+      {
+        "type": "glyph",
+        "text": "{{random.coin}}",
+        "size": 26,
+        "color": "n.black"
+      },
+      {
+        "type": "text",
+        "text": "TAP TO FLIP",
+        "size": 11,
+        "color": "n.graphite",
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 200,
+    "padding": 10,
+    "align": "center",
+    "justify": "center",
+    "gap": 6,
+    "action": {
+      "type": "refresh"
+    }
+  },
+  "compact": {
+    "type": "column",
+    "children": [
+      {
+        "type": "box",
+        "children": [],
+        "width": 8,
+        "height": 8,
+        "radius": 4,
+        "background": "n.red"
+      },
+      {
+        "type": "glyph",
+        "text": "{{random.coin}}",
+        "size": 17,
+        "color": "n.black"
+      },
+      {
+        "type": "text",
+        "text": "TAP TO FLIP",
+        "size": 9,
+        "color": "n.graphite",
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 200,
+    "padding": 8,
+    "align": "center",
+    "justify": "center",
+    "gap": 5,
+    "action": {
+      "type": "refresh"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "box",
+        "children": [],
+        "width": 12,
+        "height": 12,
+        "radius": 6,
+        "background": "n.red"
+      },
+      {
+        "type": "glyph",
+        "text": "{{random.coin}}",
+        "size": 40,
+        "color": "n.black"
+      },
+      {
+        "type": "text",
+        "text": "TAP TO FLIP",
+        "size": 13,
+        "color": "n.graphite",
+        "bold": true
+      }
+    ],
+    "fill": "both",
+    "background": "n.white",
+    "radius": 200,
+    "padding": 20,
+    "align": "center",
+    "justify": "center",
+    "gap": 10,
+    "action": {
+      "type": "refresh"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "id": "month-dots",
+  "version": 1,
+  "name": "Month Dots",
+  "description": "The month as a calendar of dots. Days left are bright.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-12",
+  "categories": [
+    "Time & Date"
+  ],
+  "tags": [
+    "calendar",
+    "month",
+    "dots"
+  ],
+  "chrome": "none",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "column",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.month.long.upper}}",
+            "size": 13,
+            "color": "n.ash",
+            "bold": true
+          },
+          {
+            "type": "glyph",
+            "text": "{{date.day.pad}}",
+            "size": 58,
+            "color": "n.white"
+          },
+          {
+            "type": "text",
+            "text": "{{date.weekday.upper}}",
+            "size": 11,
+            "color": "n.ash",
+            "bold": true
+          }
+        ],
+        "grow": true,
+        "justify": "center",
+        "gap": 4
+      },
+      {
+        "type": "dotgrid",
+        "columns": 7,
+        "rows": 6,
+        "width": 126,
+        "height": 78,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "pattern": "{{month.pattern}}"
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 16,
+    "align": "center",
+    "gap": 12,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "compact": {
+    "type": "column",
+    "children": [
+      {
+        "type": "text",
+        "text": "{{date.month.long.upper}}",
+        "size": 12,
+        "color": "n.ash",
+        "bold": true
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "dotgrid",
+        "columns": 7,
+        "rows": 6,
+        "width": 84,
+        "height": 72,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "pattern": "{{month.pattern}}"
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 14,
+    "gap": 4,
+    "action": {
+      "type": "open_app"
+    }
+  },
+  "large": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{date.month.long.upper}}",
+            "size": 14,
+            "color": "n.ash",
+            "grow": true,
+            "bold": true
+          },
+          {
+            "type": "text",
+            "text": "{{date.year}}",
+            "size": 14,
+            "color": "n.ash",
+            "textAlign": "end",
+            "bold": true
+          }
+        ]
+      },
+      {
+        "type": "glyph",
+        "text": "{{date.day.pad}}",
+        "size": 64,
+        "color": "n.white"
+      },
+      {
+        "type": "spacer",
+        "grow": true
+      },
+      {
+        "type": "dotgrid",
+        "columns": 7,
+        "rows": 6,
+        "width": 210,
+        "height": 110,
+        "color": "n.white",
+        "track": "n.dot",
+        "accent": "n.red",
+        "pattern": "{{month.pattern}}"
+      }
+    ],
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 40,
+    "padding": 20,
+    "gap": 8,
+    "action": {
+      "type": "open_app"
+    }
+  }
+}
