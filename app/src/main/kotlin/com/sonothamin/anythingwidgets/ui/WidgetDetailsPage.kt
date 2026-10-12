@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,10 +20,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,7 +53,6 @@ import androidx.glance.appwidget.updateAll
 import com.sonothamin.anythingwidgets.ui.components.CardShape
 import com.sonothamin.anythingwidgets.ui.components.NothingCard
 import com.sonothamin.anythingwidgets.ui.components.NothingDialog
-import com.sonothamin.anythingwidgets.ui.components.NothingField
 import com.sonothamin.anythingwidgets.ui.components.NothingItem
 import com.sonothamin.anythingwidgets.ui.components.NothingStack
 import com.sonothamin.anythingwidgets.ui.components.PageHeader
@@ -227,6 +232,64 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 )
             }
 
+            // At a glance: stat tiles
+            SectionLabel("At a glance")
+            val stats = buildList {
+                add(
+                    "Version" to buildString {
+                        append("v${spec.version}")
+                        if (update != null) append(" → v${update.version}")
+                    },
+                )
+                add("Size" to (bytes?.let(::formatSize) ?: "Unknown"))
+                spec.created?.let { add("Created" to formatIsoDate(it)) }
+                addedAt?.let { add("Added" to formatMillis(it)) }
+            }
+            Column(Modifier.pageMargin(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                stats.chunked(2).forEach { pair ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        pair.forEach { (label, value) -> StatTile(label, value, Modifier.weight(1f)) }
+                        if (pair.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                }
+            }
+
+            // How it behaves: capsules instead of a key/value list
+            SectionLabel("How it behaves")
+            NothingCard(CardShape, Modifier.pageMargin()) {
+                val quiet = MaterialTheme.colorScheme.surfaceContainerHighest
+                val onQuiet = MaterialTheme.colorScheme.onSurface
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Pill(
+                        if (SpecInfo.hasSizeLayouts(spec)) "Adapts to small, wide and large" else "Single layout",
+                        quiet, onQuiet,
+                    )
+                    if (dataUsed.isEmpty()) {
+                        Pill("Fully static", quiet, onQuiet)
+                    } else {
+                        dataUsed.forEach { Pill("Reads: $it", quiet, onQuiet) }
+                    }
+                    if (actions.isEmpty()) {
+                        Pill("Not tappable", quiet, onQuiet)
+                    } else {
+                        actions.forEach { Pill("Tap: ${it.replaceFirstChar { c -> c.lowercase() }}", quiet, onQuiet) }
+                    }
+                    Pill(
+                        when {
+                            installed == null -> hostOf(registry.baseUrl)
+                            source == WidgetImporter.SOURCE -> "Imported from zip"
+                            source == null -> "Unknown source"
+                            else -> hostOf(source)
+                        },
+                        quiet, onQuiet,
+                    )
+                    Pill("id: ${spec.id}", quiet, onQuiet)
+                }
+            }
+
             // Categories and tags
             if (spec.categories.isNotEmpty() || spec.tags.isNotEmpty()) {
                 SectionLabel("Categories & tags")
@@ -242,38 +305,6 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                             Pill("#$it", MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.onSurface)
                         }
                     }
-                }
-            }
-
-            // Details
-            SectionLabel("Details")
-            val rows = buildList {
-                add("Created by" to (spec.author ?: "Unknown"))
-                add("Created" to (spec.created?.let(::formatIsoDate) ?: "Unknown"))
-                add("Added" to (addedAt?.let(::formatMillis) ?: "Not installed"))
-                add(
-                    "Version" to buildString {
-                        append("v${spec.version}")
-                        if (update != null) append(" (v${update.version} available)")
-                    },
-                )
-                add("File size" to (bytes?.let(::formatSize) ?: "Unknown"))
-                add("Layouts" to if (SpecInfo.hasSizeLayouts(spec)) "Adapts to small, wide and large" else "Single layout")
-                add("Data used" to (dataUsed.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Nothing, fully static"))
-                add("Tapping" to (actions.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "Nothing"))
-                add(
-                    "Source" to when {
-                        installed == null -> hostOf(registry.baseUrl)
-                        source == WidgetImporter.SOURCE -> "Imported from zip"
-                        source == null -> "Unknown"
-                        else -> hostOf(source)
-                    },
-                )
-                add("ID" to spec.id)
-            }
-            NothingStack(Modifier.pageMargin()) {
-                rows.forEach { (label, value) ->
-                    row { shape -> NothingField(label = label, value = value, shape = shape) }
                 }
             }
 
@@ -299,22 +330,36 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                         )
                     }
                     row { shape ->
-                        NothingCard(shape) {
-                            Text(
-                                "Add to home screen",
-                                style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
-                                color = MaterialTheme.colorScheme.onSurface,
+                        var sizeMenu by remember { mutableStateOf(false) }
+                        Box {
+                            NothingItem(
+                                title = "Add to home screen",
+                                shape = shape,
+                                onClick = { sizeMenu = true },
+                                trailing = {
+                                    Icon(
+                                        Icons.Rounded.Add,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                },
                             )
-                            Text(
-                                "Place one, then choose which widget it shows.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Spacer(Modifier.height(12.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                FilledTonalButton(onClick = { pin(SmallWidgetReceiver::class.java) }) { Text("Small") }
-                                FilledTonalButton(onClick = { pin(WideWidgetReceiver::class.java) }) { Text("Wide") }
-                                FilledTonalButton(onClick = { pin(LargeWidgetReceiver::class.java) }) { Text("Large") }
+                            DropdownMenu(expanded = sizeMenu, onDismissRequest = { sizeMenu = false }) {
+                                PreviewSize.entries.forEach { s ->
+                                    DropdownMenuItem(
+                                        text = { Text(s.label) },
+                                        onClick = {
+                                            sizeMenu = false
+                                            pin(
+                                                when (s) {
+                                                    PreviewSize.Small -> SmallWidgetReceiver::class.java
+                                                    PreviewSize.Wide -> WideWidgetReceiver::class.java
+                                                    PreviewSize.Large -> LargeWidgetReceiver::class.java
+                                                },
+                                            )
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
@@ -367,6 +412,25 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
+    }
+}
+
+/** One big number or date with its label underneath. */
+@Composable
+private fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
+    NothingCard(CardShape, modifier, contentPadding = PaddingValues(horizontal = 20.dp, vertical = 18.dp)) {
+        Text(
+            value,
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp, lineHeight = 28.sp),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

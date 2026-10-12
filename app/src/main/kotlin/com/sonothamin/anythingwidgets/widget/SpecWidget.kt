@@ -1,22 +1,31 @@
 package com.sonothamin.anythingwidgets.widget
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.LocalContext
 import androidx.glance.LocalSize
+import androidx.glance.currentState
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -46,10 +55,18 @@ class SpecWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         // Do I/O before composing; each update re-runs this, so data is always fresh.
-        val specId = getAppWidgetState(context, PreferencesGlanceStateDefinition, id)[KEY_SPEC]
-        val spec = withContext(Dispatchers.IO) { specId?.let { SpecStore(context).load(it) } }
+        val initialId = getAppWidgetState(context, PreferencesGlanceStateDefinition, id)[KEY_SPEC]
+        val initialSpec = withContext(Dispatchers.IO) { initialId?.let { SpecStore(context).load(it) } }
         val data = DataSnapshot.build(context)
-        provideContent { GlanceTheme { WidgetContent(spec, data) } }
+        val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
+        provideContent {
+            // Read the choice from live state: a session started before the user picked a widget
+            // must still re-render with the new choice instead of the captured (null) spec.
+            val liveId = currentState<Preferences>()[KEY_SPEC]
+            val spec = if (liveId == initialId) initialSpec
+            else remember(liveId) { liveId?.let { SpecStore(context).load(it) } }
+            GlanceTheme { WidgetContent(spec, data, appWidgetId) }
+        }
     }
 
     companion object {
@@ -58,7 +75,7 @@ class SpecWidget : GlanceAppWidget() {
 }
 
 @Composable
-private fun WidgetContent(spec: WidgetSpec?, data: Map<String, String>) {
+private fun WidgetContent(spec: WidgetSpec?, data: Map<String, String>, appWidgetId: Int) {
     // Follow the system's widget corner radius on Android 12+ (Google design guidance).
     // Specs with chrome "none" draw their own shape, so no card goes behind them.
     val bare = spec?.chrome == "none"
@@ -76,8 +93,15 @@ private fun WidgetContent(spec: WidgetSpec?, data: Map<String, String>) {
     }
 
     if (spec == null) {
+        val context = LocalContext.current
+        // Reopen the picker for this exact instance (not the app) so a choice can be made here.
+        val pick = actionStartActivity(
+            Intent(context, WidgetConfigActivity::class.java)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                .setData(Uri.parse("anythingwidgets://configure/$appWidgetId")),
+        )
         Box(
-            shape.clickable(openAppAction()).padding(12.dp),
+            shape.clickable(pick).padding(12.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(

@@ -111,6 +111,28 @@
       "sha256": "979861d0d5035c80610d8e03401f07742585d3a9c34cbc7563e9f49656173657"
     },
     {
+      "id": "bento-red",
+      "name": "Bento Red",
+      "author": "AnythingWidgets",
+      "description": "Dark bento tile: a red date orb with battery and year-progress pills. Tap to refresh.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Time & Date",
+        "System"
+      ],
+      "tags": [
+        "bento",
+        "red",
+        "dark",
+        "date",
+        "battery",
+        "year"
+      ],
+      "spec": "widgets/bento-red.json",
+      "sha256": "f8fcf00084aac383251e712825408ac0c9b271e41f310b4fbba8b27a8a8da100"
+    },
+    {
       "id": "date",
       "name": "Date",
       "author": "AnythingWidgets",

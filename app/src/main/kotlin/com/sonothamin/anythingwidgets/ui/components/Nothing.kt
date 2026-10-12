@@ -1,6 +1,5 @@
 package com.sonothamin.anythingwidgets.ui.components
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -239,38 +236,5 @@ fun ChevronIcon() {
         Icons.AutoMirrored.Rounded.KeyboardArrowRight,
         contentDescription = null,
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
-
-/** Dashboard tile: icon on top, title and subtitle at the bottom (like the Glyph home tiles). */
-@Composable
-fun NothingTile(
-    title: String,
-    modifier: Modifier = Modifier,
-    subtitle: String? = null,
-    onClick: (() -> Unit)? = null,
-    icon: @Composable () -> Unit,
-) {
-    NothingCard(CardShape, modifier, onClick, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 18.dp)) {
-        Box(Modifier.height(32.dp), contentAlignment = Alignment.CenterStart) { icon() }
-        Spacer(Modifier.height(28.dp))
-        Text(
-            title,
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        if (subtitle != null) {
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-/** Outlined rounded rectangle that hints at a widget's proportions. */
-@Composable
-fun SizeGlyph(width: Dp, height: Dp) {
-    Box(
-        Modifier
-            .size(width, height)
-            .border(2.dp, MaterialTheme.colorScheme.onSurface, RoundedCornerShape(5.dp)),
     )
 }

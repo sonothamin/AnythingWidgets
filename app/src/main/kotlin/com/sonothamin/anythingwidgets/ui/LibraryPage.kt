@@ -1,108 +1,114 @@
 package com.sonothamin.anythingwidgets.ui
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sonothamin.anythingwidgets.ui.components.CardShape
-import com.sonothamin.anythingwidgets.ui.components.ChevronIcon
 import com.sonothamin.anythingwidgets.ui.components.NothingCard
-import com.sonothamin.anythingwidgets.ui.components.NothingItem
-import com.sonothamin.anythingwidgets.ui.components.NothingTile
 import com.sonothamin.anythingwidgets.ui.components.PageHeader
 import com.sonothamin.anythingwidgets.ui.components.SectionLabel
-import com.sonothamin.anythingwidgets.ui.components.SizeGlyph
-import com.sonothamin.anythingwidgets.ui.components.groupShape
 import com.sonothamin.anythingwidgets.ui.components.pageMargin
-import com.sonothamin.anythingwidgets.widget.LargeWidgetReceiver
-import com.sonothamin.anythingwidgets.widget.SmallWidgetReceiver
-import com.sonothamin.anythingwidgets.widget.WideWidgetReceiver
+import com.sonothamin.anythingwidgets.widget.DataSnapshot
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
+import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
 
-/** Dashboard: how many widgets you have, one-tap "add to home screen" per size, and the installed list. */
+/** Dashboard: your installed widgets as a gallery of live previews. */
 @Composable
-fun LibraryPage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
+fun LibraryPage(
+    refreshKey: Any? = null,
+    onOpen: (String) -> Unit = {},
+    onExplore: () -> Unit = {},
+) {
     val context = LocalContext.current
     val installed = remember(refreshKey) { SpecStore(context).installed() }
-    val manager = remember { AppWidgetManager.getInstance(context) }
-
-    fun pin(receiver: Class<*>) {
-        if (manager.isRequestPinAppWidgetSupported) {
-            manager.requestPinAppWidget(ComponentName(context, receiver), null, null)
-        }
-    }
+    val data = remember(refreshKey) { DataSnapshot.build(context) }
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 120.dp)) {
         item { PageHeader("Widgets") }
 
-        item {
-            NothingCard(
-                shape = CardShape,
-                modifier = Modifier.pageMargin(),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 28.dp),
-            ) {
-                Text(
-                    installed.size.toString().padStart(2, '0'),
-                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 88.sp, lineHeight = 96.sp),
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    if (installed.isEmpty()) "No widgets yet. Find some in Explore."
-                    else if (installed.size == 1) "widget installed" else "widgets installed",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+        if (installed.isEmpty()) {
+            item {
+                NothingCard(CardShape, Modifier.pageMargin(), contentPadding = PaddingValues(24.dp)) {
+                    Text(
+                        "No widgets yet",
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        "Install some from Explore, then add them from your home screen's widget picker.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
+                    )
+                    Button(onClick = onExplore) { Text("Browse Explore") }
+                }
+            }
+        } else {
+            item { SectionLabel("Installed") }
+            items(installed.chunked(2), key = { row -> row.first().id }) { row ->
+                Row(
+                    Modifier.pageMargin().fillMaxWidth().padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    row.forEach { spec ->
+                        WidgetTile(spec, data, Modifier.weight(1f)) { onOpen(spec.id) }
+                    }
+                    if (row.size == 1) Spacer(Modifier.weight(1f))
+                }
             }
         }
+    }
+}
 
-        item { SectionLabel("Add to home screen") }
-        item {
-            Row(Modifier.pageMargin(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                NothingTile("Small", Modifier.weight(1f), onClick = { pin(SmallWidgetReceiver::class.java) }) {
-                    SizeGlyph(14.dp, 14.dp)
-                }
-                NothingTile("Wide", Modifier.weight(1f), onClick = { pin(WideWidgetReceiver::class.java) }) {
-                    SizeGlyph(26.dp, 14.dp)
-                }
-                NothingTile("Large", Modifier.weight(1f), onClick = { pin(LargeWidgetReceiver::class.java) }) {
-                    SizeGlyph(26.dp, 26.dp)
-                }
-            }
+/** A widget shown as it really looks, with its name underneath. */
+@Composable
+private fun WidgetTile(spec: WidgetSpec, data: Map<String, String>, modifier: Modifier, onClick: () -> Unit) {
+    NothingCard(
+        CardShape,
+        modifier,
+        onClick = onClick,
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 14.dp),
+    ) {
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            SpecPreview(spec, PreviewSize.Small, data)
         }
-        item {
+        Spacer(Modifier.height(12.dp))
+        Text(
+            spec.name,
+            style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, lineHeight = 22.sp),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+        spec.categories.firstOrNull()?.let {
             Text(
-                "Place one, then choose which widget it shows.",
+                it,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 4.dp),
             )
-        }
-
-        if (installed.isNotEmpty()) {
-            item { SectionLabel("Installed") }
-            itemsIndexed(installed, key = { _, spec -> spec.id }) { i, spec ->
-                NothingItem(
-                    title = spec.name,
-                    subtitle = spec.description ?: spec.categories.joinToString(" · ").ifEmpty { null },
-                    shape = groupShape(i, installed.size),
-                    modifier = Modifier.pageMargin().padding(top = if (i > 0) 2.dp else 0.dp),
-                    onClick = { onOpen(spec.id) },
-                    trailing = { ChevronIcon() },
-                )
-            }
         }
     }
 }
