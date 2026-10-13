@@ -75,6 +75,17 @@ object NothingArt {
         "....R..",
     )
 
+    /** A sparkle with an LED at its heart. */
+    val Spark = listOf(
+        "....#....",
+        "....#....",
+        "...###...",
+        "####R####",
+        "...###...",
+        "....#....",
+        "....#....",
+    )
+
     /** A key. */
     val Key = listOf(
         ".###.........",
