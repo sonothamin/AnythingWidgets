@@ -1,5 +1,8 @@
 package com.sonothamin.anythingwidgets.ui
 
+import com.sonothamin.anythingwidgets.ui.components.DotLoader
+import com.sonothamin.anythingwidgets.ui.components.NothingArt
+import com.sonothamin.anythingwidgets.ui.components.NothingEmptyState
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.widget.Toast
@@ -200,11 +203,12 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
         if (spec == null) {
             Box(Modifier.fillMaxWidth().padding(48.dp), Alignment.Center) {
                 if (loading) {
-                    CircularProgressIndicator()
+                    DotLoader()
                 } else {
-                    Text(
-                        if (offline) "Can't reach the registry. Check your connection." else "This widget isn't available.",
-                        style = MaterialTheme.typography.bodyLarge,
+                    NothingEmptyState(
+                        art = if (offline) NothingArt.Offline else NothingArt.Missing,
+                        title = if (offline) "No signal" else "Not found",
+                        message = if (offline) "Can't reach the registry. Check your connection." else "This widget isn't available.",
                     )
                 }
             }

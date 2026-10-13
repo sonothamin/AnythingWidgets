@@ -5,14 +5,14 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
-/** Minimal HTTPS-only client: timeouts, size cap, conditional GET. */
+/** Minimal client: HTTPS by default, plain HTTP only when the caller opts in. Timeouts, size cap, conditional GET. */
 internal object Http {
     private const val MAX_BYTES = 256 * 1024
 
     class Response(val code: Int, val bytes: ByteArray, val etag: String?)
 
-    fun get(url: String, etag: String? = null): Response {
-        require(url.startsWith("https://")) { "HTTPS required" }
+    fun get(url: String, etag: String? = null, allowHttp: Boolean = false): Response {
+        require(url.startsWith("https://") || (allowHttp && url.startsWith("http://"))) { "HTTPS required" }
         val conn = URL(url).openConnection() as HttpURLConnection
         try {
             conn.connectTimeout = 10_000
