@@ -1,5 +1,8 @@
 package com.sonothamin.anythingwidgets.ui
 
+import com.sonothamin.anythingwidgets.ui.components.DotLoader
+import com.sonothamin.anythingwidgets.ui.components.NothingArt
+import com.sonothamin.anythingwidgets.ui.components.NothingStateCard
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -86,7 +89,7 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
 
         when (val s = state) {
             ExploreState.Loading -> Box(Modifier.fillMaxWidth().weight(1f), Alignment.Center) {
-                CircularProgressIndicator()
+                DotLoader()
             }
 
             ExploreState.Failed -> {
@@ -96,16 +99,14 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                     contentPadding = PaddingValues(bottom = 120.dp),
                 ) {
                     item {
-                        NothingCard(CardShape, Modifier.pageMargin()) {
-                            Text("Can't reach the registry", style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                "Check your connection and try again.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = 2.dp, bottom = 12.dp),
-                            )
-                            Button(onClick = { load() }) { Text("Retry") }
-                        }
+                        NothingStateCard(
+                            art = NothingArt.Offline,
+                            title = "No signal",
+                            message = "Can't reach the registry. Check your connection and try again.",
+                            modifier = Modifier.pageMargin(),
+                            actionLabel = "Retry",
+                            onAction = { load() },
+                        )
                     }
                     onDevice(local, onOpen)
                 }
