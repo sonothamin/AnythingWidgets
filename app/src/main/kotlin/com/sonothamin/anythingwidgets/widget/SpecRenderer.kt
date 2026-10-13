@@ -43,6 +43,7 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.sonothamin.anythingwidgets.MainActivity
+import com.sonothamin.anythingwidgets.debug.DebugLog
 import com.sonothamin.anythingwidgets.widget.spec.ActionSpec
 import com.sonothamin.anythingwidgets.widget.spec.Node
 import com.sonothamin.anythingwidgets.widget.spec.NothingPalette
@@ -226,7 +227,7 @@ private fun actionOf(a: ActionSpec?, data: Map<String, String>): Action? {
     if (a == null) return null
     val context = LocalContext.current
     fun t(s: String?) = DataSnapshot.apply(s.orEmpty(), data)
-    return when (a.type) {
+    val action: Action? = when (a.type) {
         "open_app" -> openAppAction()
         "open_url" -> a.url?.takeIf { it.startsWith("https://") }?.let {
             actionStartActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)).addCategory(Intent.CATEGORY_BROWSABLE))
@@ -268,6 +269,9 @@ private fun actionOf(a: ActionSpec?, data: Map<String, String>): Action? {
         }
         else -> null
     }
+    if (action == null) DebugLog.w(context, "tap", "'${a.type}' on ${data["spec.id"] ?: "?"} has nothing to run (bad or missing fields); taps will do nothing")
+    else DebugLog.d(context, "tap", "'${a.type}' attached on ${data["spec.id"] ?: "?"}")
+    return action
 }
 
 private fun settingsIntent(screen: String?): Intent? = when (screen) {
