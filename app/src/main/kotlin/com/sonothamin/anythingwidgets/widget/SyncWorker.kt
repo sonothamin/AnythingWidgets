@@ -38,7 +38,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
             } catch (_: Exception) {
             }
         }
-        SpecWidget().updateAll(applicationContext)
+        SpecWidget.redrawAll(applicationContext)
         return Result.success()
     }
 

@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -30,6 +31,7 @@ import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.state.getAppWidgetState
+import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import androidx.glance.background
 import androidx.glance.layout.Alignment
@@ -59,8 +61,11 @@ class SpecWidget : GlanceAppWidget() {
     )
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        // Do I/O before composing; each update re-runs this, so data is always fresh.
-        val initialId = getAppWidgetState(context, PreferencesGlanceStateDefinition, id)[KEY_SPEC]
+        // Do I/O before composing. This only re-runs when a new session starts; while one is alive,
+        // redraws come through the tick in widget state (see redraw) and recompute inside the composition.
+        val initialState = getAppWidgetState(context, PreferencesGlanceStateDefinition, id)
+        val initialId = initialState[KEY_SPEC]
+        val initialTick = initialState[KEY_TICK]
         val initialSpec = withContext(Dispatchers.IO) { initialId?.let { SpecStore(context).load(it) } }
         // Feeds only hit the network when the user allowed it and the cached copy is older than its ttl.
         initialSpec?.let { spec -> withTimeoutOrNull(8_000) { WidgetRuntime.refreshFeeds(context, spec) } }
@@ -70,17 +75,38 @@ class SpecWidget : GlanceAppWidget() {
         provideContent {
             // Read the choice from live state: a session started before the user picked a widget
             // must still re-render with the new choice instead of the captured (null) spec.
-            val liveId = currentState<Preferences>()[KEY_SPEC]
-            val spec = if (liveId == initialId) initialSpec
-            else remember(liveId) { liveId?.let { SpecStore(context).load(it) } }
-            // A spec picked after this session started has no precomputed values yet.
-            val liveData = if (spec === initialSpec || spec == null) data else remember(spec) { WidgetRuntime.data(context, spec) }
+            val liveState = currentState<Preferences>()
+            val liveId = liveState[KEY_SPEC]
+            val tick = liveState[KEY_TICK]
+            // Anything that happened since this session started (a new choice, a tap, a refresh) has no
+            // precomputed values, so rebuild the spec and its data instead of reusing the captured ones.
+            val fresh = liveId == initialId && tick == initialTick
+            val spec = if (fresh) initialSpec else remember(liveId, tick) { liveId?.let { SpecStore(context).load(it) } }
+            val liveData = if (fresh) data
+            else remember(spec, tick) {
+                DebugLog.d(context, "widget", "Redraw #$appWidgetId spec=${liveId ?: "none"} tick=$tick")
+                spec?.let { WidgetRuntime.data(context, it) } ?: DataSnapshot.build(context)
+            }
             GlanceTheme { WidgetContent(spec, liveData, appWidgetId) }
         }
     }
 
     companion object {
         val KEY_SPEC = stringPreferencesKey("spec_id")
+
+        /** Bumped on every redraw. A live Glance session only recomposes, so this is what tells it to recompute. */
+        val KEY_TICK = longPreferencesKey("tick")
+
+        /** Redraws one widget now, with fresh data, even if its session is still alive. */
+        suspend fun redraw(context: Context, id: GlanceId) {
+            updateAppWidgetState(context, id) { it[KEY_TICK] = System.currentTimeMillis() }
+            SpecWidget().update(context, id)
+        }
+
+        /** Redraws every widget on the home screen. Use instead of updateAll, which can leave a live session stale. */
+        suspend fun redrawAll(context: Context) {
+            GlanceAppWidgetManager(context).getGlanceIds(SpecWidget::class.java).forEach { redraw(context, it) }
+        }
     }
 }
 
@@ -140,7 +166,7 @@ class RefreshAction : ActionCallback {
             id?.let { SpecStore(context).load(it) }?.let { spec ->
                 withTimeoutOrNull(8_000) { WidgetRuntime.refreshFeeds(context, spec, force = true) }
             }
-            SpecWidget().update(context, glanceId)
+            SpecWidget.redraw(context, glanceId)
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -166,7 +192,7 @@ class StateAction : ActionCallback {
         )
         val changed = WidgetRuntime.applyOp(context, spec, op)
         DebugLog.i(context, "tap", if (changed) "'$type' changed state; redrawing" else "'$type' changed nothing (invalid target, type or value)")
-        if (changed) SpecWidget().updateAll(context)
+        if (changed) SpecWidget.redrawAll(context)
     }
 
     companion object {

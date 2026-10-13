@@ -181,7 +181,7 @@ fun AiPage(
                         scope.launch {
                             runCatching { SpecStore(context).save(current.spec, current.raw, "ai") }
                                 .onSuccess {
-                                    SpecWidget().updateAll(context)
+                                    SpecWidget.redrawAll(context)
                                     Toast.makeText(context, "${current.spec.name} installed", Toast.LENGTH_SHORT).show()
                                     onOpen(current.spec.id)
                                     result = null

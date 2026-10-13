@@ -123,7 +123,7 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
             try {
                 val spec = registry.install(entry)
                 installed = installed + (spec.id to spec.version)
-                SpecWidget().updateAll(context)
+                SpecWidget.redrawAll(context)
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
