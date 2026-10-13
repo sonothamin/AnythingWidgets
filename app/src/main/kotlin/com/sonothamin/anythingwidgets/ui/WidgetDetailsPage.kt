@@ -22,12 +22,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -102,6 +105,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
     var autoUpdate by remember { mutableStateOf(WidgetPrefs.autoUpdate(context, id)) }
     var confirmRemove by remember { mutableStateOf(false) }
     var sizeIndex by rememberSaveable { mutableIntStateOf(0) }
+    var showInfo by remember { mutableStateOf(false) }
 
     LaunchedEffect(id) {
         loading = true
@@ -166,7 +170,17 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
             .navigationBarsPadding()
             .padding(bottom = 32.dp),
     ) {
-        PageHeader(spec?.name ?: "Widget", onBack = onBack)
+        PageHeader(
+            spec?.name ?: "Widget",
+            onBack = onBack,
+            action = if (spec != null) {
+                {
+                    IconButton(onClick = { showInfo = true }) {
+                        Icon(Icons.Rounded.Info, contentDescription = "Details")
+                    }
+                }
+            } else null,
+        )
 
         if (spec == null) {
             Box(Modifier.fillMaxWidth().padding(48.dp), Alignment.Center) {
@@ -180,20 +194,45 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 }
             }
         } else {
-            val dataUsed = SpecInfo.dataUsed(spec)
-            val actions = SpecInfo.actions(spec)
+            val subtitle = listOfNotNull(
+                spec.author?.takeIf { it.isNotBlank() },
+                (spec.created?.let(::formatIsoDate) ?: addedAt?.let(::formatMillis)),
+            ).joinToString(" • ")
 
-            // Author, version, description
-            Column(Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Creator • date
+            if (subtitle.isNotEmpty()) {
                 Text(
-                    listOfNotNull(spec.author, "v${spec.version}").joinToString(" · "),
+                    subtitle,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 24.dp),
                 )
-                spec.description?.let { Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface) }
             }
 
-            // Install / update
+            // Preview
+            NothingCard(CardShape, Modifier.pageMargin().padding(top = 20.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    sizes.forEachIndexed { i, s ->
+                        FilterChip(selected = i == sizeIndex, onClick = { sizeIndex = i }, label = { Text(s.label) })
+                    }
+                }
+                Spacer(Modifier.height(20.dp))
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    SpecPreview(spec, size, data)
+                }
+            }
+
+            // Description
+            spec.description?.takeIf { it.isNotBlank() }?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 20.dp),
+                )
+            }
+
+            // Install / update, only when there is something to do
             when {
                 installed == null -> Button(
                     onClick = { entry?.let(::install) },
@@ -208,128 +247,10 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 ) { Text(if (busy) "Updating…" else "Update to v${update.version}") }
             }
 
-            // Preview
-            SectionLabel("Preview")
-            NothingCard(CardShape, Modifier.pageMargin()) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    sizes.forEachIndexed { i, s ->
-                        FilterChip(
-                            selected = i == sizeIndex,
-                            onClick = { sizeIndex = i },
-                            label = { Text(s.label) },
-                        )
-                    }
-                }
-                Spacer(Modifier.height(20.dp))
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    SpecPreview(spec, size, data)
-                }
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    "${size.width} × ${size.height} dp · live data from this device. Your launcher may size it slightly differently.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            // At a glance: stat tiles
-            SectionLabel("At a glance")
-            val stats = buildList {
-                add(
-                    "Version" to buildString {
-                        append("v${spec.version}")
-                        if (update != null) append(" → v${update.version}")
-                    },
-                )
-                add("Size" to (bytes?.let(::formatSize) ?: "Unknown"))
-                spec.created?.let { add("Created" to formatIsoDate(it)) }
-                addedAt?.let { add("Added" to formatMillis(it)) }
-            }
-            Column(Modifier.pageMargin(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                stats.chunked(2).forEach { pair ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        pair.forEach { (label, value) -> StatTile(label, value, Modifier.weight(1f)) }
-                        if (pair.size == 1) Spacer(Modifier.weight(1f))
-                    }
-                }
-            }
-
-            // How it behaves: capsules instead of a key/value list
-            SectionLabel("How it behaves")
-            NothingCard(CardShape, Modifier.pageMargin()) {
-                val quiet = MaterialTheme.colorScheme.surfaceContainerHighest
-                val onQuiet = MaterialTheme.colorScheme.onSurface
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Pill(
-                        if (SpecInfo.hasSizeLayouts(spec)) "Adapts to small, wide and large" else "Single layout",
-                        quiet, onQuiet,
-                    )
-                    if (dataUsed.isEmpty()) {
-                        Pill("Fully static", quiet, onQuiet)
-                    } else {
-                        dataUsed.forEach { Pill("Reads: $it", quiet, onQuiet) }
-                    }
-                    if (actions.isEmpty()) {
-                        Pill("Not tappable", quiet, onQuiet)
-                    } else {
-                        actions.forEach { Pill("Tap: ${it.replaceFirstChar { c -> c.lowercase() }}", quiet, onQuiet) }
-                    }
-                    Pill(
-                        when {
-                            installed == null -> hostOf(registry.baseUrl)
-                            source == WidgetImporter.SOURCE -> "Imported from zip"
-                            source == "ai" -> "Made with AI"
-                            source == null -> "Unknown source"
-                            else -> hostOf(source)
-                        },
-                        quiet, onQuiet,
-                    )
-                    Pill("id: ${spec.id}", quiet, onQuiet)
-                }
-            }
-
-            // Categories and tags
-            if (spec.categories.isNotEmpty() || spec.tags.isNotEmpty()) {
-                SectionLabel("Categories & tags")
-                NothingCard(CardShape, Modifier.pageMargin()) {
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        spec.categories.forEach {
-                            Pill(it, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary)
-                        }
-                        spec.tags.forEach {
-                            Pill("#$it", MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.onSurface)
-                        }
-                    }
-                }
-            }
-
-            // Per-widget settings (only once it's on the device)
+            // Widget settings (only once it's on the device)
             if (installed != null) {
-                SectionLabel("Settings")
+                SectionLabel("Widget settings")
                 NothingStack(Modifier.pageMargin()) {
-                    row { shape ->
-                        NothingItem(
-                            title = "Update automatically",
-                            subtitle = if (managed) "Get new versions from the registry as they're published."
-                            else "Only for widgets installed from your current source.",
-                            shape = shape,
-                            onClick = if (managed) {
-                                {
-                                    autoUpdate = !autoUpdate
-                                    WidgetPrefs.setAutoUpdate(context, id, autoUpdate)
-                                }
-                            } else null,
-                            trailing = {
-                                Switch(checked = managed && autoUpdate, onCheckedChange = null, enabled = managed)
-                            },
-                        )
-                    }
                     row { shape ->
                         var sizeMenu by remember { mutableStateOf(false) }
                         Box {
@@ -364,24 +285,48 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                             }
                         }
                     }
-                    row { shape ->
-                        NothingItem(
-                            title = "Refresh widgets",
-                            subtitle = "Redraw every widget on your home screen.",
-                            shape = shape,
-                            onClick = {
-                                scope.launch {
-                                    SpecWidget().updateAll(context)
-                                    Toast.makeText(context, "Widgets refreshed", Toast.LENGTH_SHORT).show()
-                                }
-                            },
-                        )
+                    if (managed) {
+                        row { shape ->
+                            NothingItem(
+                                title = "Update automatically",
+                                subtitle = "Get new versions as they're published.",
+                                shape = shape,
+                                onClick = {
+                                    autoUpdate = !autoUpdate
+                                    WidgetPrefs.setAutoUpdate(context, id, autoUpdate)
+                                },
+                                trailing = { Switch(checked = autoUpdate, onCheckedChange = null) },
+                            )
+                        }
                     }
+                }
+            }
+
+            // Tags
+            if (spec.categories.isNotEmpty() || spec.tags.isNotEmpty()) {
+                SectionLabel("Tags")
+                FlowRow(
+                    Modifier.pageMargin().padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    spec.categories.forEach {
+                        Pill(it, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary)
+                    }
+                    spec.tags.forEach {
+                        Pill("#$it", MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.onSurface)
+                    }
+                }
+            }
+
+            // Delete
+            if (installed != null) {
+                Spacer(Modifier.height(32.dp))
+                NothingStack(Modifier.pageMargin()) {
                     row { shape ->
                         NothingItem(
-                            title = "Remove",
+                            title = "Delete from device",
                             titleColor = MaterialTheme.colorScheme.error,
-                            subtitle = "Uninstall from this device.",
                             shape = shape,
                             onClick = { confirmRemove = true },
                         )
@@ -391,11 +336,87 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
         }
     }
 
+    // Technical details live behind the info button instead of cluttering the page.
+    if (showInfo && spec != null) {
+        ModalBottomSheet(onDismissRequest = { showInfo = false }) {
+            val dataUsed = SpecInfo.dataUsed(spec)
+            val actions = SpecInfo.actions(spec)
+            Column(
+                Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Text(
+                    "Details",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                )
+                val stats = buildList {
+                    add("Version" to buildString {
+                        append("v${spec.version}")
+                        if (update != null) append(" → v${update.version}")
+                    })
+                    add("Size" to (bytes?.let(::formatSize) ?: "Unknown"))
+                    spec.created?.let { add("Created" to formatIsoDate(it)) }
+                    addedAt?.let { add("Added" to formatMillis(it)) }
+                }
+                Column(Modifier.pageMargin(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    stats.chunked(2).forEach { pair ->
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            pair.forEach { (label, value) -> StatTile(label, value, Modifier.weight(1f)) }
+                            if (pair.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+                val quiet = MaterialTheme.colorScheme.surfaceContainerHighest
+                val onQuiet = MaterialTheme.colorScheme.onSurface
+                FlowRow(
+                    Modifier.padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Pill(if (SpecInfo.hasSizeLayouts(spec)) "Adapts to small, wide and large" else "Single layout", quiet, onQuiet)
+                    if (dataUsed.isEmpty()) Pill("Fully static", quiet, onQuiet)
+                    else dataUsed.forEach { Pill("Reads: $it", quiet, onQuiet) }
+                    if (actions.isEmpty()) Pill("Not tappable", quiet, onQuiet)
+                    else actions.forEach { Pill("Tap: ${it.replaceFirstChar { c -> c.lowercase() }}", quiet, onQuiet) }
+                    Pill(
+                        when {
+                            installed == null -> hostOf(registry.baseUrl)
+                            source == WidgetImporter.SOURCE -> "Imported from zip"
+                            source == "ai" -> "Made with AI"
+                            source == null -> "Unknown source"
+                            else -> hostOf(source)
+                        },
+                        quiet, onQuiet,
+                    )
+                    Pill("id: ${spec.id}", quiet, onQuiet)
+                }
+                if (installed != null) {
+                    NothingStack(Modifier.pageMargin()) {
+                        row { shape ->
+                            NothingItem(
+                                title = "Refresh widgets",
+                                subtitle = "Redraw every widget on your home screen.",
+                                shape = shape,
+                                onClick = {
+                                    scope.launch {
+                                        SpecWidget().updateAll(context)
+                                        Toast.makeText(context, "Widgets refreshed", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if (confirmRemove) {
         NothingDialog(
-            title = "Remove ${spec?.name ?: "widget"}?",
+            title = "Delete ${spec?.name ?: "widget"}?",
             onDismiss = { confirmRemove = false },
-            confirmText = "Remove",
+            confirmText = "Delete",
             dismissText = "Keep",
             destructive = true,
             onConfirm = {
