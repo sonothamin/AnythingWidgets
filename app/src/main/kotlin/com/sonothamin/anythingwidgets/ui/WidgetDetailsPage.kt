@@ -208,7 +208,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                     NothingEmptyState(
                         art = if (offline) NothingArt.Offline else NothingArt.Missing,
                         title = if (offline) "No signal" else "Not found",
-                        message = if (offline) "Can't reach the registry. Check your connection." else "This widget isn't available.",
+                        message = if (offline) "Check your connection." else "This widget isn't available.",
                     )
                 }
             }
@@ -286,7 +286,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                             val allowed = WidgetPrefs.netAllowed(context, id)
                             NothingItem(
                                 title = "Allow internet access",
-                                subtitle = "Fetches from $hosts. Nothing is sent but the request itself.",
+                                subtitle = hosts,
                                 shape = shape,
                                 onClick = {
                                     WidgetPrefs.setNetAllowed(context, id, !allowed)
@@ -334,7 +334,6 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                         row { shape ->
                             NothingItem(
                                 title = "Update automatically",
-                                subtitle = "Get new versions as they're published.",
                                 shape = shape,
                                 onClick = {
                                     autoUpdate = !autoUpdate
@@ -348,10 +347,6 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                         row { shape ->
                             NothingItem(
                                 title = "Reset to defaults",
-                                subtitle = listOfNotNull(
-                                    "options".takeIf { spec.params.isNotEmpty() },
-                                    "saved data".takeIf { spec.state.isNotEmpty() },
-                                ).joinToString(" and "),
                                 shape = shape,
                                 onClick = {
                                     WidgetPrefs.resetParams(context, id)
@@ -461,7 +456,6 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                         row { shape ->
                             NothingItem(
                                 title = "Refresh widgets",
-                                subtitle = "Redraw every widget on your home screen.",
                                 shape = shape,
                                 onClick = {
                                     scope.launch {
@@ -495,7 +489,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
             },
         ) {
             Text(
-                "Copies on your home screen will ask you to pick another widget. You can reinstall it anytime from Explore.",
+                "Copies on your home screen will stop working. You can reinstall it from Explore.",
                 style = MaterialTheme.typography.bodyMedium,
             )
         }

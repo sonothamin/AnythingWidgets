@@ -149,7 +149,7 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                         NothingStateCard(
                             art = NothingArt.Offline,
                             title = "No signal",
-                            message = "Can't reach the registry. Check your connection and try again.",
+                            message = "Check your connection and try again.",
                             actionLabel = "Retry",
                             onAction = { load() },
                         )
@@ -184,8 +184,7 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                         }
                         BentoTile(
                             title = entry.name,
-                            subtitle = if (isWide(i)) entry.description ?: entry.categories.firstOrNull()
-                            else entry.categories.firstOrNull() ?: entry.description,
+                            subtitle = entry.categories.firstOrNull(),
                             spec = localSpec ?: previews[key],
                             previewFailed = key in previewFailed,
                             wide = isWide(i),
@@ -431,8 +430,7 @@ private fun LazyGridScope.onDevice(specs: List<WidgetSpec>, refreshKey: Any?, on
     ) { i, spec ->
         BentoTile(
             title = spec.name,
-            subtitle = if (isWide(i)) spec.description ?: spec.categories.firstOrNull()
-            else spec.categories.firstOrNull() ?: spec.description,
+            subtitle = spec.categories.firstOrNull(),
             spec = spec,
             previewFailed = false,
             wide = isWide(i),

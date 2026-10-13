@@ -89,7 +89,7 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
                 RepoOption(
                     selected = source == Source.OFFICIAL,
                     title = "sonothamin.dev",
-                    subtitle = RegistrySettings.OFFICIAL_URL,
+                    subtitle = null,
                     shape = shape,
                     onSelect = {
                         RegistrySettings.useOfficial(context)
@@ -117,19 +117,12 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
                 )
             }
         }
-        Text(
-            "Widgets only describe what to show, but the source decides what that is. Stick to sources you trust.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-        )
 
         SectionLabel("Import")
         NothingStack(Modifier.pageMargin()) {
             row { shape ->
                 NothingItem(
                     title = "Import from zip",
-                    subtitle = "Needs an index.json and a widgets/ folder. Widgets with the same ID get replaced.",
                     shape = shape,
                     onClick = {
                         picker.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream"))
@@ -144,7 +137,6 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
             row { shape ->
                 NothingItem(
                     title = "Show AI tab",
-                    subtitle = "Generate widgets from a description. Off hides the tab; your keys are kept.",
                     shape = shape,
                     onClick = { onAiEnabledChange(!aiEnabled) },
                     trailing = { Switch(checked = aiEnabled, onCheckedChange = onAiEnabledChange) },
@@ -153,7 +145,6 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
             row { shape ->
                 NothingItem(
                     title = "AI keys",
-                    subtitle = "Gemini, OpenAI, Claude, Ollama or any OpenAI-compatible server. Tried in order.",
                     shape = shape,
                     onClick = { keysOpen = true },
                     trailing = { ChevronIcon() },
@@ -166,7 +157,6 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
             row { shape ->
                 NothingItem(
                     title = "Advanced options",
-                    subtitle = "Settings that loosen a safe default",
                     shape = shape,
                     onClick = { advancedOpen = true },
                     trailing = { ChevronIcon() },
@@ -179,7 +169,6 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
             row { shape ->
                 NothingItem(
                     title = "About AnythingWidgets",
-                    subtitle = "Version, credits and legal",
                     shape = shape,
                     onClick = { aboutOpen = true },
                     trailing = { ChevronIcon() },
@@ -209,7 +198,7 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
 private fun RepoOption(
     selected: Boolean,
     title: String,
-    subtitle: String,
+    subtitle: String?,
     shape: Shape,
     onSelect: () -> Unit,
     trailing: (@Composable () -> Unit)? = null,
@@ -229,12 +218,14 @@ private fun RepoOption(
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                )
+                if (subtitle != null) {
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                    )
+                }
             }
             trailing?.invoke()
         }
@@ -258,8 +249,7 @@ private fun CustomRepoDialog(initial: String, allowHttp: Boolean, onDismiss: () 
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(
-                if (allowHttp) "Paste the http or https link to the folder that holds your index.json."
-                else "Paste the https link to the folder that holds your index.json.",
+                "Link to the folder that holds your index.json.",
                 style = MaterialTheme.typography.bodyMedium,
             )
             OutlinedTextField(
