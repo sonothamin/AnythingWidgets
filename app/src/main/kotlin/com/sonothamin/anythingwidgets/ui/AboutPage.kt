@@ -17,9 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowOutward
 import androidx.compose.material.icons.rounded.Code
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -56,9 +54,6 @@ private const val ISSUES_URL = "$REPO_URL/issues"
 private const val RELEASES_URL = "$REPO_URL/releases"
 private const val LICENSES_URL = "$REPO_URL/tree/main/licenses"
 private const val SITE_URL = "https://sonothamin.dev"
-private const val GITHUB_URL = "https://github.com/sonothamin"
-private const val LINKEDIN_URL = "https://www.linkedin.com/in/sonoth-amin-9b98491b5/"
-private const val BLOG_URL = "https://sonoth-amin.blogspot.com/"
 
 /** Opens [url] in the browser; a device with no browser installed shouldn't crash the app. */
 private fun UriHandler.open(url: String) {
@@ -139,24 +134,7 @@ fun AboutPage(onBack: () -> Unit) {
 
         SectionLabel("Developer")
         NothingStack(Modifier.pageMargin()) {
-            row { shape ->
-                NothingCard(shape) {
-                    Text(
-                        "Sonoth Amin",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        "Linux enthusiast, web developer and system administrator.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-            row { shape -> LinkItem("Website", "sonothamin.dev", Icons.Rounded.Language, shape) { uri.open(SITE_URL) } }
-            row { shape -> LinkItem("GitHub", "github.com/sonothamin", Icons.Rounded.Code, shape) { uri.open(GITHUB_URL) } }
-            row { shape -> LinkItem("LinkedIn", "Sonoth Amin", Icons.Rounded.Work, shape) { uri.open(LINKEDIN_URL) } }
-            row { shape -> LinkItem("Blog", "sonoth-amin.blogspot.com", Icons.Rounded.Edit, shape) { uri.open(BLOG_URL) } }
+            row { shape -> LinkItem("Sonoth Amin", "sonothamin.dev", Icons.Rounded.Language, shape) { uri.open(SITE_URL) } }
         }
 
         SectionLabel("Project")
