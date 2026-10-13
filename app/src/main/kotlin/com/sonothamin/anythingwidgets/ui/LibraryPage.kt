@@ -1,5 +1,7 @@
 package com.sonothamin.anythingwidgets.ui
 
+import com.sonothamin.anythingwidgets.ui.components.NothingArt
+import com.sonothamin.anythingwidgets.ui.components.NothingEmptyState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,20 +48,14 @@ fun LibraryPage(
 
         if (installed.isEmpty()) {
             item {
-                NothingCard(CardShape, Modifier.pageMargin(), contentPadding = PaddingValues(24.dp)) {
-                    Text(
-                        "No widgets yet",
-                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        "Install some from Explore, then add them from your home screen's widget picker.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
-                    )
-                    Button(onClick = onExplore) { Text("Browse Explore") }
-                }
+                NothingEmptyState(
+                    art = NothingArt.Empty,
+                    title = "Nothing here. Yet.",
+                    message = "Install a widget from Explore, then add it from your home screen's widget picker.",
+                    modifier = Modifier.fillParentMaxHeight(0.6f),
+                    actionLabel = "Browse Explore",
+                    onAction = onExplore,
+                )
             }
         } else {
             item { SectionLabel("Installed") }

@@ -1,5 +1,8 @@
 package com.sonothamin.anythingwidgets.ui
 
+import com.sonothamin.anythingwidgets.ui.components.DotLoader
+import com.sonothamin.anythingwidgets.ui.components.NothingArt
+import com.sonothamin.anythingwidgets.ui.components.NothingStateCard
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -99,22 +102,14 @@ fun AiPage(
         PageHeader("AI")
 
         if (!hasKey) {
-            NothingCard(CardShape, Modifier.pageMargin(), contentPadding = PaddingValues(24.dp)) {
-                Icon(Icons.Rounded.AutoAwesome, contentDescription = null, modifier = Modifier.size(28.dp))
-                Text(
-                    "Bring your own key",
-                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(top = 12.dp),
-                )
-                Text(
-                    "Add an API key for Gemini, OpenAI, Claude or a local Ollama server in Settings, and describe the widget you want.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
-                )
-                Button(onClick = onOpenSettings) { Text("Open Settings") }
-            }
+            NothingStateCard(
+                art = NothingArt.Key,
+                title = "Bring your own key",
+                message = "Add an API key for Gemini, OpenAI, Claude or a local Ollama server in Settings, then describe the widget you want.",
+                modifier = Modifier.pageMargin(),
+                actionLabel = "Open Settings",
+                onAction = onOpenSettings,
+            )
             return@Column
         }
 
@@ -140,7 +135,7 @@ fun AiPage(
                 if (current != null) {
                     TextButton(onClick = { run(refine = false) }, enabled = prompt.isNotBlank() && !loading) { Text("New instead") }
                 }
-                if (loading) CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
+                if (loading) DotLoader(diameter = 24.dp)
             }
         }
 
