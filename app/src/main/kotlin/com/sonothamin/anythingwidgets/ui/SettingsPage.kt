@@ -39,6 +39,7 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
     val context = LocalContext.current
     var keysOpen by rememberSaveable { mutableStateOf(false) }
     var aboutOpen by rememberSaveable { mutableStateOf(false) }
+    var advancedOpen by rememberSaveable { mutableStateOf(false) }
     var source by remember { mutableStateOf(RegistrySettings.source(context)) }
     var custom by remember { mutableStateOf(RegistrySettings.customUrl(context)) }
     var askUrl by remember { mutableStateOf(false) }
@@ -66,6 +67,16 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
 
     if (aboutOpen) {
         AboutPage(onBack = { aboutOpen = false })
+        return
+    }
+
+    if (advancedOpen) {
+        AdvancedPage(onBack = {
+            advancedOpen = false
+            // Turning HTTP off can switch the source back to the official one.
+            source = RegistrySettings.source(context)
+            custom = RegistrySettings.customUrl(context)
+        })
         return
     }
 
@@ -150,6 +161,19 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
             }
         }
 
+        SectionLabel("Advanced")
+        NothingStack(Modifier.pageMargin()) {
+            row { shape ->
+                NothingItem(
+                    title = "Advanced options",
+                    subtitle = "Settings that loosen a safe default",
+                    shape = shape,
+                    onClick = { advancedOpen = true },
+                    trailing = { ChevronIcon() },
+                )
+            }
+        }
+
         SectionLabel("About")
         NothingStack(Modifier.pageMargin()) {
             row { shape ->
@@ -169,6 +193,7 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
     if (askUrl) {
         CustomRepoDialog(
             initial = custom.orEmpty(),
+            allowHttp = RegistrySettings.allowHttp(context),
             onDismiss = { askUrl = false },
             onSave = { url ->
                 RegistrySettings.useCustom(context, url)
@@ -217,7 +242,7 @@ private fun RepoOption(
 }
 
 @Composable
-private fun CustomRepoDialog(initial: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+private fun CustomRepoDialog(initial: String, allowHttp: Boolean, onDismiss: () -> Unit, onSave: (String) -> Unit) {
     var text by remember { mutableStateOf(initial) }
     var showError by remember { mutableStateOf(false) }
 
@@ -227,13 +252,14 @@ private fun CustomRepoDialog(initial: String, onDismiss: () -> Unit, onSave: (St
         confirmText = "Save",
         dismissText = "Cancel",
         onConfirm = {
-            val url = RegistrySettings.normalize(text)
+            val url = RegistrySettings.normalize(text, allowHttp)
             if (url != null) onSave(url) else showError = true
         },
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(
-                "Paste the https link to the folder that holds your index.json.",
+                if (allowHttp) "Paste the http or https link to the folder that holds your index.json."
+                else "Paste the https link to the folder that holds your index.json.",
                 style = MaterialTheme.typography.bodyMedium,
             )
             OutlinedTextField(
@@ -241,9 +267,20 @@ private fun CustomRepoDialog(initial: String, onDismiss: () -> Unit, onSave: (St
                 onValueChange = { text = it; showError = false },
                 singleLine = true,
                 label = { Text("Source URL") },
-                placeholder = { Text("https://example.com/widgets/") },
+                placeholder = { Text(if (allowHttp) "http://192.168.1.10/widgets/" else "https://example.com/widgets/") },
                 isError = showError,
-                supportingText = { if (showError) Text("That needs to be a valid https:// link.") },
+                supportingText = {
+                    if (showError) {
+                        Text(
+                            when {
+                                allowHttp -> "That needs to be a valid http:// or https:// link."
+                                text.trim().startsWith("http://", ignoreCase = true) ->
+                                    "Plain http:// links are off. You can allow them under Advanced options."
+                                else -> "That needs to be a valid https:// link."
+                            },
+                        )
+                    }
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             )
         }

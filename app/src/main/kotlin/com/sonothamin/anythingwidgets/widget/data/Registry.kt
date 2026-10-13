@@ -20,7 +20,7 @@ class Registry(
         val cache = File(context.cacheDir, CACHE_INDEX)
         val etagFile = File(context.cacheDir, CACHE_ETAG)
         val etag = if (cache.exists() && etagFile.exists()) etagFile.readText() else null
-        val res = Http.get(baseUrl + "index.json", etag)
+        val res = Http.get(baseUrl + "index.json", etag, allowHttp = RegistrySettings.allowHttp(context))
         val raw = if (res.code == 304) {
             cache.readText()
         } else {
@@ -37,7 +37,7 @@ class Registry(
     class Fetched(val spec: WidgetSpec, val raw: String, val sizeBytes: Int)
 
     private fun download(entry: IndexEntry): Fetched {
-        val bytes = Http.get(baseUrl + entry.spec).bytes
+        val bytes = Http.get(baseUrl + entry.spec, allowHttp = RegistrySettings.allowHttp(context)).bytes
         check(sha256(bytes).equals(entry.sha256, ignoreCase = true)) { "Checksum mismatch" }
         val raw = bytes.decodeToString()
         val spec = SpecCodec.parseSpec(raw)

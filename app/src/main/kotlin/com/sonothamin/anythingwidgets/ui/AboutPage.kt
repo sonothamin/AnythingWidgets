@@ -72,6 +72,7 @@ private fun UriHandler.open(url: String) {
 fun AboutPage(onBack: () -> Unit) {
     val uri = LocalUriHandler.current
     var licensesOpen by rememberSaveable { mutableStateOf(false) }
+    var trademarksOpen by rememberSaveable { mutableStateOf(false) }
 
     if (licensesOpen) {
         LicensesPage(onBack = { licensesOpen = false })
@@ -176,15 +177,41 @@ fun AboutPage(onBack: () -> Unit) {
                     trailing = { ChevronIcon() },
                 )
             }
+            row { shape ->
+                NothingItem(
+                    title = "Trademarks and affiliation",
+                    subtitle = "Nothing OS",
+                    shape = shape,
+                    onClick = { trademarksOpen = true },
+                    trailing = { ChevronIcon() },
+                )
+            }
         }
 
         Text(
-            "\u00A9 2026 Sonoth Amin. The visual style is inspired by Nothing OS; AnythingWidgets is an independent project and is not affiliated with or endorsed by Nothing Technology Limited.",
+            "\u00A9 2026 Sonoth Amin",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 24.dp),
         )
+    }
+
+    if (trademarksOpen) {
+        NothingDialog(
+            title = "Trademarks and affiliation",
+            onDismiss = { trademarksOpen = false },
+            confirmText = "Close",
+            onConfirm = { trademarksOpen = false },
+        ) {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Text(
+                    "The visual style of AnythingWidgets is inspired by Nothing OS. AnythingWidgets is an independent project and is not affiliated with, sponsored by or endorsed by Nothing Technology Limited.\n\n" +
+                        "Nothing and Nothing OS are trademarks of Nothing Technology Limited.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
     }
 }
 
