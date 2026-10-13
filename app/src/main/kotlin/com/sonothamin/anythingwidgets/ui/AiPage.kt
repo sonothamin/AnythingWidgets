@@ -105,7 +105,7 @@ fun AiPage(
             NothingStateCard(
                 art = NothingArt.Key,
                 title = "Bring your own key",
-                message = "Add an API key for Gemini, OpenAI, Claude or a local Ollama server in Settings, then describe the widget you want.",
+                message = "Add an API key in Settings to generate widgets.",
                 modifier = Modifier.pageMargin(),
                 actionLabel = "Open Settings",
                 onAction = onOpenSettings,
@@ -172,15 +172,6 @@ fun AiPage(
                 current.spec.description?.let {
                     Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Text(
-                    buildString {
-                        append("Made with ${current.usedLabel}")
-                        if (current.failures.isNotEmpty()) append(" after ${current.failures.size} other key${if (current.failures.size == 1) "" else "s"} failed")
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
                 Row(Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(onClick = {
                         scope.launch {
@@ -197,12 +188,6 @@ fun AiPage(
                     OutlinedButton(onClick = { result = null; error = null }) { Text("Discard") }
                 }
             }
-            Text(
-                "AI widgets are checked by the same validator as every other widget. They can only show data, never run code.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-            )
         }
     }
 }

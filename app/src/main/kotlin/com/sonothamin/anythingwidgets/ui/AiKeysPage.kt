@@ -71,13 +71,6 @@ fun AiKeysPage(onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
         PageHeader("AI keys", onBack = onBack)
 
-        Text(
-            "Requests go to the first enabled key. If it fails (bad key, quota, offline server, unusable answer), the next one is tried. Drag order is set with the arrows.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
-        )
-
         SectionLabel("Priority")
         NothingStack(Modifier.pageMargin()) {
             keys.forEachIndexed { i, key ->
@@ -108,19 +101,12 @@ fun AiKeysPage(onBack: () -> Unit) {
             row { shape ->
                 NothingItem(
                     title = "Add a key",
-                    subtitle = "Gemini, OpenAI, Claude, Ollama or any OpenAI-compatible server.",
                     shape = shape,
                     onClick = { editing = blankKey(AiPreset.GEMINI); isNew = true },
                     trailing = { Icon(Icons.Rounded.Add, contentDescription = null) },
                 )
             }
         }
-        Text(
-            "Keys are encrypted on this device and only ever sent to the address you set for that key.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-        )
     }
 
     editing?.let { key ->
@@ -228,16 +214,18 @@ private fun KeyDialog(
             )
             if (preset == AiPreset.OLLAMA) {
                 Text(
-                    "Use your computer's address on the network, not localhost. Ollama must listen on it (OLLAMA_HOST=0.0.0.0).",
+                    "Use your computer's network address, not localhost.",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
             if (preset.protocol == AiProtocol.OPENAI_COMPAT) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text("JSON mode", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-                        Text("Ask for strict JSON output. Turn off if the server rejects it.", style = MaterialTheme.typography.bodySmall)
-                    }
+                    Text(
+                        "JSON mode",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                    )
                     Switch(checked = draft.jsonMode, onCheckedChange = { draft = draft.copy(jsonMode = it) })
                 }
             }

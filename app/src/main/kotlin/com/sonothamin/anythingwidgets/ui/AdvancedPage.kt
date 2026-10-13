@@ -43,7 +43,6 @@ fun AdvancedPage(onBack: () -> Unit) {
             row { shape ->
                 NothingItem(
                     title = "Allow HTTP sources",
-                    subtitle = "Lets a custom source use plain http:// links, for example a server on your own network.",
                     shape = shape,
                     onClick = {
                         if (allowHttp) {
@@ -66,13 +65,6 @@ fun AdvancedPage(onBack: () -> Unit) {
                 )
             }
         }
-        Text(
-            "HTTP isn't encrypted. Anyone on the network can read or change what the source sends. " +
-                "Turning this off also switches back to the official source if your custom source uses http://.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-        )
     }
 
     if (confirming) {
@@ -89,8 +81,7 @@ fun AdvancedPage(onBack: () -> Unit) {
             },
         ) {
             Text(
-                "Widgets and their checksums would travel unencrypted, so someone on the network could swap a widget for another one. " +
-                    "Only use this for sources you run yourself on a network you trust.",
+                "Unencrypted sources can be tampered with by anyone on the network. Only use this for servers you run yourself.",
                 style = MaterialTheme.typography.bodyMedium,
             )
         }

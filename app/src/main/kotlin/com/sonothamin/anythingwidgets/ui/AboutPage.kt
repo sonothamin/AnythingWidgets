@@ -104,13 +104,6 @@ fun AboutPage(onBack: () -> Unit) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 20.dp, start = 24.dp, end = 24.dp),
             )
-            Text(
-                "Home-screen widgets from a simple spec.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 4.dp, start = 24.dp, end = 24.dp),
-            )
             Surface(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -139,9 +132,9 @@ fun AboutPage(onBack: () -> Unit) {
 
         SectionLabel("Project")
         NothingStack(Modifier.pageMargin()) {
-            row { shape -> LinkItem("Source code", "github.com/sonothamin/AnythingWidgets", Icons.Rounded.Code, shape) { uri.open(REPO_URL) } }
-            row { shape -> LinkItem("Release notes", "What changed in each version", null, shape) { uri.open(RELEASES_URL) } }
-            row { shape -> LinkItem("Report an issue", "Bugs and feature requests", null, shape) { uri.open(ISSUES_URL) } }
+            row { shape -> LinkItem("Source code", null, Icons.Rounded.Code, shape) { uri.open(REPO_URL) } }
+            row { shape -> LinkItem("Release notes", null, null, shape) { uri.open(RELEASES_URL) } }
+            row { shape -> LinkItem("Report an issue", null, null, shape) { uri.open(ISSUES_URL) } }
         }
 
         SectionLabel("Legal")
@@ -149,7 +142,6 @@ fun AboutPage(onBack: () -> Unit) {
             row { shape ->
                 NothingItem(
                     title = "Open-source licenses",
-                    subtitle = "Fonts and libraries used in this app",
                     shape = shape,
                     onClick = { licensesOpen = true },
                     trailing = { ChevronIcon() },
@@ -158,7 +150,6 @@ fun AboutPage(onBack: () -> Unit) {
             row { shape ->
                 NothingItem(
                     title = "Trademarks and affiliation",
-                    subtitle = "Nothing OS",
                     shape = shape,
                     onClick = { trademarksOpen = true },
                     trailing = { ChevronIcon() },
@@ -197,7 +188,7 @@ fun AboutPage(onBack: () -> Unit) {
 @Composable
 private fun LinkItem(
     title: String,
-    subtitle: String,
+    subtitle: String?,
     icon: ImageVector?,
     shape: androidx.compose.ui.graphics.Shape,
     onClick: () -> Unit,
@@ -266,13 +257,6 @@ private fun LicensesPage(onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
         PageHeader("Open-source licenses", onBack = onBack)
 
-        Text(
-            "AnythingWidgets is built with the following open-source components.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
-        )
-
         SectionLabel("Components")
         NothingStack(Modifier.pageMargin()) {
             notices.forEachIndexed { i, n ->
@@ -291,7 +275,7 @@ private fun LicensesPage(onBack: () -> Unit) {
         SectionLabel("Full texts")
         NothingStack(Modifier.pageMargin()) {
             row { shape ->
-                LinkItem("License files", "Bundled in the repository", null, shape) { uri.open(LICENSES_URL) }
+                LinkItem("License files", null, null, shape) { uri.open(LICENSES_URL) }
             }
         }
     }

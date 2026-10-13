@@ -51,7 +51,7 @@ fun LibraryPage(
                 NothingEmptyState(
                     art = NothingArt.Empty,
                     title = "Nothing here. Yet.",
-                    message = "Install a widget from Explore, then add it from your home screen's widget picker.",
+                    message = "Install a widget from Explore.",
                     modifier = Modifier.fillParentMaxHeight(0.6f),
                     actionLabel = "Browse Explore",
                     onAction = onExplore,
