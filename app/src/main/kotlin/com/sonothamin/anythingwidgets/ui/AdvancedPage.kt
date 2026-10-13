@@ -18,6 +18,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.sonothamin.anythingwidgets.debug.DebugLog
+import com.sonothamin.anythingwidgets.ui.components.ChevronIcon
 import com.sonothamin.anythingwidgets.ui.components.NothingDialog
 import com.sonothamin.anythingwidgets.ui.components.NothingItem
 import com.sonothamin.anythingwidgets.ui.components.NothingStack
@@ -32,6 +34,14 @@ fun AdvancedPage(onBack: () -> Unit) {
     val context = LocalContext.current
     var allowHttp by remember { mutableStateOf(RegistrySettings.allowHttp(context)) }
     var confirming by rememberSaveable { mutableStateOf(false) }
+
+    var debugOn by remember { mutableStateOf(DebugLog.enabled(context)) }
+    var logOpen by rememberSaveable { mutableStateOf(false) }
+
+    if (logOpen) {
+        DebugLogPage(onBack = { logOpen = false })
+        return
+    }
 
     BackHandler(onBack = onBack)
 
@@ -62,6 +72,29 @@ fun AdvancedPage(onBack: () -> Unit) {
                             },
                         )
                     },
+                )
+            }
+        }
+
+        SectionLabel("Debug")
+        NothingStack(Modifier.pageMargin()) {
+            row { shape ->
+                NothingItem(
+                    title = "Debug logging",
+                    shape = shape,
+                    onClick = {
+                        debugOn = !debugOn
+                        DebugLog.setEnabled(context, debugOn)
+                    },
+                    trailing = { Switch(checked = debugOn, onCheckedChange = null) },
+                )
+            }
+            row { shape ->
+                NothingItem(
+                    title = "View log",
+                    shape = shape,
+                    onClick = { logOpen = true },
+                    trailing = { ChevronIcon() },
                 )
             }
         }

@@ -40,6 +40,7 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
+import com.sonothamin.anythingwidgets.debug.DebugLog
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import com.sonothamin.anythingwidgets.widget.spec.ActionSpec
 import kotlinx.coroutines.withTimeoutOrNull
@@ -65,6 +66,7 @@ class SpecWidget : GlanceAppWidget() {
         initialSpec?.let { spec -> withTimeoutOrNull(8_000) { WidgetRuntime.refreshFeeds(context, spec) } }
         val data = initialSpec?.let { WidgetRuntime.data(context, it) } ?: DataSnapshot.build(context)
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
+        DebugLog.d(context, "widget", "Draw #$appWidgetId spec=${initialId ?: "none"}${if (initialId != null && initialSpec == null) " (spec file missing)" else ""}")
         provideContent {
             // Read the choice from live state: a session started before the user picked a widget
             // must still re-render with the new choice instead of the captured (null) spec.
@@ -133,26 +135,38 @@ class RefreshAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         // A tap on "refresh" also re-fetches this widget's feeds, if the user allowed them.
         val id = getAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId)[SpecWidget.KEY_SPEC]
-        id?.let { SpecStore(context).load(it) }?.let { spec ->
-            withTimeoutOrNull(8_000) { WidgetRuntime.refreshFeeds(context, spec, force = true) }
+        DebugLog.i(context, "tap", "refresh tapped on ${id ?: "unknown widget"}")
+        try {
+            id?.let { SpecStore(context).load(it) }?.let { spec ->
+                withTimeoutOrNull(8_000) { WidgetRuntime.refreshFeeds(context, spec, force = true) }
+            }
+            SpecWidget().update(context, glanceId)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            DebugLog.e(context, "tap", "refresh failed", e)
+            throw e
         }
-        SpecWidget().update(context, glanceId)
     }
 }
 
 /** Mini-app taps: counters, toggles, pickers. Validated against the spec again here; bad input is ignored. */
 class StateAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        val specId = parameters[SPEC] ?: return
-        val type = parameters[TYPE] ?: return
-        val spec = withContext(Dispatchers.IO) { SpecStore(context).load(specId) } ?: return
+        val specId = parameters[SPEC] ?: return DebugLog.w(context, "tap", "State tap without a spec id; ignored")
+        val type = parameters[TYPE] ?: return DebugLog.w(context, "tap", "State tap without a type; ignored")
+        DebugLog.i(context, "tap", "'$type' tapped on $specId (target=${parameters[TARGET] ?: "-"})")
+        val spec = withContext(Dispatchers.IO) { SpecStore(context).load(specId) }
+            ?: return DebugLog.w(context, "tap", "Spec $specId not found; ignored")
         val op = ActionSpec(
             type = type,
             target = parameters[TARGET],
             by = parameters[BY]?.toDoubleOrNull(),
             value = parameters[VALUE]?.let { JsonPrimitive(it) },
         )
-        if (WidgetRuntime.applyOp(context, spec, op)) SpecWidget().updateAll(context)
+        val changed = WidgetRuntime.applyOp(context, spec, op)
+        DebugLog.i(context, "tap", if (changed) "'$type' changed state; redrawing" else "'$type' changed nothing (invalid target, type or value)")
+        if (changed) SpecWidget().updateAll(context)
     }
 
     companion object {
