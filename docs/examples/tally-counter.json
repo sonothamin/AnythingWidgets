@@ -1,0 +1,180 @@
+{
+  "schema": 2,
+  "id": "tally-counter",
+  "version": 1,
+  "name": "Tally Counter",
+  "description": "Tap + to count, - to undo. Pick a goal and color in the app.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-13",
+  "categories": [
+    "Mini apps"
+  ],
+  "tags": [
+    "counter",
+    "tally"
+  ],
+  "chrome": "none",
+  "params": [
+    {
+      "id": "goal",
+      "type": "number",
+      "label": "Goal",
+      "default": 10,
+      "min": 1,
+      "max": 100,
+      "step": 1
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent",
+      "default": "n.red"
+    }
+  ],
+  "state": [
+    {
+      "id": "count",
+      "type": "number",
+      "default": 0,
+      "min": 0,
+      "max": 999
+    }
+  ],
+  "root": {
+    "type": "row",
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 14,
+    "align": "center",
+    "gap": 12,
+    "children": [
+      {
+        "type": "box",
+        "width": 56,
+        "height": 56,
+        "radius": 28,
+        "background": "n.dot",
+        "align": "center",
+        "action": {
+          "type": "dec",
+          "target": "count"
+        },
+        "children": [
+          {
+            "type": "text",
+            "text": "-",
+            "size": 28,
+            "color": "n.white"
+          }
+        ]
+      },
+      {
+        "type": "column",
+        "grow": true,
+        "align": "center",
+        "gap": 4,
+        "children": [
+          {
+            "type": "glyph",
+            "text": "{{state.count}}",
+            "size": 44,
+            "color": "{{param.accent}}",
+            "textAlign": "center"
+          },
+          {
+            "type": "text",
+            "text": "of {{param.goal}}",
+            "size": 12,
+            "color": "n.ash"
+          }
+        ]
+      },
+      {
+        "type": "box",
+        "width": 56,
+        "height": 56,
+        "radius": 28,
+        "background": "{{param.accent}}",
+        "align": "center",
+        "action": {
+          "type": "inc",
+          "target": "count"
+        },
+        "children": [
+          {
+            "type": "text",
+            "text": "+",
+            "size": 28,
+            "color": "n.white"
+          }
+        ]
+      }
+    ]
+  },
+  "compact": {
+    "type": "column",
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 12,
+    "align": "center",
+    "justify": "center",
+    "gap": 8,
+    "children": [
+      {
+        "type": "glyph",
+        "text": "{{state.count}}",
+        "size": 36,
+        "color": "{{param.accent}}",
+        "textAlign": "center"
+      },
+      {
+        "type": "row",
+        "gap": 12,
+        "children": [
+          {
+            "type": "box",
+            "width": 40,
+            "height": 40,
+            "radius": 20,
+            "background": "n.dot",
+            "align": "center",
+            "action": {
+              "type": "dec",
+              "target": "count"
+            },
+            "children": [
+              {
+                "type": "text",
+                "text": "-",
+                "size": 22,
+                "color": "n.white"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "width": 40,
+            "height": 40,
+            "radius": 20,
+            "background": "{{param.accent}}",
+            "align": "center",
+            "action": {
+              "type": "inc",
+              "target": "count"
+            },
+            "children": [
+              {
+                "type": "text",
+                "text": "+",
+                "size": 22,
+                "color": "n.white"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -66,12 +66,15 @@ import com.sonothamin.anythingwidgets.widget.LargeWidgetReceiver
 import com.sonothamin.anythingwidgets.widget.SmallWidgetReceiver
 import com.sonothamin.anythingwidgets.widget.SpecWidget
 import com.sonothamin.anythingwidgets.widget.WideWidgetReceiver
+import com.sonothamin.anythingwidgets.widget.WidgetRuntime
 import com.sonothamin.anythingwidgets.widget.data.Registry
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import com.sonothamin.anythingwidgets.widget.data.WidgetImporter
 import com.sonothamin.anythingwidgets.widget.data.WidgetPrefs
+import com.sonothamin.anythingwidgets.widget.spec.ActionSpec
 import com.sonothamin.anythingwidgets.widget.spec.IndexEntry
 import com.sonothamin.anythingwidgets.widget.spec.SpecInfo
+import com.sonothamin.anythingwidgets.widget.spec.SpecValidator
 import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -106,6 +109,8 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
     var confirmRemove by remember { mutableStateOf(false) }
     var sizeIndex by rememberSaveable { mutableIntStateOf(0) }
     var showInfo by remember { mutableStateOf(false) }
+    // Bumped whenever a setting or mini-app value changes so previews re-read their data.
+    var dataTick by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(id) {
         loading = true
@@ -129,7 +134,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
     val update: IndexEntry? = installed?.let { local -> entry?.takeIf { it.version > local.version } }
     val source = remember(installed) { store.sourceOf(id) }
     val managed = installed != null && source == registry.baseUrl
-    val data = remember { DataSnapshot.build(context) }
+    val data = remember(spec, dataTick) { spec?.let { WidgetRuntime.data(context, it) } ?: DataSnapshot.build(context) }
 
     fun install(e: IndexEntry) {
         scope.launch {
@@ -155,6 +160,16 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
             manager.requestPinAppWidget(ComponentName(context, receiver), null, null)
         } else {
             Toast.makeText(context, "Your launcher doesn't support adding widgets from here", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /** Re-reads values for the previews and redraws the real widgets on the home screen. */
+    fun changed(refetch: Boolean = false) {
+        dataTick++
+        scope.launch {
+            if (refetch) spec?.let { WidgetRuntime.refreshFeeds(context, it, force = true) }
+            dataTick++
+            SpecWidget().updateAll(context)
         }
     }
 
@@ -218,7 +233,12 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 }
                 Spacer(Modifier.height(20.dp))
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    SpecPreview(spec, size, data)
+                    SpecPreview(
+                        spec, size, data,
+                        onAction = if (installed != null) {
+                            { a: ActionSpec -> if (WidgetRuntime.applyOp(context, spec, a)) changed() }
+                        } else null,
+                    )
                 }
             }
 
@@ -251,6 +271,27 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
             if (installed != null) {
                 SectionLabel("Widget settings")
                 NothingStack(Modifier.pageMargin()) {
+                    val paramValues = spec.params.associate { it.id to (WidgetRuntime.paramValue(context, spec, it.id) ?: "") }
+                    paramRows(spec.params, paramValues) { pid, v ->
+                        WidgetPrefs.setParam(context, id, pid, v)
+                        changed(refetch = spec.feeds.isNotEmpty())
+                    }
+                    if (spec.feeds.isNotEmpty()) {
+                        row { shape ->
+                            val hosts = spec.feeds.mapNotNull { SpecValidator.feedHost(it.url) }.distinct().joinToString(", ")
+                            val allowed = WidgetPrefs.netAllowed(context, id)
+                            NothingItem(
+                                title = "Allow internet access",
+                                subtitle = "Fetches from $hosts. Nothing is sent but the request itself.",
+                                shape = shape,
+                                onClick = {
+                                    WidgetPrefs.setNetAllowed(context, id, !allowed)
+                                    changed(refetch = !allowed)
+                                },
+                                trailing = { Switch(checked = allowed, onCheckedChange = null) },
+                            )
+                        }
+                    }
                     row { shape ->
                         var sizeMenu by remember { mutableStateOf(false) }
                         Box {
@@ -296,6 +337,23 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                                     WidgetPrefs.setAutoUpdate(context, id, autoUpdate)
                                 },
                                 trailing = { Switch(checked = autoUpdate, onCheckedChange = null) },
+                            )
+                        }
+                    }
+                    if (spec.params.isNotEmpty() || spec.state.isNotEmpty()) {
+                        row { shape ->
+                            NothingItem(
+                                title = "Reset to defaults",
+                                subtitle = listOfNotNull(
+                                    "options".takeIf { spec.params.isNotEmpty() },
+                                    "saved data".takeIf { spec.state.isNotEmpty() },
+                                ).joinToString(" and "),
+                                shape = shape,
+                                onClick = {
+                                    WidgetPrefs.resetParams(context, id)
+                                    WidgetPrefs.resetState(context, id)
+                                    changed(refetch = spec.feeds.isNotEmpty())
+                                },
                             )
                         }
                     }
@@ -389,6 +447,9 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                         },
                         quiet, onQuiet,
                     )
+                    if (spec.params.isNotEmpty()) Pill("${spec.params.size} option${if (spec.params.size == 1) "" else "s"}", quiet, onQuiet)
+                    if (SpecInfo.isInteractive(spec)) Pill("Interactive", quiet, onQuiet)
+                    SpecInfo.feedHosts(spec).forEach { Pill("Online: $it", quiet, onQuiet) }
                     Pill("id: ${spec.id}", quiet, onQuiet)
                 }
                 if (installed != null) {

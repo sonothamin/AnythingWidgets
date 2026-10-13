@@ -28,6 +28,16 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         } catch (_: Exception) {
             // Offline or registry hiccup: still refresh local data below.
         }
+        // Feeds: only widgets the user allowed online access for, and only the ones that are due.
+        val store = SpecStore(applicationContext)
+        store.installed().filter { it.feeds.isNotEmpty() }.forEach { spec ->
+            try {
+                WidgetRuntime.refreshFeeds(applicationContext, spec)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+            }
+        }
         SpecWidget().updateAll(applicationContext)
         return Result.success()
     }

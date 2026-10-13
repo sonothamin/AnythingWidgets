@@ -1,0 +1,160 @@
+{
+  "schema": 2,
+  "id": "weather-now",
+  "version": 1,
+  "name": "Weather Now",
+  "description": "Current temperature from Open-Meteo. Set your coordinates in the app.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-13",
+  "categories": [
+    "Online"
+  ],
+  "tags": [
+    "weather",
+    "temperature"
+  ],
+  "chrome": "none",
+  "params": [
+    {
+      "id": "lat",
+      "type": "text",
+      "label": "Latitude",
+      "default": "51.5072",
+      "maxLength": 12
+    },
+    {
+      "id": "lon",
+      "type": "text",
+      "label": "Longitude",
+      "default": "-0.1276",
+      "maxLength": 12
+    },
+    {
+      "id": "unit",
+      "type": "choice",
+      "label": "Unit",
+      "default": "celsius",
+      "choices": [
+        {
+          "value": "celsius",
+          "label": "Celsius"
+        },
+        {
+          "value": "fahrenheit",
+          "label": "Fahrenheit"
+        }
+      ]
+    }
+  ],
+  "feeds": [
+    {
+      "id": "weather",
+      "ttl": 30,
+      "label": "Open-Meteo",
+      "url": "https://api.open-meteo.com/v1/forecast?latitude={{param.lat}}&longitude={{param.lon}}&current=temperature_2m,weather_code,wind_speed_10m&temperature_unit={{param.unit}}",
+      "fields": {
+        "temp": "current.temperature_2m",
+        "wind": "current.wind_speed_10m",
+        "code": "current.weather_code"
+      }
+    }
+  ],
+  "root": {
+    "type": "column",
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 16,
+    "justify": "center",
+    "gap": 4,
+    "action": {
+      "type": "refresh"
+    },
+    "children": [
+      {
+        "type": "glyph",
+        "text": "{{feed.weather.temp.round}}",
+        "size": 56,
+        "color": "n.white",
+        "visible": "feed.weather.ok"
+      },
+      {
+        "type": "text",
+        "text": "CLEAR",
+        "size": 12,
+        "bold": true,
+        "color": "n.ash",
+        "visible": "feed.weather.code==0"
+      },
+      {
+        "type": "text",
+        "text": "CLOUDY",
+        "size": 12,
+        "bold": true,
+        "color": "n.ash",
+        "visible": "feed.weather.code>=1 && feed.weather.code<=3"
+      },
+      {
+        "type": "text",
+        "text": "FOG",
+        "size": 12,
+        "bold": true,
+        "color": "n.ash",
+        "visible": "feed.weather.code>=45 && feed.weather.code<=48"
+      },
+      {
+        "type": "text",
+        "text": "RAIN",
+        "size": 12,
+        "bold": true,
+        "color": "n.ash",
+        "visible": "feed.weather.code>=51 && feed.weather.code<=67"
+      },
+      {
+        "type": "text",
+        "text": "SNOW",
+        "size": 12,
+        "bold": true,
+        "color": "n.ash",
+        "visible": "feed.weather.code>=71 && feed.weather.code<=77"
+      },
+      {
+        "type": "text",
+        "text": "SHOWERS",
+        "size": 12,
+        "bold": true,
+        "color": "n.ash",
+        "visible": "feed.weather.code>=80 && feed.weather.code<=82"
+      },
+      {
+        "type": "text",
+        "text": "STORM",
+        "size": 12,
+        "bold": true,
+        "color": "n.ash",
+        "visible": "feed.weather.code>=95"
+      },
+      {
+        "type": "text",
+        "text": "Wind {{feed.weather.wind.round}} - updated {{feed.weather.updated}}",
+        "size": 11,
+        "color": "n.ash",
+        "visible": "feed.weather.ok"
+      },
+      {
+        "type": "text",
+        "text": "Allow internet access for this widget in the app.",
+        "size": 13,
+        "color": "n.white",
+        "visible": "!net.allowed"
+      },
+      {
+        "type": "text",
+        "text": "Waiting for data...",
+        "size": 13,
+        "color": "n.ash",
+        "visible": "net.allowed && !feed.weather.ok"
+      }
+    ]
+  }
+}

@@ -27,7 +27,7 @@ import com.sonothamin.anythingwidgets.ui.components.NothingCard
 import com.sonothamin.anythingwidgets.ui.components.PageHeader
 import com.sonothamin.anythingwidgets.ui.components.SectionLabel
 import com.sonothamin.anythingwidgets.ui.components.pageMargin
-import com.sonothamin.anythingwidgets.widget.DataSnapshot
+import com.sonothamin.anythingwidgets.widget.WidgetRuntime
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
 
@@ -40,7 +40,6 @@ fun LibraryPage(
 ) {
     val context = LocalContext.current
     val installed = remember(refreshKey) { SpecStore(context).installed() }
-    val data = remember(refreshKey) { DataSnapshot.build(context) }
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 120.dp)) {
         item { PageHeader("My Widgets") }
@@ -70,7 +69,7 @@ fun LibraryPage(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     row.forEach { spec ->
-                        WidgetTile(spec, data, Modifier.weight(1f)) { onOpen(spec.id) }
+                        WidgetTile(spec, refreshKey, Modifier.weight(1f)) { onOpen(spec.id) }
                     }
                     if (row.size == 1) Spacer(Modifier.weight(1f))
                 }
@@ -81,7 +80,8 @@ fun LibraryPage(
 
 /** A widget shown as it really looks, with its name underneath. */
 @Composable
-private fun WidgetTile(spec: WidgetSpec, data: Map<String, String>, modifier: Modifier, onClick: () -> Unit) {
+private fun WidgetTile(spec: WidgetSpec, refreshKey: Any?, modifier: Modifier, onClick: () -> Unit) {
+    val context = LocalContext.current
     NothingCard(
         CardShape,
         modifier,
@@ -89,7 +89,7 @@ private fun WidgetTile(spec: WidgetSpec, data: Map<String, String>, modifier: Mo
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 14.dp),
     ) {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            SpecPreview(spec, PreviewSize.Small, data)
+            SpecPreview(spec, PreviewSize.Small, remember(spec, refreshKey) { WidgetRuntime.data(context, spec) })
         }
         Spacer(Modifier.height(12.dp))
         Text(

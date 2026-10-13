@@ -1,0 +1,349 @@
+{
+  "schema": 2,
+  "id": "habit-week",
+  "version": 1,
+  "name": "Habit Week",
+  "description": "Tap a day to mark it done. Reset starts a new week.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-13",
+  "categories": [
+    "Mini apps"
+  ],
+  "tags": [
+    "habit",
+    "tracker"
+  ],
+  "chrome": "none",
+  "params": [
+    {
+      "id": "title",
+      "type": "text",
+      "label": "Habit",
+      "default": "WORKOUT",
+      "maxLength": 20
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent",
+      "default": "n.red"
+    }
+  ],
+  "state": [
+    {
+      "id": "d0",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "id": "d1",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "id": "d2",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "id": "d3",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "id": "d4",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "id": "d5",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "id": "d6",
+      "type": "bool",
+      "default": false
+    }
+  ],
+  "root": {
+    "type": "column",
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 16,
+    "justify": "center",
+    "gap": 10,
+    "children": [
+      {
+        "type": "row",
+        "align": "center",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{param.title}}",
+            "size": 14,
+            "bold": true,
+            "color": "n.white",
+            "grow": true
+          },
+          {
+            "type": "text",
+            "text": "RESET",
+            "size": 11,
+            "bold": true,
+            "color": "n.ash",
+            "action": {
+              "type": "reset"
+            }
+          }
+        ]
+      },
+      {
+        "type": "row",
+        "justify": "center",
+        "gap": 8,
+        "children": [
+          {
+            "type": "column",
+            "align": "center",
+            "gap": 6,
+            "children": [
+              {
+                "type": "text",
+                "text": "M",
+                "size": 11,
+                "color": "n.ash"
+              },
+              {
+                "type": "box",
+                "width": 30,
+                "height": 30,
+                "action": {
+                  "type": "toggle",
+                  "target": "d0"
+                },
+                "children": [
+                  {
+                    "type": "dotgrid",
+                    "columns": 1,
+                    "rows": 1,
+                    "width": 30,
+                    "height": 30,
+                    "pattern": "{{state.d0.bit}}",
+                    "color": "{{param.accent}}",
+                    "track": "n.dot"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "column",
+            "align": "center",
+            "gap": 6,
+            "children": [
+              {
+                "type": "text",
+                "text": "T",
+                "size": 11,
+                "color": "n.ash"
+              },
+              {
+                "type": "box",
+                "width": 30,
+                "height": 30,
+                "action": {
+                  "type": "toggle",
+                  "target": "d1"
+                },
+                "children": [
+                  {
+                    "type": "dotgrid",
+                    "columns": 1,
+                    "rows": 1,
+                    "width": 30,
+                    "height": 30,
+                    "pattern": "{{state.d1.bit}}",
+                    "color": "{{param.accent}}",
+                    "track": "n.dot"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "column",
+            "align": "center",
+            "gap": 6,
+            "children": [
+              {
+                "type": "text",
+                "text": "W",
+                "size": 11,
+                "color": "n.ash"
+              },
+              {
+                "type": "box",
+                "width": 30,
+                "height": 30,
+                "action": {
+                  "type": "toggle",
+                  "target": "d2"
+                },
+                "children": [
+                  {
+                    "type": "dotgrid",
+                    "columns": 1,
+                    "rows": 1,
+                    "width": 30,
+                    "height": 30,
+                    "pattern": "{{state.d2.bit}}",
+                    "color": "{{param.accent}}",
+                    "track": "n.dot"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "column",
+            "align": "center",
+            "gap": 6,
+            "children": [
+              {
+                "type": "text",
+                "text": "T",
+                "size": 11,
+                "color": "n.ash"
+              },
+              {
+                "type": "box",
+                "width": 30,
+                "height": 30,
+                "action": {
+                  "type": "toggle",
+                  "target": "d3"
+                },
+                "children": [
+                  {
+                    "type": "dotgrid",
+                    "columns": 1,
+                    "rows": 1,
+                    "width": 30,
+                    "height": 30,
+                    "pattern": "{{state.d3.bit}}",
+                    "color": "{{param.accent}}",
+                    "track": "n.dot"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "column",
+            "align": "center",
+            "gap": 6,
+            "children": [
+              {
+                "type": "text",
+                "text": "F",
+                "size": 11,
+                "color": "n.ash"
+              },
+              {
+                "type": "box",
+                "width": 30,
+                "height": 30,
+                "action": {
+                  "type": "toggle",
+                  "target": "d4"
+                },
+                "children": [
+                  {
+                    "type": "dotgrid",
+                    "columns": 1,
+                    "rows": 1,
+                    "width": 30,
+                    "height": 30,
+                    "pattern": "{{state.d4.bit}}",
+                    "color": "{{param.accent}}",
+                    "track": "n.dot"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "column",
+            "align": "center",
+            "gap": 6,
+            "children": [
+              {
+                "type": "text",
+                "text": "S",
+                "size": 11,
+                "color": "n.ash"
+              },
+              {
+                "type": "box",
+                "width": 30,
+                "height": 30,
+                "action": {
+                  "type": "toggle",
+                  "target": "d5"
+                },
+                "children": [
+                  {
+                    "type": "dotgrid",
+                    "columns": 1,
+                    "rows": 1,
+                    "width": 30,
+                    "height": 30,
+                    "pattern": "{{state.d5.bit}}",
+                    "color": "{{param.accent}}",
+                    "track": "n.dot"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "column",
+            "align": "center",
+            "gap": 6,
+            "children": [
+              {
+                "type": "text",
+                "text": "S",
+                "size": 11,
+                "color": "n.ash"
+              },
+              {
+                "type": "box",
+                "width": 30,
+                "height": 30,
+                "action": {
+                  "type": "toggle",
+                  "target": "d6"
+                },
+                "children": [
+                  {
+                    "type": "dotgrid",
+                    "columns": 1,
+                    "rows": 1,
+                    "width": 30,
+                    "height": 30,
+                    "pattern": "{{state.d6.bit}}",
+                    "color": "{{param.accent}}",
+                    "track": "n.dot"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.LinearProgressIndicator
@@ -46,7 +47,10 @@ import com.sonothamin.anythingwidgets.widget.ClockViews
 import com.sonothamin.anythingwidgets.widget.DataSnapshot
 import com.sonothamin.anythingwidgets.widget.DotArt
 import com.sonothamin.anythingwidgets.widget.spec.NothingPalette
+import com.sonothamin.anythingwidgets.widget.WidgetRuntime
+import com.sonothamin.anythingwidgets.widget.spec.ActionSpec
 import com.sonothamin.anythingwidgets.widget.spec.Node
+import com.sonothamin.anythingwidgets.widget.spec.SpecRules
 import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
 
 /** Sizes the preview can mimic. They match the sizes SpecWidget registers (and its compact cutoff of 180dp). */
@@ -66,6 +70,8 @@ fun SpecPreview(
     size: PreviewSize,
     data: Map<String, String>,
     modifier: Modifier = Modifier,
+    /** When set, taps on mini-app nodes (counters, toggles, pickers) are reported here so the preview is playable. */
+    onAction: ((ActionSpec) -> Unit)? = null,
 ) {
     val node = spec.layoutFor(size.width.toFloat(), size.height.toFloat())
     val bare = spec.chrome == "none"
@@ -85,15 +91,16 @@ fun SpecPreview(
             color = if (bare) Color.Transparent else scheme.surface,
             border = if (bare) null else BorderStroke(1.dp, scheme.outlineVariant),
         ) {
-            Box(Modifier.fillMaxSize()) { PreviewNode(node, data, Modifier.fillMaxSize()) }
+            Box(Modifier.fillMaxSize()) { PreviewNode(node, data, onAction, Modifier.fillMaxSize()) }
         }
     }
 }
 
 @Composable
-private fun PreviewNode(node: Node, data: Map<String, String>, extra: Modifier = Modifier) {
+private fun PreviewNode(raw: Node, data: Map<String, String>, onAction: ((ActionSpec) -> Unit)?, extra: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme
-    val m = node.toPreviewModifier(extra, scheme)
+    val node = SpecRules.resolve(raw, data) ?: return
+    val m = node.toPreviewModifier(extra, scheme, onAction)
     when (node.type) {
         "column" -> Column(
             modifier = m,
@@ -101,7 +108,7 @@ private fun PreviewNode(node: Node, data: Map<String, String>, extra: Modifier =
             horizontalAlignment = hAlign(node.align),
         ) {
             node.children.forEach { child ->
-                PreviewNode(child, data, if (child.grow) Modifier.weight(1f) else Modifier)
+                PreviewNode(child, data, onAction, if (child.grow) Modifier.weight(1f) else Modifier)
             }
         }
 
@@ -111,12 +118,12 @@ private fun PreviewNode(node: Node, data: Map<String, String>, extra: Modifier =
             verticalAlignment = vAlign(node.align),
         ) {
             node.children.forEach { child ->
-                PreviewNode(child, data, if (child.grow) Modifier.weight(1f) else Modifier)
+                PreviewNode(child, data, onAction, if (child.grow) Modifier.weight(1f) else Modifier)
             }
         }
 
         "box" -> Box(modifier = m, contentAlignment = boxAlign(node.align)) {
-            node.children.forEach { PreviewNode(it, data) }
+            node.children.forEach { PreviewNode(it, data, onAction) }
         }
 
         "text" -> Text(
@@ -197,7 +204,7 @@ private fun PreviewNode(node: Node, data: Map<String, String>, extra: Modifier =
     }
 }
 
-private fun Node.toPreviewModifier(extra: Modifier, scheme: ColorScheme): Modifier {
+private fun Node.toPreviewModifier(extra: Modifier, scheme: ColorScheme, onAction: ((ActionSpec) -> Unit)?): Modifier {
     var m = extra
     when (fill) {
         "width" -> m = m.fillMaxWidth()
@@ -211,10 +218,12 @@ private fun Node.toPreviewModifier(extra: Modifier, scheme: ColorScheme): Modifi
     background?.let { m = m.background(colorOf(it, scheme.surface, scheme), shape) }
     if (radius > 0) m = m.clip(shape)
     if (padding > 0) m = m.padding(padding.dp)
+    val a = action
+    if (onAction != null && a != null && a.type in WidgetRuntime.STATE_OPS) m = m.clickable { onAction(a) }
     return m
 }
 
-private fun colorOf(ref: String?, fallback: Color, s: ColorScheme): Color {
+internal fun colorOf(ref: String?, fallback: Color, s: ColorScheme): Color {
     if (ref == null) return fallback
     return when (ref) {
         "primary" -> s.primary

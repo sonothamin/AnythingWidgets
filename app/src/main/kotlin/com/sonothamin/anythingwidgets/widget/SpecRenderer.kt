@@ -13,7 +13,11 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
+import android.provider.AlarmClock
+import android.provider.Settings
 import androidx.glance.action.Action
+import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.LinearProgressIndicator
@@ -42,11 +46,14 @@ import com.sonothamin.anythingwidgets.MainActivity
 import com.sonothamin.anythingwidgets.widget.spec.ActionSpec
 import com.sonothamin.anythingwidgets.widget.spec.Node
 import com.sonothamin.anythingwidgets.widget.spec.NothingPalette
+import com.sonothamin.anythingwidgets.widget.spec.SpecRules
 
 /** Maps a validated [Node] tree onto Glance composables. Unknown input is never executed. */
 @Composable
-fun RenderNode(node: Node, data: Map<String, String>, extra: GlanceModifier = GlanceModifier) {
-    val m = node.toModifier(extra)
+fun RenderNode(raw: Node, data: Map<String, String>, extra: GlanceModifier = GlanceModifier) {
+    // Conditions, bindings and templated colors are resolved first; a hidden node draws nothing.
+    val node = SpecRules.resolve(raw, data) ?: return
+    val m = node.toModifier(extra, data)
     when (node.type) {
         "column" -> Column(
             modifier = m,
@@ -158,7 +165,7 @@ fun RenderNode(node: Node, data: Map<String, String>, extra: GlanceModifier = Gl
 }
 
 @Composable
-private fun Node.toModifier(extra: GlanceModifier): GlanceModifier {
+private fun Node.toModifier(extra: GlanceModifier, data: Map<String, String>): GlanceModifier {
     var m = extra
     when (fill) {
         "width" -> m = m.fillMaxWidth()
@@ -171,7 +178,7 @@ private fun Node.toModifier(extra: GlanceModifier): GlanceModifier {
     background?.let { m = m.background(colorOf(it, GlanceTheme.colors.surface)) }
     if (radius > 0) m = m.cornerRadius(radius.dp)
     if (padding > 0) m = m.padding(padding.dp)
-    actionOf(action)?.let { m = m.clickable(it) }
+    actionOf(action, data)?.let { m = m.clickable(it) }
     return m
 }
 
@@ -215,14 +222,69 @@ internal fun openAppAction(): Action =
     actionStartActivity(Intent(LocalContext.current, MainActivity::class.java))
 
 @Composable
-private fun actionOf(a: ActionSpec?): Action? = when (a?.type) {
-    "open_app" -> openAppAction()
-    "open_url" -> a.url?.takeIf { it.startsWith("https://") }?.let {
-        actionStartActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)).addCategory(Intent.CATEGORY_BROWSABLE))
+private fun actionOf(a: ActionSpec?, data: Map<String, String>): Action? {
+    if (a == null) return null
+    val context = LocalContext.current
+    fun t(s: String?) = DataSnapshot.apply(s.orEmpty(), data)
+    return when (a.type) {
+        "open_app" -> openAppAction()
+        "open_url" -> a.url?.takeIf { it.startsWith("https://") }?.let {
+            actionStartActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)).addCategory(Intent.CATEGORY_BROWSABLE))
+        }
+        "refresh" -> actionRunCallback<RefreshAction>()
+        "launch_app" -> a.pkg?.let { context.packageManager.getLaunchIntentForPackage(it) }?.let { actionStartActivity(it) }
+        "dial" -> t(a.number).trim().takeIf { Regex("[0-9+*#() .-]{1,40}").matches(it) }
+            ?.let { actionStartActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + Uri.encode(it)))) }
+        "email" -> t(a.to).trim().takeIf { Regex("[^\\s@]+@[^\\s@]+\\.[^\\s@]+").matches(it) }?.let {
+            actionStartActivity(
+                Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + Uri.encode(it)))
+                    .putExtra(Intent.EXTRA_SUBJECT, t(a.subject)),
+            )
+        }
+        "map" -> t(a.query).trim().takeIf { it.isNotEmpty() }
+            ?.let { actionStartActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + Uri.encode(it)))) }
+        "settings" -> settingsIntent(a.screen)?.let { actionStartActivity(it) }
+        "timer" -> a.seconds?.let {
+            actionStartActivity(
+                Intent(AlarmClock.ACTION_SET_TIMER)
+                    .putExtra(AlarmClock.EXTRA_LENGTH, it)
+                    .putExtra(AlarmClock.EXTRA_SKIP_UI, false),
+            )
+        }
+        "alarms" -> actionStartActivity(Intent(AlarmClock.ACTION_SHOW_ALARMS))
+        in WidgetRuntime.STATE_OPS -> {
+            val spec = data["spec.id"].orEmpty()
+            if (spec.isEmpty()) null
+            else {
+                val pairs = buildList<ActionParameters.Pair<*>> {
+                    add(StateAction.SPEC to spec)
+                    add(StateAction.TYPE to a.type)
+                    a.target?.let { add(StateAction.TARGET to it) }
+                    a.by?.let { add(StateAction.BY to it.toString()) }
+                    a.value?.let { add(StateAction.VALUE to it.content) }
+                }
+                actionRunCallback<StateAction>(actionParametersOf(*pairs.toTypedArray()))
+            }
+        }
+        else -> null
     }
-    "refresh" -> actionRunCallback<RefreshAction>()
-    else -> null
 }
+
+private fun settingsIntent(screen: String?): Intent? = when (screen) {
+    "wifi" -> Settings.ACTION_WIFI_SETTINGS
+    "bluetooth" -> Settings.ACTION_BLUETOOTH_SETTINGS
+    "display" -> Settings.ACTION_DISPLAY_SETTINGS
+    "battery" -> Settings.ACTION_BATTERY_SAVER_SETTINGS
+    "sound" -> Settings.ACTION_SOUND_SETTINGS
+    "location" -> Settings.ACTION_LOCATION_SOURCE_SETTINGS
+    "airplane" -> Settings.ACTION_AIRPLANE_MODE_SETTINGS
+    "storage" -> Settings.ACTION_INTERNAL_STORAGE_SETTINGS
+    "apps" -> Settings.ACTION_APPLICATION_SETTINGS
+    "date" -> Settings.ACTION_DATE_SETTINGS
+    "accessibility" -> Settings.ACTION_ACCESSIBILITY_SETTINGS
+    "all" -> Settings.ACTION_SETTINGS
+    else -> null
+}?.let { Intent(it) }
 
 private fun horizontal(s: String?) = when (s) {
     "center" -> Alignment.CenterHorizontally

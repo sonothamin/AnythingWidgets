@@ -1,0 +1,69 @@
+{
+  "schema": 2,
+  "id": "quick-dial",
+  "version": 1,
+  "name": "Quick Dial",
+  "description": "One tap to call someone. Set the name and number in the app.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-13",
+  "categories": [
+    "Shortcuts"
+  ],
+  "tags": [
+    "call",
+    "contact"
+  ],
+  "chrome": "none",
+  "params": [
+    {
+      "id": "name",
+      "type": "text",
+      "label": "Name",
+      "default": "Mom",
+      "maxLength": 20
+    },
+    {
+      "id": "number",
+      "type": "text",
+      "label": "Phone number",
+      "default": "+15555550123",
+      "maxLength": 24
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent",
+      "default": "n.red"
+    }
+  ],
+  "root": {
+    "type": "column",
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 16,
+    "justify": "center",
+    "gap": 4,
+    "action": {
+      "type": "dial",
+      "number": "{{param.number}}"
+    },
+    "children": [
+      {
+        "type": "text",
+        "text": "{{param.name}}",
+        "size": 24,
+        "bold": true,
+        "color": "n.white",
+        "maxLines": 1
+      },
+      {
+        "type": "text",
+        "text": "TAP TO CALL",
+        "size": 11,
+        "bold": true,
+        "color": "{{param.accent}}"
+      }
+    ]
+  }
+}

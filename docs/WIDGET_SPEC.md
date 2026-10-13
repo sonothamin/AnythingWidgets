@@ -1,4 +1,6 @@
-# Widget spec (schema 1)
+# Widget spec (schema 2)
+
+Schema 2 adds options, conditions, mini-app state, more actions and optional online data. Schema 1 specs stay valid. Everything is still data: nothing in a spec is ever executed. Worked examples are in [`docs/examples/`](examples/).
 
 Widgets are **data, not code**. The app downloads a JSON spec from the registry, validates it, and renders it with Jetpack Glance. Nothing from the registry is ever executed.
 
@@ -51,7 +53,8 @@ Widgets can't tick every minute: Android limits background updates, so values re
 ## Security model
 - HTTPS only; each spec is verified against the SHA-256 in `index.json` before install.
 - Specs are re-validated every time they're loaded from disk.
-- No scripts, no HTML, no remote images, no arbitrary intents.
+- No scripts, no HTML, no remote images. Taps can only trigger the fixed list of actions below, never an arbitrary intent.
+- Online data (`feeds`) is off until the user allows it per widget, https only, public hosts only, and the URL can vary only through the widget's own `params`.
 
 ## Importing from a zip (development and bring-your-own widgets)
 Settings -> Import widgets -> Choose zip. The zip uses the same layout as a registry:
@@ -68,3 +71,105 @@ Zipping the registry folder itself (so everything sits in one wrapper folder) al
 ## Widget details screen
 Tapping a widget in Widgets or Explore opens its details: a live preview (Small / Wide / Large, using this device's data), title, author, description, created and added dates, version, file size, categories, tags, which device data it reads, what tapping it does, and where it came from.
 Widgets that aren't installed yet are previewed from a verified download; nothing is stored until you tap Install. Once installed, the screen also offers per-widget settings: automatic updates on/off, add to home screen, refresh, and remove.
+
+## Schema 2
+
+New top-level fields (all optional): `params`, `state`, `feeds`. New node fields: `visible`, `bind`. Use `"schema": 2`.
+
+### Parameters: options the user edits
+Shown in the widget's details screen under **Widget settings**. Values are stored per widget on the device, validated on every read, and read in layouts as `{{param.<id>}}`. Ids match `[a-z][A-Za-z0-9]{0,23}`; at most 12 params.
+
+```json
+"params": [
+  {"id": "accent", "type": "color",  "label": "Accent", "default": "n.red"},
+  {"id": "goal",   "type": "number", "label": "Goal", "default": 10, "min": 1, "max": 100, "step": 1, "unit": "reps"},
+  {"id": "style",  "type": "choice", "label": "Style", "default": "dots",
+   "choices": [{"value": "dots", "label": "Dots"}, {"value": "bar", "label": "Bar"}]},
+  {"id": "title",  "type": "text",   "label": "Title", "default": "Hello", "maxLength": 20},
+  {"id": "date",   "type": "date",   "label": "Date",  "default": "2026-12-25"},
+  {"id": "seconds","type": "toggle", "label": "Show seconds", "default": false}
+]
+```
+
+| type | stored as | extra keys |
+|---|---|---|
+| `toggle` | `true` / `false` | |
+| `choice` | the choice `value` (2-16 choices, `[A-Za-z0-9_.-]{1,24}`) | `{{param.id.label}}`, `{{param.id.index}}` |
+| `text` | string up to `maxLength` (default 60, max 80) | |
+| `number` | number clamped to `min`..`max` (default 0..100) | `{{param.id.fraction}}` (0..1) |
+| `color` | Material token, palette name or hex | |
+| `date` | `yyyy-MM-dd` | `.days` (signed), `.daysUntil`, `.daysSince`, `.isPast`, `.isToday`, `.text` |
+
+Params can drive a layout in three ways:
+- **Anywhere text is templated**: `text`, `pool`, `progress`, `pattern`.
+- **Colors**: `"color": "{{param.accent}}"` (also `background`, `track`, `accent`).
+- **Numbers and bold**: `"bind": {"size": "{{param.fontSize}}", "radius": "{{param.corner}}"}`. Bindable: `size, padding, gap, radius, width, height, columns, rows, maxLines, bold`. Results are clamped to the normal limits; a value that is not a number is ignored.
+
+### Conditions: `visible`
+A node (and its children) is drawn only when its condition holds.
+```
+clause  = [!]key | key OP literal          OP = == != < <= > >=
+visible = clause (&& clause)* (|| ...)*    max 160 chars
+```
+A bare key is true unless it is empty, `false`, `0`, `no` or `off`. Numbers compare numerically, anything else as text. Examples: `"param.seconds"`, `"!battery.charging"`, `"battery.level<20"`, `"feed.weather.ok && net.allowed"`. Use two sibling nodes with opposite conditions for if/else.
+
+### State and actions: mini apps
+`state` is data the widget changes itself when tapped, stored per widget on the device. Read it as `{{state.<id>}}`. At most 12 values.
+
+```json
+"state": [
+  {"id": "count", "type": "number", "default": 0, "min": 0, "max": 99, "wrap": false},
+  {"id": "done",  "type": "bool",   "default": false},
+  {"id": "mood",  "type": "choice", "values": ["good", "ok", "bad"], "default": "ok"}
+]
+```
+Extra keys: bool `{{state.id.bit}}` (`#` or `.`, ideal for `dotgrid` patterns), number `{{state.id.fraction}}` (with `min` and `max`), choice `{{state.id.index}}`.
+
+Put an `action` on any node:
+
+| action | does |
+|---|---|
+| `inc` / `dec` `{target, by?}` | change a number state (`wrap` loops between `min` and `max`) |
+| `toggle {target}` | flip a bool state |
+| `cycle {target}` | next value of a choice state |
+| `set {target, value}` | store a fixed value |
+| `reset {target?}` | back to the default (all state when no target) |
+
+These redraw the widget immediately, and the preview in the app is playable.
+
+### More actions (integrations)
+`open_app`, `refresh`, `open_url {url}` (https), plus:
+
+| action | fields | notes |
+|---|---|---|
+| `launch_app` | `package` | opens an installed app by package name; does nothing if it is not installed |
+| `dial` | `number` | opens the dialer with the number filled in; may use `{{param.x}}` |
+| `email` | `to`, `subject?` | opens a draft; may use `{{param.x}}` |
+| `map` | `query` | opens a map search; may use `{{param.x}}` |
+| `settings` | `screen` | `wifi bluetooth display battery sound location airplane storage apps date accessibility all` |
+| `timer` | `seconds` (1-86400) | starts a timer in the system clock app |
+| `alarms` | | opens the alarm list |
+
+Nothing is called without the user tapping, and the system app always asks for the final confirmation (calls are only dialed, mail is only drafted).
+
+### More device data
+`battery.charging`, `date.iso`, `date.weekend`, `time.hour24`, `device.model`, `device.brand`, `device.android`, `network.type` (`WI-FI`, `MOBILE`, `ETHERNET`, `ONLINE`, `OFFLINE`), `network.online`, `storage.used.fraction`, `storage.used.percent`, `storage.free.gb`, `storage.total.gb`. `spec.id` and `net.allowed` are always present.
+
+### Feeds: online data
+A feed is a read-only JSON endpoint. It does nothing until the user turns on **Allow internet access** for that widget (the screen shows the host). At most 4 feeds.
+
+```json
+"feeds": [{
+  "id": "weather", "ttl": 30,
+  "url": "https://api.open-meteo.com/v1/forecast?latitude={{param.lat}}&longitude={{param.lon}}&current=temperature_2m",
+  "fields": {"temp": "current.temperature_2m"}
+}]
+```
+- `url`: https, a public hostname (no IPs, ports, credentials, `.local`/`.internal`), at most 400 chars. Only declared `{{param.x}}` values may appear, never in the host; they are URL-encoded.
+- `fields`: name to dotted path, with `[0]` for array items (`daily.temperature_2m_max[0]`). Values are read as `{{feed.<id>.<name>}}`; numeric ones also get `.round`.
+- `ttl`: minutes between refreshes, 15-1440. Refreshes happen on the hourly sync, when the widget redraws and the data is older than `ttl`, when an option changes, and on a `refresh` tap.
+- Always present: `{{feed.id.ok}}` (data exists), `{{feed.id.stale}}`, `{{feed.id.updated}}` (time of last fetch), plus `{{net.allowed}}` so a layout can ask the user to enable access. Failed fetches keep the last good data.
+- Responses are capped at 256 KB, and no cookies or custom headers are sent.
+
+### Limits added in schema 2
+At most 12 params, 12 state values, 4 feeds, 16 fields per feed, 10 `bind` entries per node. A state action must target an existing state of the right type, or the spec is rejected.

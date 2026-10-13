@@ -46,7 +46,7 @@ import com.sonothamin.anythingwidgets.ui.components.NothingCard
 import com.sonothamin.anythingwidgets.ui.components.PageHeader
 import com.sonothamin.anythingwidgets.ui.components.SectionLabel
 import com.sonothamin.anythingwidgets.ui.components.pageMargin
-import com.sonothamin.anythingwidgets.widget.DataSnapshot
+import com.sonothamin.anythingwidgets.widget.WidgetRuntime
 import com.sonothamin.anythingwidgets.widget.SpecWidget
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import kotlinx.coroutines.CancellationException
@@ -62,7 +62,6 @@ fun AiPage(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val hasKey = remember(refreshKey) { AiKeyStore(context).hasUsableKey() }
-    val data = remember(refreshKey) { DataSnapshot.build(context) }
 
     var prompt by rememberSaveable { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
@@ -167,7 +166,7 @@ fun AiPage(
                 }
             }
             Box(Modifier.pageMargin().fillMaxWidth(), contentAlignment = Alignment.Center) {
-                SpecPreview(current.spec, size, data)
+                SpecPreview(current.spec, size, remember(current, refreshKey) { WidgetRuntime.data(context, current.spec) })
             }
             NothingCard(CardShape, Modifier.pageMargin().padding(top = 16.dp)) {
                 Text(

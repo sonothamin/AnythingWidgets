@@ -29,12 +29,17 @@ object SpecInfo {
                     "random.pool".takeIf { n.rotate == "random" && n.pool.isNotEmpty() },
                 )
             }
-            .map {
+            .mapNotNull {
                 when {
                     it.startsWith("battery.") -> "Battery level"
                     it.startsWith("time.") || it.startsWith("day.") -> "Time"
                     it.startsWith("date.") || it.startsWith("year.") || it.startsWith("month.") -> "Date"
                     it.startsWith("random.") -> "Chance"
+                    it.startsWith("storage.") -> "Storage"
+                    it.startsWith("network.") -> "Network status"
+                    it.startsWith("device.") -> "Device info"
+                    it.startsWith("param.") || it.startsWith("state.") || it.startsWith("spec.") || it.startsWith("net.") -> null
+                    it.startsWith("feed.") -> "Online data"
                     else -> it
                 }
             }
@@ -48,6 +53,14 @@ object SpecInfo {
                 when (a.type) {
                     "open_app" -> "Opens this app"
                     "refresh" -> "Refreshes the widget"
+                    "launch_app" -> "Opens ${a.pkg}"
+                    "dial" -> "Starts a call"
+                    "email" -> "Starts an email"
+                    "map" -> "Opens a map search"
+                    "settings" -> "Opens ${a.screen} settings"
+                    "timer" -> "Starts a timer"
+                    "alarms" -> "Opens alarms"
+                    "inc", "dec", "set", "toggle", "cycle", "reset" -> "Changes its own data"
                     "open_url" -> {
                         val host = a.url?.let { runCatching { URI(it).host }.getOrNull() }
                         if (host.isNullOrBlank()) "Opens a link" else "Opens $host"
@@ -56,6 +69,15 @@ object SpecInfo {
                 }
             }
             .distinct()
+
+    /** True when tapping the widget changes something the widget remembers (a mini app). */
+    fun isInteractive(spec: WidgetSpec): Boolean = spec.state.isNotEmpty() && nodes(spec).any { it.action?.type in STATE_OPS }
+
+    /** Hosts the widget would contact if the user allows internet access. */
+    fun feedHosts(spec: WidgetSpec): List<String> =
+        spec.feeds.mapNotNull { SpecValidator.feedHost(it.url) }.distinct()
+
+    private val STATE_OPS = setOf("inc", "dec", "set", "toggle", "cycle", "reset")
 
     fun hasSizeLayouts(spec: WidgetSpec): Boolean = spec.compact != null || spec.large != null
 }

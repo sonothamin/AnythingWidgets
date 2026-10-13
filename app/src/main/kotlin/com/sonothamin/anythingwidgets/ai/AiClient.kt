@@ -69,7 +69,7 @@ object AiClient {
 
         val id = forceId ?: uniqueId(context, first.name)
         val spec = first.copy(
-            schema = 1,
+            schema = 2,
             id = id,
             version = (previousVersion ?: 0) + 1,
             author = "AI",

@@ -1,0 +1,92 @@
+{
+  "schema": 2,
+  "id": "countdown",
+  "version": 1,
+  "name": "Countdown",
+  "description": "Days until (or since) a date you choose.",
+  "author": "AnythingWidgets",
+  "created": "2026-10-13",
+  "categories": [
+    "Time"
+  ],
+  "tags": [
+    "countdown",
+    "date"
+  ],
+  "chrome": "none",
+  "params": [
+    {
+      "id": "date",
+      "type": "date",
+      "label": "Date",
+      "default": "2026-12-25"
+    },
+    {
+      "id": "title",
+      "type": "text",
+      "label": "Title",
+      "default": "CHRISTMAS",
+      "maxLength": 20
+    },
+    {
+      "id": "accent",
+      "type": "color",
+      "label": "Accent",
+      "default": "n.red"
+    }
+  ],
+  "root": {
+    "type": "column",
+    "fill": "both",
+    "background": "n.dark",
+    "radius": 32,
+    "padding": 16,
+    "justify": "center",
+    "gap": 6,
+    "children": [
+      {
+        "type": "glyph",
+        "text": "{{param.date.daysUntil}}",
+        "size": 56,
+        "color": "{{param.accent}}",
+        "visible": "!param.date.isPast && !param.date.isToday"
+      },
+      {
+        "type": "glyph",
+        "text": "TODAY",
+        "size": 40,
+        "color": "{{param.accent}}",
+        "visible": "param.date.isToday"
+      },
+      {
+        "type": "glyph",
+        "text": "{{param.date.daysSince}}",
+        "size": 56,
+        "color": "{{param.accent}}",
+        "visible": "param.date.isPast"
+      },
+      {
+        "type": "text",
+        "text": "DAYS UNTIL {{param.title}}",
+        "size": 12,
+        "bold": true,
+        "color": "n.white",
+        "visible": "!param.date.isPast && !param.date.isToday"
+      },
+      {
+        "type": "text",
+        "text": "DAYS SINCE {{param.title}}",
+        "size": 12,
+        "bold": true,
+        "color": "n.white",
+        "visible": "param.date.isPast"
+      },
+      {
+        "type": "text",
+        "text": "{{param.date.text}}",
+        "size": 11,
+        "color": "n.ash"
+      }
+    ]
+  }
+}

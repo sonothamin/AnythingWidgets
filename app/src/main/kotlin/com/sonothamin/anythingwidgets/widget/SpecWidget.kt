@@ -30,6 +30,7 @@ import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.state.getAppWidgetState
+import androidx.glance.appwidget.updateAll
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -40,6 +41,9 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
+import com.sonothamin.anythingwidgets.widget.spec.ActionSpec
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.json.JsonPrimitive
 import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -57,7 +61,9 @@ class SpecWidget : GlanceAppWidget() {
         // Do I/O before composing; each update re-runs this, so data is always fresh.
         val initialId = getAppWidgetState(context, PreferencesGlanceStateDefinition, id)[KEY_SPEC]
         val initialSpec = withContext(Dispatchers.IO) { initialId?.let { SpecStore(context).load(it) } }
-        val data = DataSnapshot.build(context)
+        // Feeds only hit the network when the user allowed it and the cached copy is older than its ttl.
+        initialSpec?.let { spec -> withTimeoutOrNull(8_000) { WidgetRuntime.refreshFeeds(context, spec) } }
+        val data = initialSpec?.let { WidgetRuntime.data(context, it) } ?: DataSnapshot.build(context)
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
         provideContent {
             // Read the choice from live state: a session started before the user picked a widget
@@ -65,7 +71,9 @@ class SpecWidget : GlanceAppWidget() {
             val liveId = currentState<Preferences>()[KEY_SPEC]
             val spec = if (liveId == initialId) initialSpec
             else remember(liveId) { liveId?.let { SpecStore(context).load(it) } }
-            GlanceTheme { WidgetContent(spec, data, appWidgetId) }
+            // A spec picked after this session started has no precomputed values yet.
+            val liveData = if (spec === initialSpec || spec == null) data else remember(spec) { WidgetRuntime.data(context, spec) }
+            GlanceTheme { WidgetContent(spec, liveData, appWidgetId) }
         }
     }
 
@@ -123,7 +131,36 @@ private fun WidgetContent(spec: WidgetSpec?, data: Map<String, String>, appWidge
 
 class RefreshAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        // A tap on "refresh" also re-fetches this widget's feeds, if the user allowed them.
+        val id = getAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId)[SpecWidget.KEY_SPEC]
+        id?.let { SpecStore(context).load(it) }?.let { spec ->
+            withTimeoutOrNull(8_000) { WidgetRuntime.refreshFeeds(context, spec, force = true) }
+        }
         SpecWidget().update(context, glanceId)
+    }
+}
+
+/** Mini-app taps: counters, toggles, pickers. Validated against the spec again here; bad input is ignored. */
+class StateAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val specId = parameters[SPEC] ?: return
+        val type = parameters[TYPE] ?: return
+        val spec = withContext(Dispatchers.IO) { SpecStore(context).load(specId) } ?: return
+        val op = ActionSpec(
+            type = type,
+            target = parameters[TARGET],
+            by = parameters[BY]?.toDoubleOrNull(),
+            value = parameters[VALUE]?.let { JsonPrimitive(it) },
+        )
+        if (WidgetRuntime.applyOp(context, spec, op)) SpecWidget().updateAll(context)
+    }
+
+    companion object {
+        val SPEC = ActionParameters.Key<String>("spec")
+        val TYPE = ActionParameters.Key<String>("type")
+        val TARGET = ActionParameters.Key<String>("target")
+        val BY = ActionParameters.Key<String>("by")
+        val VALUE = ActionParameters.Key<String>("value")
     }
 }
 

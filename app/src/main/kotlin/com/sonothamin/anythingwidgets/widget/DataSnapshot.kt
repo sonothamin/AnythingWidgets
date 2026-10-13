@@ -3,7 +3,12 @@ package com.sonothamin.anythingwidgets.widget
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.BatteryManager
+import android.os.Build
+import android.os.Environment
+import android.os.StatFs
 import android.text.format.DateFormat
 import com.sonothamin.anythingwidgets.widget.spec.Node
 import java.text.SimpleDateFormat
@@ -34,7 +39,7 @@ object DataSnapshot {
         val heads = Random.nextBoolean()
         val today = LocalDate.now()
 
-        return mapOf(
+        return storage() + mapOf(
             "time.short" to DateFormat.getTimeFormat(context).format(now),
             "date.weekday" to weekday,
             "date.weekday.short" to weekdayShort,
@@ -80,6 +85,15 @@ object DataSnapshot {
                 level >= 15 -> "A BIT LOW"
                 else -> "FEED ME"
             },
+            "battery.charging" to charging.toString(),
+            "date.iso" to today.toString(),
+            "date.weekend" to (cal.get(Calendar.DAY_OF_WEEK).let { it == Calendar.SATURDAY || it == Calendar.SUNDAY }).toString(),
+            "time.hour24" to hour.toString(),
+            "device.model" to Build.MODEL.orEmpty(),
+            "device.brand" to Build.MANUFACTURER.orEmpty().replaceFirstChar { it.uppercase() },
+            "device.android" to Build.VERSION.RELEASE.orEmpty(),
+            "network.type" to networkType(context),
+            "network.online" to (networkType(context) != "OFFLINE").toString(),
             "random.dice" to dice.toString(),
             "random.dice.pattern" to DICE[dice - 1],
             "random.coin" to if (heads) "HEADS" else "TAILS",
@@ -89,6 +103,34 @@ object DataSnapshot {
             "tick.random" to Random.nextInt(0, 1_000_000).toString(),
         )
     }
+
+    private fun networkType(context: Context): String = runCatching {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val caps = cm.getNetworkCapabilities(cm.activeNetwork)
+        when {
+            caps == null -> "OFFLINE"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "WI-FI"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "MOBILE"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ETHERNET"
+            else -> "ONLINE"
+        }
+    }.getOrDefault("UNKNOWN")
+
+    /** Internal storage: fractions, a percent and sizes in GB. */
+    private fun storage(): Map<String, String> = runCatching {
+        val st = StatFs(Environment.getDataDirectory().path)
+        val total = st.blockCountLong * st.blockSizeLong
+        val free = st.availableBlocksLong * st.blockSizeLong
+        val used = (total - free).coerceAtLeast(0L)
+        val gb = 1024.0 * 1024.0 * 1024.0
+        val fraction = if (total > 0) used.toDouble() / total else 0.0
+        mapOf(
+            "storage.used.fraction" to fraction.toString(),
+            "storage.used.percent" to Math.round(fraction * 100).toString(),
+            "storage.free.gb" to "%.1f".format(Locale.US, free / gb),
+            "storage.total.gb" to "%.0f".format(Locale.US, total / gb),
+        )
+    }.getOrDefault(emptyMap())
 
     private fun isCharging(context: Context): Boolean {
         val i = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)) ?: return false
