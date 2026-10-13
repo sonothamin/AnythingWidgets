@@ -1,6 +1,7 @@
 package com.sonothamin.anythingwidgets.ai
 
 import android.content.Context
+import com.sonothamin.anythingwidgets.debug.DebugLog
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import com.sonothamin.anythingwidgets.widget.spec.SpecCodec
 import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
@@ -25,7 +26,17 @@ import java.time.LocalDate
 /** One key that was tried and didn't work, kept so the UI can explain what happened. */
 class AiFailure(val keyLabel: String, val message: String)
 
-class AiResult(val spec: WidgetSpec, val raw: String, val usedLabel: String, val failures: List<AiFailure>)
+class AiResult(
+    val spec: WidgetSpec,
+    val raw: String,
+    /** The saved key's own name, e.g. "Work Gemini". */
+    val usedLabel: String,
+    /** Provider and model that actually answered, e.g. "Gemini" / "gemini-2.5-flash". */
+    val provider: String,
+    val model: String,
+    val millis: Long,
+    val failures: List<AiFailure>,
+)
 
 class AiException(message: String, val failures: List<AiFailure>) : Exception(message)
 
@@ -36,7 +47,14 @@ object AiClient {
      * Generates (or, with [current], revises) a widget. Walks the saved keys in priority order and
      * falls through to the next one on any failure: network, HTTP error, or an answer that isn't a valid spec.
      */
-    suspend fun generate(context: Context, request: String, current: WidgetSpec? = null, currentRaw: String? = null): AiResult =
+    suspend fun generate(
+        context: Context,
+        request: String,
+        current: WidgetSpec? = null,
+        currentRaw: String? = null,
+        /** Called just before each key is tried, so the UI can say who is being asked. */
+        onAttempt: (AiKey) -> Unit = {},
+    ): AiResult =
         withContext(Dispatchers.IO) {
             val keys = AiKeyStore(context).load().filter { it.usable }
             if (keys.isEmpty()) throw AiException("No AI keys are set up. Add one in Settings.", emptyList())
@@ -46,18 +64,53 @@ object AiClient {
             val failures = mutableListOf<AiFailure>()
 
             for (key in keys) {
+                onAttempt(key)
+                val started = System.currentTimeMillis()
                 try {
                     val text = call(key, system, user)
                     val (spec, raw) = parse(context, text, forceId = current?.id, previousVersion = current?.version)
-                    return@withContext AiResult(spec, raw, key.label, failures)
+                    val took = System.currentTimeMillis() - started
+                    DebugLog.i(context, "ai", "${key.preset.label} ${key.model} answered in ${took}ms")
+                    return@withContext AiResult(spec, raw, key.label, key.preset.label, key.model.trim(), took, failures)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    failures += AiFailure(key.label, e.message?.lineSequence()?.firstOrNull()?.take(160) ?: "Failed")
+                    val why = e.message?.lineSequence()?.firstOrNull()?.take(160) ?: "Failed"
+                    DebugLog.w(context, "ai", "${key.preset.label} ${key.model} failed: $why")
+                    failures += AiFailure(key.label, why)
                 }
             }
             throw AiException("Every key failed.", failures)
         }
+
+    /**
+     * One short, buildable widget idea for the "surprise me" button. Same key order and fall-through
+     * as [generate]; throws [AiException] when no key could answer.
+     */
+    suspend fun idea(context: Context, avoid: String? = null): String = withContext(Dispatchers.IO) {
+        val keys = AiKeyStore(context).load().filter { it.usable }
+        if (keys.isEmpty()) throw AiException("No AI keys are set up. Add one in Settings.", emptyList())
+        val system = "You suggest ideas for Android home screen widgets. Reply with ONE idea in a single sentence " +
+            "of at most 16 words. Make it concrete and visual, something that can be built from text, dot grids, " +
+            "progress bars, counters, clocks and device data such as battery, date and time. " +
+            "No quotes, no preamble, no list."
+        val user = "Give me one fresh widget idea." + (avoid?.let { " Not similar to: $it." } ?: "") +
+            " (variation ${kotlin.random.Random.nextInt(1000)})"
+        val failures = mutableListOf<AiFailure>()
+        for (key in keys) {
+            try {
+                // Plain sentence wanted, so never force the server into JSON mode.
+                val text = call(key.copy(jsonMode = false), system, user)
+                val idea = text.trim().lineSequence().firstOrNull { it.isNotBlank() }.orEmpty().trim().trim('"', '\'', '`').take(140)
+                if (idea.isNotBlank()) return@withContext idea
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                failures += AiFailure(key.label, e.message?.lineSequence()?.firstOrNull()?.take(160) ?: "Failed")
+            }
+        }
+        throw AiException("Couldn't get an idea.", failures)
+    }
 
     // --- parsing -------------------------------------------------------------------------------
 
