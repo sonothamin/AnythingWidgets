@@ -146,7 +146,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 val s = registry.install(e)
                 installed = s
                 remote = null
-                SpecWidget().updateAll(context)
+                SpecWidget.redrawAll(context)
             } catch (c: CancellationException) {
                 throw c
             } catch (_: Exception) {
@@ -172,7 +172,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
         scope.launch {
             if (refetch) spec?.let { WidgetRuntime.refreshFeeds(context, it, force = true) }
             dataTick++
-            SpecWidget().updateAll(context)
+            SpecWidget.redrawAll(context)
         }
     }
 
@@ -459,7 +459,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                                 shape = shape,
                                 onClick = {
                                     scope.launch {
-                                        SpecWidget().updateAll(context)
+                                        SpecWidget.redrawAll(context)
                                         Toast.makeText(context, "Widgets refreshed", Toast.LENGTH_SHORT).show()
                                     }
                                 },
@@ -483,7 +483,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 scope.launch {
                     store.delete(id)
                     WidgetPrefs.clear(context, id)
-                    SpecWidget().updateAll(context)
+                    SpecWidget.redrawAll(context)
                     onBack()
                 }
             },

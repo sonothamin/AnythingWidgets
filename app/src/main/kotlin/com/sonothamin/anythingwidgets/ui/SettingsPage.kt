@@ -50,7 +50,7 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
         if (uri != null) scope.launch {
             importResult = try {
                 val result = WidgetImporter.import(context, uri)
-                if (result.imported.isNotEmpty()) SpecWidget().updateAll(context)
+                if (result.imported.isNotEmpty()) SpecWidget.redrawAll(context)
                 ImportOutcome.Done(result)
             } catch (e: CancellationException) {
                 throw e

@@ -55,7 +55,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.glance.appwidget.updateAll
 import com.sonothamin.anythingwidgets.ai.AiClient
 import com.sonothamin.anythingwidgets.ai.AiException
 import com.sonothamin.anythingwidgets.ai.AiFailure
@@ -186,7 +185,7 @@ fun AiPage(
         scope.launch {
             runCatching { SpecStore(context).save(v.result.spec, v.result.raw, "ai") }
                 .onSuccess {
-                    SpecWidget().updateAll(context)
+                    SpecWidget.redrawAll(context)
                     Toast.makeText(context, "${v.result.spec.name} installed", Toast.LENGTH_SHORT).show()
                     onOpen(v.result.spec.id)
                     AiSession.clear()
