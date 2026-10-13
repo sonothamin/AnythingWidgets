@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit = {}) {
     val context = LocalContext.current
     var keysOpen by rememberSaveable { mutableStateOf(false) }
+    var aboutOpen by rememberSaveable { mutableStateOf(false) }
     var source by remember { mutableStateOf(RegistrySettings.source(context)) }
     var custom by remember { mutableStateOf(RegistrySettings.customUrl(context)) }
     var askUrl by remember { mutableStateOf(false) }
@@ -60,6 +61,11 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
 
     if (keysOpen) {
         AiKeysPage(onBack = { keysOpen = false })
+        return
+    }
+
+    if (aboutOpen) {
+        AboutPage(onBack = { aboutOpen = false })
         return
     }
 
@@ -139,6 +145,19 @@ fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit
                     subtitle = "Gemini, OpenAI, Claude, Ollama or any OpenAI-compatible server. Tried in order.",
                     shape = shape,
                     onClick = { keysOpen = true },
+                    trailing = { ChevronIcon() },
+                )
+            }
+        }
+
+        SectionLabel("About")
+        NothingStack(Modifier.pageMargin()) {
+            row { shape ->
+                NothingItem(
+                    title = "About AnythingWidgets",
+                    subtitle = "Version, credits and legal",
+                    shape = shape,
+                    onClick = { aboutOpen = true },
                     trailing = { ChevronIcon() },
                 )
             }
