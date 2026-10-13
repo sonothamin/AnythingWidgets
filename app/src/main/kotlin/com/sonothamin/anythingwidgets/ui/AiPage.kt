@@ -2,7 +2,7 @@ package com.sonothamin.anythingwidgets.ui
 
 import com.sonothamin.anythingwidgets.ui.components.DotLoader
 import com.sonothamin.anythingwidgets.ui.components.NothingArt
-import com.sonothamin.anythingwidgets.ui.components.NothingStateCard
+import com.sonothamin.anythingwidgets.ui.components.NothingEmptyState
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -98,20 +98,24 @@ fun AiPage(
         }
     }
 
+    if (!hasKey) {
+        Column(Modifier.fillMaxSize()) {
+            PageHeader("AI")
+            Box(Modifier.fillMaxWidth().weight(1f).padding(bottom = 120.dp), Alignment.Center) {
+                NothingEmptyState(
+                    art = NothingArt.Key,
+                    title = "Bring your own key",
+                    message = "Add an API key in Settings to generate widgets.",
+                    actionLabel = "Open Settings",
+                    onAction = onOpenSettings,
+                )
+            }
+        }
+        return
+    }
+
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
         PageHeader("AI")
-
-        if (!hasKey) {
-            NothingStateCard(
-                art = NothingArt.Key,
-                title = "Bring your own key",
-                message = "Add an API key in Settings to generate widgets.",
-                modifier = Modifier.pageMargin(),
-                actionLabel = "Open Settings",
-                onAction = onOpenSettings,
-            )
-            return@Column
-        }
 
         val current = result
         NothingCard(CardShape, Modifier.pageMargin(), contentPadding = PaddingValues(20.dp)) {

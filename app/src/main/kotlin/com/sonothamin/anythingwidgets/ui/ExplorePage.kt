@@ -59,7 +59,7 @@ import com.sonothamin.anythingwidgets.ui.components.CardShape
 import com.sonothamin.anythingwidgets.ui.components.DotLoader
 import com.sonothamin.anythingwidgets.ui.components.NothingArt
 import com.sonothamin.anythingwidgets.ui.components.NothingCard
-import com.sonothamin.anythingwidgets.ui.components.NothingStateCard
+import com.sonothamin.anythingwidgets.ui.components.NothingEmptyState
 import com.sonothamin.anythingwidgets.ui.components.PageHeader
 import com.sonothamin.anythingwidgets.widget.SpecWidget
 import com.sonothamin.anythingwidgets.widget.WidgetRuntime
@@ -142,20 +142,14 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                 DotLoader()
             }
 
-            ExploreState.Failed -> {
-                val local = remember(refreshKey, installed) { store.installed() }
-                BentoGrid(Modifier.weight(1f)) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        NothingStateCard(
-                            art = NothingArt.Offline,
-                            title = "No signal",
-                            message = "Check your connection and try again.",
-                            actionLabel = "Retry",
-                            onAction = { load() },
-                        )
-                    }
-                    onDevice(local, refreshKey, onOpen)
-                }
+            ExploreState.Failed -> Box(Modifier.fillMaxWidth().weight(1f).padding(bottom = 120.dp), Alignment.Center) {
+                NothingEmptyState(
+                    art = NothingArt.Offline,
+                    title = "No signal",
+                    message = "Check your connection and try again.",
+                    actionLabel = "Retry",
+                    onAction = { load() },
+                )
             }
 
             is ExploreState.Ready -> {

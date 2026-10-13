@@ -201,33 +201,3 @@ fun NothingEmptyState(
         }
     }
 }
-
-/** The same state as a card, for places where other content follows it on the page. */
-@Composable
-fun NothingStateCard(
-    art: List<String>,
-    title: String,
-    message: String,
-    modifier: Modifier = Modifier,
-    actionLabel: String? = null,
-    onAction: (() -> Unit)? = null,
-) {
-    NothingCard(CardShape, modifier, contentPadding = PaddingValues(24.dp)) {
-        DotMatrix(art, dot = 6.dp, gap = 4.dp)
-        Text(
-            title,
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, lineHeight = 24.sp),
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 20.dp),
-        )
-        Text(
-            message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 4.dp),
-        )
-        if (actionLabel != null && onAction != null) {
-            Button(onClick = onAction, modifier = Modifier.padding(top = 16.dp)) { Text(actionLabel) }
-        }
-    }
-}
