@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Widgets
@@ -27,6 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import com.sonothamin.anythingwidgets.ai.AiSettings
+import com.sonothamin.anythingwidgets.ui.AiPage
 import com.sonothamin.anythingwidgets.ui.ExplorePage
 import com.sonothamin.anythingwidgets.ui.LibraryPage
 import com.sonothamin.anythingwidgets.ui.SettingsPage
@@ -44,15 +48,21 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private val tabs = listOf(
-    NavTab("Widgets", Icons.Rounded.Widgets),
-    NavTab("Explore", Icons.Rounded.Explore),
-    NavTab("Settings", Icons.Rounded.Settings),
-)
+private enum class Page(val tab: NavTab) {
+    MyWidgets(NavTab("My Widgets", Icons.Rounded.Widgets)),
+    Explore(NavTab("Explore", Icons.Rounded.Explore)),
+    Ai(NavTab("AI", Icons.Rounded.AutoAwesome)),
+    Settings(NavTab("Settings", Icons.Rounded.Settings)),
+}
 
 @Composable
 fun HomeScreen() {
-    var tab by rememberSaveable { mutableIntStateOf(0) }
+    val context = LocalContext.current
+    var aiEnabled by remember { mutableStateOf(AiSettings.tabEnabled(context)) }
+    var requested by rememberSaveable { mutableStateOf(Page.MyWidgets) }
+    // The AI tab can be switched off; if it was open when that happened, fall back to the first tab.
+    val pages = Page.entries.filter { it != Page.Ai || aiEnabled }
+    val page = if (requested in pages) requested else Page.MyWidgets
     // Id of the widget whose details are open, or null. Kept above the tabs so their state survives.
     var detailsId by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -62,9 +72,9 @@ fun HomeScreen() {
         overlay = { backdrop ->
             if (detailsId == null) {
                 GlassNavBar(
-                    tabs = tabs,
-                    selectedIndex = tab,
-                    onSelect = { tab = it },
+                    tabs = pages.map { it.tab },
+                    selectedIndex = pages.indexOf(page),
+                    onSelect = { requested = pages[it] },
                     backdrop = backdrop,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -77,14 +87,25 @@ fun HomeScreen() {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) {
             Box(Modifier.fillMaxSize()) {
                 AnimatedContent(
-                    targetState = tab,
+                    targetState = page,
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                     label = "tab",
-                ) { page ->
-                    when (page) {
-                        0 -> LibraryPage(refreshKey = detailsId, onOpen = { detailsId = it }, onExplore = { tab = 1 })
-                        1 -> ExplorePage(refreshKey = detailsId, onOpen = { detailsId = it })
-                        else -> SettingsPage()
+                ) { current ->
+                    when (current) {
+                        Page.MyWidgets -> LibraryPage(refreshKey = detailsId, onOpen = { detailsId = it }, onExplore = { requested = Page.Explore })
+                        Page.Explore -> ExplorePage(refreshKey = detailsId, onOpen = { detailsId = it })
+                        Page.Ai -> AiPage(
+                            refreshKey = detailsId,
+                            onOpenSettings = { requested = Page.Settings },
+                            onOpen = { detailsId = it },
+                        )
+                        Page.Settings -> SettingsPage(
+                            aiEnabled = aiEnabled,
+                            onAiEnabledChange = {
+                                aiEnabled = it
+                                AiSettings.setTabEnabled(context, it)
+                            },
+                        )
                     }
                 }
 

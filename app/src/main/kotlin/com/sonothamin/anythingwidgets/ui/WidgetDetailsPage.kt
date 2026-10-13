@@ -281,6 +281,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                         when {
                             installed == null -> hostOf(registry.baseUrl)
                             source == WidgetImporter.SOURCE -> "Imported from zip"
+                            source == "ai" -> "Made with AI"
                             source == null -> "Unknown source"
                             else -> hostOf(source)
                         },

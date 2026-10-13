@@ -43,7 +43,7 @@ fun LibraryPage(
     val data = remember(refreshKey) { DataSnapshot.build(context) }
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 120.dp)) {
-        item { PageHeader("Widgets") }
+        item { PageHeader("My Widgets") }
 
         if (installed.isEmpty()) {
             item {

@@ -7,6 +7,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,8 +35,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingsPage() {
+fun SettingsPage(aiEnabled: Boolean = true, onAiEnabledChange: (Boolean) -> Unit = {}) {
     val context = LocalContext.current
+    var keysOpen by rememberSaveable { mutableStateOf(false) }
     var source by remember { mutableStateOf(RegistrySettings.source(context)) }
     var custom by remember { mutableStateOf(RegistrySettings.customUrl(context)) }
     var askUrl by remember { mutableStateOf(false) }
@@ -54,6 +56,11 @@ fun SettingsPage() {
                 ImportOutcome.Failed(e.message ?: "That file couldn't be read as a widget pack.")
             }
         }
+    }
+
+    if (keysOpen) {
+        AiKeysPage(onBack = { keysOpen = false })
+        return
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
@@ -110,6 +117,28 @@ fun SettingsPage() {
                     onClick = {
                         picker.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream"))
                     },
+                    trailing = { ChevronIcon() },
+                )
+            }
+        }
+
+        SectionLabel("AI")
+        NothingStack(Modifier.pageMargin()) {
+            row { shape ->
+                NothingItem(
+                    title = "Show AI tab",
+                    subtitle = "Generate widgets from a description. Off hides the tab; your keys are kept.",
+                    shape = shape,
+                    onClick = { onAiEnabledChange(!aiEnabled) },
+                    trailing = { Switch(checked = aiEnabled, onCheckedChange = onAiEnabledChange) },
+                )
+            }
+            row { shape ->
+                NothingItem(
+                    title = "AI keys",
+                    subtitle = "Gemini, OpenAI, Claude, Ollama or any OpenAI-compatible server. Tried in order.",
+                    shape = shape,
+                    onClick = { keysOpen = true },
                     trailing = { ChevronIcon() },
                 )
             }
