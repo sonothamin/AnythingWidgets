@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import android.provider.Settings
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,9 +19,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -30,29 +35,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.hypot
 import kotlin.math.sin
 
 /*
- * Nothing-style states: a dot-matrix picture that breathes, a short dry headline in the dot-matrix
+ * Nothing-style states: a halftone dot-matrix picture, a short dry headline in the dot-matrix
  * face, and one clear action. Pictures are plain text grids so they're easy to read and to add.
  *
- *   #  lit dot, takes part in the slow wave
- *   R  red dot, blinks like a status LED
- *   .  unlit dot (the faint grid)
+ *   #  lit dot: swells (size and brightness) as a ripple travels outward from the red dot
+ *   R  red dot: steady, never blinks (a blinking red dot reads as "recording"), with a soft glow
+ *   .  unlit dot (the faint grid), barely reacts to the ripple
  *      (space) no dot
  */
 object NothingArt {
-    /** An empty widget frame with a status LED. */
+    /** An empty widget layout: a square and two small tiles, with the red dot in the free slot. */
     val Empty = listOf(
-        "..#########..",
-        ".#.........#.",
-        "#...........#",
-        "#...........#",
-        "#.....R.....#",
-        "#...........#",
-        "#...........#",
-        ".#.........#.",
-        "..#########..",
+        ".#####. .#####.",
+        "#.....# #.....#",
+        "#.....# #.....#",
+        "#.....# .#####.",
+        "#.....#        ",
+        "#.....# .#####.",
+        "#.....# #..R..#",
+        "#.....# #.....#",
+        ".#####. .#####.",
     )
 
     /** Two ends of a link with the connection dropped between them. */
@@ -96,7 +102,11 @@ object NothingArt {
     ).map { it.padEnd(13, '.') }
 }
 
-/** Dot-matrix picture. Lit dots swell in a slow diagonal wave; red dots blink. */
+/**
+ * Halftone dot-matrix picture. Lit dots swell in size and brightness as a slow ripple travels
+ * outward from the red dot (or the middle of the picture when there is none). The red dot stays
+ * solid. Motion is off when the system's animation scale is 0.
+ */
 @Composable
 fun DotMatrix(
     pattern: List<String>,
@@ -110,19 +120,26 @@ fun DotMatrix(
     val lit = scheme.onSurface
     val accent = scheme.tertiary
 
+    val context = LocalContext.current
+    val motion = remember(context) {
+        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
+    }
+    val origin = remember(pattern) {
+        var found: Pair<Float, Float>? = null
+        for (r in 0 until rows) for (c in 0 until cols) {
+            if (found == null && pattern[r].getOrElse(c) { ' ' } == 'R') found = c.toFloat() to r.toFloat()
+        }
+        found ?: ((cols - 1) / 2f to (rows - 1) / 2f)
+    }
+
     val transition = rememberInfiniteTransition(label = "dot-matrix")
-    val wave by transition.animateFloat(
+    val animated by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(2800, easing = LinearEasing), RepeatMode.Restart),
-        label = "wave",
+        animationSpec = infiniteRepeatable(tween(3200, easing = LinearEasing), RepeatMode.Restart),
+        label = "ripple",
     )
-    val blink by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1600, easing = LinearEasing), RepeatMode.Restart),
-        label = "blink",
-    )
+    val wave = if (motion) animated else 0.25f
 
     Canvas(
         modifier
@@ -131,18 +148,29 @@ fun DotMatrix(
     ) {
         val d = dot.toPx()
         val step = d + gap.toPx()
-        val span = (rows + cols).toFloat()
+        val hasRed = pattern.any { 'R' in it }
+        if (hasRed) {
+            val glowCenter = Offset(origin.first * step + d / 2, origin.second * step + d / 2)
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(accent.copy(alpha = 0.28f), Color.Transparent),
+                    center = glowCenter,
+                    radius = step * 5f,
+                ),
+                radius = step * 5f,
+                center = glowCenter,
+            )
+        }
         for (r in 0 until rows) {
             for (c in 0 until cols) {
                 val ch = pattern[r].getOrElse(c) { ' ' }
                 val center = Offset(c * step + d / 2, r * step + d / 2)
+                val dist = hypot(c - origin.first, r - origin.second)
+                val swell = 0.5f + 0.5f * cos(2f * PI.toFloat() * (dist / 6f - wave))
                 when (ch) {
-                    '#' -> {
-                        val swell = 0.5f + 0.5f * cos(2f * PI.toFloat() * (wave - (r + c) / span))
-                        drawCircle(lit.copy(alpha = 0.45f + 0.55f * swell), d / 2, center)
-                    }
-                    'R' -> drawCircle(accent.copy(alpha = if (blink < 0.55f) 1f else 0.12f), d / 2, center)
-                    '.' -> drawCircle(lit.copy(alpha = 0.14f), d / 2, center)
+                    '#' -> drawCircle(lit.copy(alpha = 0.40f + 0.60f * swell), d / 2 * (0.55f + 0.45f * swell), center)
+                    'R' -> drawCircle(accent, d / 2 * 1.15f, center)
+                    '.' -> drawCircle(lit.copy(alpha = 0.10f + 0.07f * swell), d / 2 * 0.55f, center)
                 }
             }
         }
