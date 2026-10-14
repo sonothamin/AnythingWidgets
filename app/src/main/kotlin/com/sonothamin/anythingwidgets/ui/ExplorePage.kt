@@ -1,6 +1,7 @@
 package com.sonothamin.anythingwidgets.ui
 
 import android.widget.Toast
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -11,13 +12,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -26,11 +27,8 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -159,9 +157,10 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                     itemsIndexed(
                         s.widgets,
                         key = { _, e -> e.id },
-                        span = { i, _ -> GridItemSpan(if (isWide(i)) maxLineSpan else 1) },
+                        span = { i, e -> GridItemSpan(if (isWide(i) || e.id == selectedId) maxLineSpan else 1) },
                     ) { i, entry ->
                         val localVersion = installed[entry.id]
+                        val expanded = entry.id == selectedId
                         val localSpec = remember(localVersion) { if (localVersion != null) store.load(entry.id) else null }
                         val key = "${entry.id}@${entry.version}"
                         if (localSpec == null) {
@@ -189,26 +188,28 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                                 else -> TileStatus.Installed
                             },
                             refreshKey = refreshKey,
-                            onClick = { selectedId = entry.id },
+                            modifier = Modifier.animateItem(),
+                            onClick = { selectedId = if (expanded) null else entry.id },
+                            actions = if (expanded) {
+                                {
+                                    TileActions(
+                                        entry = entry,
+                                        localVersion = localVersion,
+                                        busy = entry.id in busy,
+                                        onInstall = { install(entry) },
+                                        onDetails = {
+                                            selectedId = null
+                                            onOpen(entry.id)
+                                        },
+                                    )
+                                }
+                            } else {
+                                null
+                            },
                         )
                     }
                     val registryIds = s.widgets.map { it.id }.toSet()
                     onDevice(store.installed().filter { it.id !in registryIds }, refreshKey, onOpen)
-                }
-
-                s.widgets.firstOrNull { it.id == selectedId }?.let { entry ->
-                    val localVersion = installed[entry.id]
-                    WidgetSheet(
-                        entry = entry,
-                        localVersion = localVersion,
-                        busy = entry.id in busy,
-                        onInstall = { install(entry) },
-                        onDetails = {
-                            selectedId = null
-                            onOpen(entry.id)
-                        },
-                        onDismiss = { selectedId = null },
-                    )
                 }
             }
         }
@@ -285,10 +286,13 @@ private fun BentoTile(
     status: TileStatus,
     refreshKey: Any?,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    actions: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     NothingCard(
         CardShape,
+        modifier = modifier.animateContentSize(),
         onClick = onClick,
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 14.dp),
     ) {
@@ -330,6 +334,7 @@ private fun BentoTile(
             }
             StatusDot(status)
         }
+        if (actions != null) actions()
     }
 }
 
@@ -355,62 +360,52 @@ private fun StatusDot(status: TileStatus) {
     )
 }
 
-/** What you can do with a widget: install or update it, or open its details. */
-@OptIn(ExperimentalMaterial3Api::class)
+/** What you can do with a widget, right inside its tile: install or update it, or open its details. */
 @Composable
-private fun WidgetSheet(
+private fun ColumnScope.TileActions(
     entry: IndexEntry,
     localVersion: Int?,
     busy: Boolean,
     onInstall: () -> Unit,
     onDetails: () -> Unit,
-    onDismiss: () -> Unit,
 ) {
     val upToDate = localVersion != null && localVersion >= entry.version
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-    ) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp).navigationBarsPadding()) {
-            Text(entry.name, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
-            entry.description?.let {
-                Text(
-                    it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-            }
-            Row(
-                Modifier.padding(top = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+    Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp).padding(top = 12.dp)) {
+        entry.description?.let {
+            Text(
+                it,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Row(
+            Modifier.padding(top = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            entry.categories.take(3).forEach { Tag(it) }
+            Text(
+                listOfNotNull(entry.author, "v${entry.version}").joinToString(" · "),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Row(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = onInstall,
+                enabled = !busy && !upToDate,
+                modifier = Modifier.weight(1f).height(48.dp),
             ) {
-                entry.categories.take(3).forEach { Tag(it) }
                 Text(
-                    listOfNotNull(entry.author, "v${entry.version}").joinToString(" · "),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    when {
+                        busy -> if (localVersion == null) "Installing…" else "Updating…"
+                        upToDate -> "Installed"
+                        localVersion == null -> "Install"
+                        else -> "Update"
+                    },
                 )
             }
-            Row(Modifier.fillMaxWidth().padding(top = 28.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
-                    onClick = onInstall,
-                    enabled = !busy && !upToDate,
-                    modifier = Modifier.weight(1f).height(52.dp),
-                ) {
-                    Text(
-                        when {
-                            busy -> if (localVersion == null) "Installing…" else "Updating…"
-                            upToDate -> "Installed"
-                            localVersion == null -> "Install"
-                            else -> "Update"
-                        },
-                    )
-                }
-                OutlinedButton(onClick = onDetails, modifier = Modifier.weight(1f).height(52.dp)) { Text("Details") }
-            }
+            OutlinedButton(onClick = onDetails, modifier = Modifier.weight(1f).height(48.dp)) { Text("Details") }
         }
     }
 }
