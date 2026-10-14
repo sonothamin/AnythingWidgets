@@ -148,7 +148,7 @@ fun AiPage(
         val began = System.currentTimeMillis()
         DebugLog.i(
             context, "ai-ui",
-            "Generate tapped (${if (base != null) "refining v${AiSession.index + 1}" else "new widget"}): $text",
+            "Generate tapped (${if (base != null) "refining ${AiSession.label(AiSession.index)}" else "new widget"}): $text",
         )
         scope.launch {
             try {
@@ -222,7 +222,11 @@ fun AiPage(
                 .onSuccess {
                     DebugLog.i(context, "ai-ui", "Installed ${v.result.spec.id}")
                     SpecWidget.redrawAll(context)
-                    Toast.makeText(context, "${v.result.spec.name} installed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "${v.result.spec.name} ${if (AiSession.isRefactor) "updated" else "installed"}",
+                        Toast.LENGTH_SHORT,
+                    ).show()
                     onOpen(v.result.spec.id)
                     AiSession.clear()
                 }
@@ -272,7 +276,7 @@ fun AiPage(
         AiComposer(
             value = AiSession.prompt,
             onValueChange = { AiSession.prompt = it },
-            placeholder = if (current == null) "Describe a widget" else "Describe a change to v${AiSession.index + 1}",
+            placeholder = if (current == null) "Describe a widget" else "Describe a change to ${AiSession.label(AiSession.index)}",
             busy = loading,
             ideaBusy = ideaBusy,
             onSend = ::generate,
@@ -399,7 +403,7 @@ private fun AiResultView(
             ) {
                 Text("Versions", style = MaterialTheme.typography.labelLarge, color = scheme.onSurfaceVariant)
                 versions.forEachIndexed { i, _ ->
-                    ChoicePill("v${i + 1}", i == AiSession.index) { AiSession.index = i }
+                    ChoicePill(AiSession.label(i), i == AiSession.index) { AiSession.index = i }
                 }
             }
         }
@@ -409,30 +413,45 @@ private fun AiResultView(
             spec.description?.takeIf { it.isNotBlank() }?.let {
                 Text(it, style = MaterialTheme.typography.bodyMedium, color = scheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
             }
-            Text(
-                buildString {
-                    append(r.provider)
-                    if (r.model.isNotBlank()) append(" · ${r.model}")
-                    append(" · ${"%.1f".format(r.millis / 1000.0)}s")
-                },
-                style = MaterialTheme.typography.labelLarge,
-                color = scheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 14.dp),
-            )
-            if (r.failures.isNotEmpty()) {
+            if (version.base) {
                 Text(
-                    "${r.failures.size} other key${if (r.failures.size == 1) "" else "s"} failed first",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = scheme.tertiary,
-                    modifier = Modifier.padding(top = 2.dp),
+                    "Installed · v${spec.version}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = scheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 14.dp),
+                )
+                Text(
+                    "Describe a change below. Nothing is saved until you install a new version.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = scheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            } else {
+                Text(
+                    buildString {
+                        append(r.provider)
+                        if (r.model.isNotBlank()) append(" · ${r.model}")
+                        append(" · ${"%.1f".format(r.millis / 1000.0)}s")
+                    },
+                    style = MaterialTheme.typography.labelLarge,
+                    color = scheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 14.dp),
+                )
+                if (r.failures.isNotEmpty()) {
+                    Text(
+                        "${r.failures.size} other key${if (r.failures.size == 1) "" else "s"} failed first",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = scheme.tertiary,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                Text(
+                    "“${version.request}”",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = scheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
-            Text(
-                "“${version.request}”",
-                style = MaterialTheme.typography.bodySmall,
-                color = scheme.onSurfaceVariant.copy(alpha = 0.7f),
-                modifier = Modifier.padding(top = 8.dp),
-            )
         }
 
         Row(
@@ -440,13 +459,26 @@ private fun AiResultView(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Button(
-                onClick = onInstall,
-                shape = CircleShape,
-                colors = ButtonDefaults.buttonColors(containerColor = scheme.onSurface, contentColor = scheme.surface),
-                modifier = Modifier.weight(1f).height(56.dp),
-            ) { Text(if (versions.size > 1) "Install v${AiSession.index + 1}" else "Install") }
-            TextButton(onClick = { AiSession.clear() }) { Text("Start over", color = scheme.onSurfaceVariant) }
+            // The base is the widget as it is now; there is nothing to install until something changed.
+            if (!version.base) {
+                Button(
+                    onClick = onInstall,
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = scheme.onSurface, contentColor = scheme.surface),
+                    modifier = Modifier.weight(1f).height(56.dp),
+                ) {
+                    val installed = AiSession.isRefactor
+                    Text(
+                        when {
+                            versions.size > 1 -> "${if (installed) "Save" else "Install"} ${AiSession.label(AiSession.index)}"
+                            else -> if (installed) "Save" else "Install"
+                        },
+                    )
+                }
+            }
+            TextButton(onClick = { AiSession.clear() }) {
+                Text(if (AiSession.isRefactor) "Discard" else "Start over", color = scheme.onSurfaceVariant)
+            }
         }
     }
 }

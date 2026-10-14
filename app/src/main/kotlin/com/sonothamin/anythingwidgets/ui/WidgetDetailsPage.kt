@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Button
@@ -96,10 +97,12 @@ import java.util.Locale
  * Everything about one widget: live preview, metadata, per-widget settings.
  * Works for installed widgets and for registry widgets that aren't installed yet (previewed from a
  * verified download, nothing is stored until the user taps Install).
+ *
+ * [onRefactor] opens the AI tab on this widget; null hides the option (the AI tab is switched off).
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
+fun WidgetDetailsPage(id: String, onBack: () -> Unit, onRefactor: (() -> Unit)? = null) {
     val context = LocalContext.current.applicationContext
     val registry = remember { Registry(context) }
     val store = remember { SpecStore(context) }
@@ -113,6 +116,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var autoUpdate by remember { mutableStateOf(WidgetPrefs.autoUpdate(context, id)) }
     var confirmRemove by remember { mutableStateOf(false) }
+    var confirmRefactor by remember { mutableStateOf(false) }
     var sizeIndex by rememberSaveable { mutableIntStateOf(0) }
     var showInfo by remember { mutableStateOf(false) }
     // Bumped whenever a setting or mini-app value changes so previews re-read their data.
@@ -158,6 +162,12 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 busy = false
             }
         }
+    }
+
+    /** Seeds the AI tab with this widget as the "Current" version and switches to it. */
+    fun startRefactor() {
+        installed?.let { AiSession.startRefactor(it) }
+        onRefactor?.invoke()
     }
 
     fun pin(receiver: Class<*>) {
@@ -285,6 +295,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 @Suppress("UNUSED_VARIABLE") val tick = dataTick
                 val paramValues = spec.params.associate { it.id to (WidgetRuntime.paramValue(context, spec, it.id) ?: "") }
                 val netAllowed = WidgetPrefs.netAllowed(context, id)
+                val resuming = AiSession.refactorId == id
                 NothingStack(Modifier.pageMargin()) {
                     paramRows(spec.params, paramValues) { pid, v ->
                         WidgetPrefs.setParam(context, id, pid, v)
@@ -371,6 +382,35 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                                     )
                                 }
                             }
+                        }
+                    }
+                    if (onRefactor != null) {
+                        row { shape ->
+                            NothingItem(
+                                title = "Refactor with AI",
+                                subtitle = when {
+                                    resuming -> "Continue your changes"
+                                    managed -> "Describe a change. Saving stops registry updates for this widget."
+                                    else -> "Describe a change and preview it before saving"
+                                },
+                                shape = shape,
+                                onClick = {
+                                    when {
+                                        // Already refactoring this one: pick up where they left off.
+                                        resuming -> onRefactor()
+                                        // A different unsaved draft would be replaced, so ask first.
+                                        AiSession.hasDraft -> confirmRefactor = true
+                                        else -> startRefactor()
+                                    }
+                                },
+                                trailing = {
+                                    Icon(
+                                        Icons.Rounded.AutoAwesome,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                },
+                            )
                         }
                     }
                     if (managed) {
@@ -512,6 +552,25 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                     }
                 }
             }
+        }
+    }
+
+    if (confirmRefactor) {
+        NothingDialog(
+            title = "Replace your AI draft?",
+            onDismiss = { confirmRefactor = false },
+            confirmText = "Replace",
+            dismissText = "Keep draft",
+            destructive = true,
+            onConfirm = {
+                confirmRefactor = false
+                startRefactor()
+            },
+        ) {
+            Text(
+                "The AI tab has changes you haven't installed. Starting a refactor of ${spec?.name ?: "this widget"} will discard them.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
     }
 

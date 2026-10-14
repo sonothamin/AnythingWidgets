@@ -116,7 +116,16 @@ fun HomeScreen() {
                 ) { id ->
                     if (id != null) {
                         Surface(Modifier.fillMaxSize()) {
-                            WidgetDetailsPage(id = id, onBack = { detailsId = null })
+                            WidgetDetailsPage(
+                                id = id,
+                                onBack = { detailsId = null },
+                                onRefactor = if (aiEnabled) {
+                                    {
+                                        detailsId = null
+                                        requested = Page.Ai
+                                    }
+                                } else null,
+                            )
                         }
                     }
                 }
