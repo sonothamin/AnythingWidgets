@@ -12,8 +12,8 @@ Optional tab (Settings > AI > Show AI tab) that turns a description into a widge
   only. Installed AI widgets use source `ai` and are not touched by registry sync.
 - **JSON mode:** per-key toggle for OpenAI-compatible servers (`response_format: json_object`); turn it off if
   a server rejects it.
-- **Refactor an installed widget:** the widget's details page has a "Refactor with AI" row (hidden when the AI tab
-  is off). It opens the AI tab with the installed spec as the "Current" version; each request is made on top of
+- **Refactor an installed widget:** the widget's details page has a "Refactor with AI" sparkle button in the header,
+  next to the info button (hidden when the AI tab is off). It opens the AI tab with the installed spec as the "Current" version; each request is made on top of
   whichever version is showing, and the earlier ones stay available as v1, v2... Nothing is written until the
   person taps Save. Saving keeps the widget's id (so copies on the home screen update), bumps `version`, and
   marks it source `ai`, which detaches a registry widget from registry updates. Starting a refactor while another

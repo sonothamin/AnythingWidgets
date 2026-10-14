@@ -170,6 +170,16 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit, onRefactor: (() -> Unit)? 
         onRefactor?.invoke()
     }
 
+    fun refactorTapped() {
+        when {
+            // Already refactoring this one: pick up where they left off.
+            AiSession.refactorId == id -> onRefactor?.invoke()
+            // A different unsaved draft would be replaced, so ask first.
+            AiSession.hasDraft -> confirmRefactor = true
+            else -> startRefactor()
+        }
+    }
+
     fun pin(receiver: Class<*>) {
         val manager = AppWidgetManager.getInstance(context)
         if (manager.isRequestPinAppWidgetSupported) {
@@ -206,6 +216,11 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit, onRefactor: (() -> Unit)? 
             onBack = onBack,
             action = if (spec != null) {
                 {
+                    if (installed != null && onRefactor != null) {
+                        IconButton(onClick = { refactorTapped() }) {
+                            Icon(Icons.Rounded.AutoAwesome, contentDescription = "Refactor with AI")
+                        }
+                    }
                     IconButton(onClick = { showInfo = true }) {
                         Icon(Icons.Rounded.Info, contentDescription = "Details")
                     }
@@ -295,7 +310,6 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit, onRefactor: (() -> Unit)? 
                 @Suppress("UNUSED_VARIABLE") val tick = dataTick
                 val paramValues = spec.params.associate { it.id to (WidgetRuntime.paramValue(context, spec, it.id) ?: "") }
                 val netAllowed = WidgetPrefs.netAllowed(context, id)
-                val resuming = AiSession.refactorId == id
                 NothingStack(Modifier.pageMargin()) {
                     paramRows(spec.params, paramValues) { pid, v ->
                         WidgetPrefs.setParam(context, id, pid, v)
@@ -382,35 +396,6 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit, onRefactor: (() -> Unit)? 
                                     )
                                 }
                             }
-                        }
-                    }
-                    if (onRefactor != null) {
-                        row { shape ->
-                            NothingItem(
-                                title = "Refactor with AI",
-                                subtitle = when {
-                                    resuming -> "Continue your changes"
-                                    managed -> "Describe a change. Saving stops registry updates for this widget."
-                                    else -> "Describe a change and preview it before saving"
-                                },
-                                shape = shape,
-                                onClick = {
-                                    when {
-                                        // Already refactoring this one: pick up where they left off.
-                                        resuming -> onRefactor()
-                                        // A different unsaved draft would be replaced, so ask first.
-                                        AiSession.hasDraft -> confirmRefactor = true
-                                        else -> startRefactor()
-                                    }
-                                },
-                                trailing = {
-                                    Icon(
-                                        Icons.Rounded.AutoAwesome,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                },
-                            )
                         }
                     }
                     if (managed) {
