@@ -137,25 +137,46 @@ fun AiPage(
         error = null
         asking = null
         askedRequest = text
+        val began = System.currentTimeMillis()
+        DebugLog.i(
+            context, "ai-ui",
+            "Generate tapped (${if (base != null) "refining v${AiSession.index + 1}" else "new widget"}): $text",
+        )
         scope.launch {
             try {
                 val r = AiClient.generate(
                     context, text, base?.result?.spec, base?.result?.raw,
-                    onAttempt = { k -> asking = "${k.preset.label} · ${k.model.ifBlank { "default model" }}" },
+                    onAttempt = { k ->
+                        asking = "${k.preset.label} · ${k.model.ifBlank { "default model" }}"
+                        DebugLog.d(context, "ai-ui", "Screen now says: asking $asking")
+                    },
                 )
                 failures = r.failures
                 AiSession.add(AiVersion(r, text))
                 AiSession.prompt = ""
+                DebugLog.i(
+                    context, "ai-ui",
+                    "Showing v${AiSession.versions.size}: ${r.spec.name} from ${r.provider} ${r.model} " +
+                        "(${r.millis}ms for the winning key, ${System.currentTimeMillis() - began}ms overall, ${r.failures.size} key failure(s))",
+                )
             } catch (e: CancellationException) {
+                DebugLog.w(context, "ai-ui", "Generation cancelled after ${System.currentTimeMillis() - began}ms (screen left or scope closed)")
                 throw e
             } catch (e: AiException) {
                 error = e.message
                 failures = e.failures
+                DebugLog.e(
+                    context, "ai-ui",
+                    "Showing error \"${e.message}\" after ${System.currentTimeMillis() - began}ms; " +
+                        e.failures.joinToString(" | ") { "${it.keyLabel}: ${it.message}" },
+                )
             } catch (e: Exception) {
                 error = e.message ?: "Something went wrong."
                 failures = emptyList()
+                DebugLog.e(context, "ai-ui", "Unexpected failure after ${System.currentTimeMillis() - began}ms", e)
             } finally {
                 loading = false
+                DebugLog.d(context, "ai-ui", "Generating state cleared after ${System.currentTimeMillis() - began}ms")
             }
         }
     }
@@ -163,6 +184,7 @@ fun AiPage(
     fun surprise() {
         if (ideaBusy || loading) return
         ideaBusy = true
+        DebugLog.i(context, "ai-ui", "Surprise me tapped")
         scope.launch {
             try {
                 val idea = try {
@@ -175,6 +197,10 @@ fun AiPage(
                 }
                 lastIdea = idea
                 AiSession.prompt = idea
+                DebugLog.i(context, "ai-ui", "Prompt box filled with idea: $idea")
+            } catch (e: CancellationException) {
+                DebugLog.w(context, "ai-ui", "Idea request cancelled (screen left or scope closed)")
+                throw e
             } finally {
                 ideaBusy = false
             }
@@ -182,15 +208,20 @@ fun AiPage(
     }
 
     fun install(v: AiVersion) {
+        DebugLog.i(context, "ai-ui", "Install tapped: ${v.result.spec.id} \"${v.result.spec.name}\" v${v.result.spec.version}")
         scope.launch {
             runCatching { SpecStore(context).save(v.result.spec, v.result.raw, "ai") }
                 .onSuccess {
+                    DebugLog.i(context, "ai-ui", "Installed ${v.result.spec.id}")
                     SpecWidget.redrawAll(context)
                     Toast.makeText(context, "${v.result.spec.name} installed", Toast.LENGTH_SHORT).show()
                     onOpen(v.result.spec.id)
                     AiSession.clear()
                 }
-                .onFailure { Toast.makeText(context, "Couldn't install it. Try again.", Toast.LENGTH_SHORT).show() }
+                .onFailure {
+                    DebugLog.e(context, "ai-ui", "Install of ${v.result.spec.id} failed", it)
+                    Toast.makeText(context, "Couldn't install it. Try again.", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
