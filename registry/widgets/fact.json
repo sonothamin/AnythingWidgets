@@ -1,9 +1,9 @@
 {
-  "schema": 1,
+  "schema": 2,
   "id": "fact",
-  "version": 1,
+  "version": 2,
   "name": "Daily Fact",
-  "description": "A new little fact every day, on paper white.",
+  "description": "A fresh trivia fact every day from Open Trivia DB. Pick a topic and difficulty; 30 are kept on the device.",
   "author": "AnythingWidgets",
   "created": "2026-10-12",
   "categories": [
@@ -15,9 +15,147 @@
     "trivia"
   ],
   "chrome": "none",
+  "params": [
+    {
+      "id": "genre",
+      "type": "choice",
+      "label": "Topic",
+      "description": "What the facts are about.",
+      "default": "any",
+      "choices": [
+        {
+          "value": "any",
+          "label": "Anything"
+        },
+        {
+          "value": "9",
+          "label": "General knowledge"
+        },
+        {
+          "value": "17",
+          "label": "Science & nature"
+        },
+        {
+          "value": "22",
+          "label": "Geography"
+        },
+        {
+          "value": "23",
+          "label": "History"
+        },
+        {
+          "value": "27",
+          "label": "Animals"
+        },
+        {
+          "value": "21",
+          "label": "Sports"
+        },
+        {
+          "value": "11",
+          "label": "Film"
+        },
+        {
+          "value": "12",
+          "label": "Music"
+        },
+        {
+          "value": "14",
+          "label": "Television"
+        },
+        {
+          "value": "15",
+          "label": "Video games"
+        },
+        {
+          "value": "18",
+          "label": "Computers"
+        },
+        {
+          "value": "19",
+          "label": "Mathematics"
+        },
+        {
+          "value": "20",
+          "label": "Mythology"
+        },
+        {
+          "value": "25",
+          "label": "Art"
+        },
+        {
+          "value": "10",
+          "label": "Books"
+        }
+      ]
+    },
+    {
+      "id": "difficulty",
+      "type": "choice",
+      "label": "Difficulty",
+      "description": "How obscure the facts get.",
+      "default": "any",
+      "choices": [
+        {
+          "value": "any",
+          "label": "Any"
+        },
+        {
+          "value": "easy",
+          "label": "Easy"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "hard",
+          "label": "Hard"
+        }
+      ]
+    },
+    {
+      "id": "showAnswer",
+      "type": "toggle",
+      "label": "Show the answer",
+      "default": true
+    }
+  ],
+  "feeds": [
+    {
+      "id": "fact",
+      "ttl": 43200,
+      "list": "results",
+      "keep": 30,
+      "url": "https://opentdb.com/api.php?amount=30&type=multiple&category={{param.genre}}&difficulty={{param.difficulty}}",
+      "fields": {
+        "question": "question",
+        "answer": "correct_answer",
+        "category": "category"
+      }
+    }
+  ],
   "root": {
     "type": "column",
     "children": [
+      {
+        "type": "text",
+        "text": "{{feed.fact.question}}",
+        "size": 13,
+        "color": "n.black",
+        "maxLines": 3,
+        "bold": true,
+        "visible": "feed.fact.ok"
+      },
+      {
+        "type": "text",
+        "text": "→ {{feed.fact.answer}}",
+        "size": 15,
+        "color": "n.red",
+        "maxLines": 2,
+        "bold": true,
+        "visible": "feed.fact.ok && param.showAnswer"
+      },
       {
         "type": "text",
         "pool": [
@@ -42,7 +180,8 @@
         "size": 15,
         "color": "n.black",
         "maxLines": 3,
-        "bold": true
+        "bold": true,
+        "visible": "!feed.fact.ok"
       },
       {
         "type": "spacer",
@@ -56,17 +195,34 @@
         "background": "n.red"
       },
       {
+        "type": "text",
+        "text": "{{feed.fact.category}} · {{feed.fact.index}}/{{feed.fact.count}}",
+        "size": 10,
+        "color": "n.black",
+        "maxLines": 1,
+        "visible": "feed.fact.ok"
+      },
+      {
         "type": "glyph",
         "text": "TODAY'S FACT",
         "size": 14,
-        "color": "n.black"
+        "color": "n.black",
+        "visible": "!feed.fact.ok && net.allowed"
+      },
+      {
+        "type": "text",
+        "text": "Allow internet access in the app for daily facts",
+        "size": 9,
+        "color": "n.black",
+        "maxLines": 2,
+        "visible": "!net.allowed"
       }
     ],
     "fill": "both",
     "background": "n.white",
     "radius": 32,
     "padding": 18,
-    "gap": 8,
+    "gap": 6,
     "action": {
       "type": "open_app"
     }
@@ -74,6 +230,24 @@
   "compact": {
     "type": "column",
     "children": [
+      {
+        "type": "text",
+        "text": "{{feed.fact.question}}",
+        "size": 10,
+        "color": "n.black",
+        "maxLines": 4,
+        "bold": true,
+        "visible": "feed.fact.ok"
+      },
+      {
+        "type": "text",
+        "text": "→ {{feed.fact.answer}}",
+        "size": 12,
+        "color": "n.red",
+        "maxLines": 2,
+        "bold": true,
+        "visible": "feed.fact.ok && param.showAnswer"
+      },
       {
         "type": "text",
         "pool": [
@@ -97,8 +271,9 @@
         ],
         "size": 11,
         "color": "n.black",
-        "maxLines": 6,
-        "bold": true
+        "maxLines": 4,
+        "bold": true,
+        "visible": "!feed.fact.ok"
       },
       {
         "type": "spacer",
@@ -115,14 +290,23 @@
         "type": "glyph",
         "text": "FACT",
         "size": 13,
-        "color": "n.black"
+        "color": "n.black",
+        "visible": "!feed.fact.ok && net.allowed"
+      },
+      {
+        "type": "text",
+        "text": "Allow internet access in the app for daily facts",
+        "size": 9,
+        "color": "n.black",
+        "maxLines": 2,
+        "visible": "!net.allowed"
       }
     ],
     "fill": "both",
     "background": "n.white",
     "radius": 32,
     "padding": 14,
-    "gap": 6,
+    "gap": 4,
     "action": {
       "type": "open_app"
     }
@@ -130,6 +314,24 @@
   "large": {
     "type": "column",
     "children": [
+      {
+        "type": "text",
+        "text": "{{feed.fact.question}}",
+        "size": 18,
+        "color": "n.black",
+        "maxLines": 6,
+        "bold": true,
+        "visible": "feed.fact.ok"
+      },
+      {
+        "type": "text",
+        "text": "→ {{feed.fact.answer}}",
+        "size": 22,
+        "color": "n.red",
+        "maxLines": 3,
+        "bold": true,
+        "visible": "feed.fact.ok && param.showAnswer"
+      },
       {
         "type": "text",
         "pool": [
@@ -154,7 +356,8 @@
         "size": 22,
         "color": "n.black",
         "maxLines": 6,
-        "bold": true
+        "bold": true,
+        "visible": "!feed.fact.ok"
       },
       {
         "type": "spacer",
@@ -168,10 +371,27 @@
         "background": "n.red"
       },
       {
+        "type": "text",
+        "text": "{{feed.fact.category}} · {{feed.fact.index}}/{{feed.fact.count}}",
+        "size": 12,
+        "color": "n.black",
+        "maxLines": 1,
+        "visible": "feed.fact.ok"
+      },
+      {
         "type": "glyph",
         "text": "TODAY'S FACT",
-        "size": 18,
-        "color": "n.black"
+        "size": 16,
+        "color": "n.black",
+        "visible": "!feed.fact.ok && net.allowed"
+      },
+      {
+        "type": "text",
+        "text": "Allow internet access in the app for daily facts",
+        "size": 9,
+        "color": "n.black",
+        "maxLines": 2,
+        "visible": "!net.allowed"
       }
     ],
     "fill": "both",

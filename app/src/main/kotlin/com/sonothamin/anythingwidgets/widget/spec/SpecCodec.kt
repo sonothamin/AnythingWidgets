@@ -110,7 +110,10 @@ object SpecValidator {
             }
             if (f.fields.isEmpty() || f.fields.size > 16) return "Feed '${f.id}' needs 1 to 16 fields"
             if (f.fields.any { (k, v) -> !FEED_FIELD.matches(k) || !FEED_PATH.matches(v) }) return "Bad field in feed '${f.id}'"
-            if (f.ttl !in 15..1440) return "Feed ttl must be 15 to 1440 minutes"
+            val maxTtl = if (f.list != null) 43200 else 1440
+            if (f.ttl !in 15..maxTtl) return "Feed ttl must be 15 to $maxTtl minutes"
+            if (f.list != null && !FEED_PATH.matches(f.list)) return "Bad list path in feed '${f.id}'"
+            if (f.keep !in 1..50) return "Feed keep must be 1 to 50"
             if ((f.label?.length ?: 0) > 40) return "Bad feed label"
         }
         return null

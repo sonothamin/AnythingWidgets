@@ -167,9 +167,23 @@ A feed is a read-only JSON endpoint. It does nothing until the user turns on **A
 ```
 - `url`: https, a public hostname (no IPs, ports, credentials, `.local`/`.internal`), at most 400 chars. Only declared `{{param.x}}` values may appear, never in the host; they are URL-encoded.
 - `fields`: name to dotted path, with `[0]` for array items (`daily.temperature_2m_max[0]`). Values are read as `{{feed.<id>.<name>}}`; numeric ones also get `.round`.
-- `ttl`: minutes between refreshes, 15-1440. Refreshes happen on the hourly sync, when the widget redraws and the data is older than `ttl`, when an option changes, and on a `refresh` tap.
+- `ttl`: minutes between refreshes, 15-1440 (up to 43200 for a list feed). Refreshes happen on the hourly sync, when the widget redraws and the data is older than `ttl`, when an option changes, and on a `refresh` tap.
 - Always present: `{{feed.id.ok}}` (data exists), `{{feed.id.stale}}`, `{{feed.id.updated}}` (time of last fetch), plus `{{net.allowed}}` so a layout can ask the user to enable access. Failed fetches keep the last good data.
 - Responses are capped at 256 KB, and no cookies or custom headers are sent.
+- Cached data belongs to the URL it was fetched with: change a `{{param.x}}` and the old cache is ignored until the new fetch succeeds.
+- A query pair in `url` whose value comes out empty or as `any` is left out of the request, so a `choice` param can offer "any" as a no-preference option.
+- HTML entities in text values (`&quot;`, `&#039;`) are decoded; tags are never interpreted.
+
+#### List feeds: cache a batch, show one a day
+Add `list` (dotted path to a JSON array) and optionally `keep` (1-50, default 30). `fields` are then read from each array element, up to `keep` elements are stored on the device, and the widget shows the next one each day (wrapping around). It refetches when `ttl` passes or the batch has been used up, and keeps working offline from the cache.
+```json
+"feeds": [{
+  "id": "fact", "ttl": 43200, "list": "results", "keep": 30,
+  "url": "https://opentdb.com/api.php?amount=30&type=multiple&category={{param.genre}}&difficulty={{param.difficulty}}",
+  "fields": {"question": "question", "answer": "correct_answer", "category": "category"}
+}]
+```
+Extra bindings: `{{feed.id.count}}` (items cached) and `{{feed.id.index}}` (1-based position of today's item).
 
 ### Limits added in schema 2
 At most 12 params, 12 state values, 4 feeds, 16 fields per feed, 10 `bind` entries per node. A state action must target an existing state of the right type, or the spec is rejected.
