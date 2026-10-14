@@ -2,7 +2,9 @@ package com.sonothamin.anythingwidgets.widget
 
 import android.content.Context
 import android.net.Uri
+import android.text.Html
 import android.text.format.DateFormat
+import com.sonothamin.anythingwidgets.debug.DebugLog
 import com.sonothamin.anythingwidgets.widget.data.Http
 import com.sonothamin.anythingwidgets.widget.data.WidgetPrefs
 import com.sonothamin.anythingwidgets.widget.spec.ActionSpec
@@ -18,8 +20,11 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import org.json.JSONArray
 import org.json.JSONObject
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
@@ -136,29 +141,66 @@ object WidgetRuntime {
 
     // --- feeds ---------------------------------------------------------------------------------
 
+    private class FeedCache(val time: Long, val items: List<Map<String, String>>)
+
+    private val TOKEN = Regex("\\{\\{([A-Za-z0-9_.]+)\\}\\}")
+    private val ENTITY = Regex("&(#\\d+|#[xX][0-9a-fA-F]+|[A-Za-z][A-Za-z0-9]*);")
+
+    /**
+     * The feed URL with params filled in. A query pair whose value comes out empty or as "any" is left
+     * out, so an optional filter can say "no preference".
+     */
+    private fun feedUrl(f: FeedSpec, params: Map<String, String>): String {
+        val filled = TOKEN.replace(f.url) { Uri.encode(params[it.groupValues[1]].orEmpty()) }
+        val q = filled.indexOf('?')
+        if (q < 0) return filled
+        val kept = filled.substring(q + 1).split('&').filter { pair ->
+            val eq = pair.indexOf('=')
+            eq < 0 || pair.substring(eq + 1).let { it.isNotEmpty() && it != "any" }
+        }
+        return filled.substring(0, q) + if (kept.isEmpty()) "" else "?" + kept.joinToString("&")
+    }
+
+    private fun daysSince(time: Long): Int =
+        ChronoUnit.DAYS.between(Instant.ofEpochMilli(time).atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now())
+            .coerceAtLeast(0).toInt()
+
     private fun putFeeds(context: Context, spec: WidgetSpec, out: MutableMap<String, String>) {
         val allowed = WidgetPrefs.netAllowed(context, spec.id)
         for (f in spec.feeds) {
             val key = "feed.${f.id}"
-            val cached = if (allowed) readCache(context, spec.id, f.id) else null
+            val cached = if (allowed) readCache(context, spec.id, f.id, feedUrl(f, out)) else null
             out["$key.ok"] = (cached != null).toString()
             if (cached == null) continue
-            val (time, values) = cached
-            out["$key.stale"] = (System.currentTimeMillis() - time > f.ttl * 3L * 60_000L).toString()
-            out["$key.updated"] = DateFormat.getTimeFormat(context).format(Date(time))
-            values.forEach { (name, v) ->
+            // A list feed shows the next cached item each day, wrapping around if the cache outlives its list.
+            val n = cached.items.size
+            val idx = if (n > 1) daysSince(cached.time).mod(n) else 0
+            out["$key.stale"] = (System.currentTimeMillis() - cached.time > f.ttl * 3L * 60_000L).toString()
+            out["$key.updated"] = DateFormat.getTimeFormat(context).format(Date(cached.time))
+            out["$key.count"] = n.toString()
+            out["$key.index"] = (idx + 1).toString()
+            cached.items[idx].forEach { (name, v) ->
                 out["$key.$name"] = v
                 v.toDoubleOrNull()?.takeIf { it.isFinite() }?.let { out["$key.$name.round"] = Math.round(it).toString() }
             }
         }
     }
 
-    private fun readCache(context: Context, id: String, feed: String): Pair<Long, Map<String, String>>? {
+    /** Null when nothing is cached, it can't be read, or it was fetched for different param values. */
+    private fun readCache(context: Context, id: String, feed: String, url: String): FeedCache? {
         val raw = WidgetPrefs.feedCache(context, id, feed) ?: return null
         return runCatching {
             val o = JSONObject(raw)
-            val v = o.getJSONObject("v")
-            o.getLong("t") to v.keys().asSequence().associateWith { v.getString(it) }
+            val fetchedFor = o.optString("u")
+            if (fetchedFor.isNotEmpty() && fetchedFor != url) return@runCatching null
+            fun toMap(v: JSONObject) = v.keys().asSequence().associateWith { v.getString(it) }
+            val items = if (o.has("i")) {
+                val arr = o.getJSONArray("i")
+                (0 until arr.length()).map { toMap(arr.getJSONObject(it)) }
+            } else {
+                listOf(toMap(o.getJSONObject("v")))
+            }
+            if (items.isEmpty()) null else FeedCache(o.getLong("t"), items)
         }.getOrNull()
     }
 
@@ -172,31 +214,55 @@ object WidgetRuntime {
             val now = System.currentTimeMillis()
             val base = HashMap<String, String>().also { putParams(context, spec, it) }
             for (f in spec.feeds) {
-                val cached = readCache(context, spec.id, f.id)
-                if (!force && cached != null && now - cached.first < f.ttl * 60_000L) continue
+                val url = feedUrl(f, base)
+                val cached = readCache(context, spec.id, f.id, url)
+                val used = cached != null && f.list != null && daysSince(cached.time) >= cached.items.size
+                if (!force && cached != null && !used && now - cached.time < f.ttl * 60_000L) continue
                 try {
-                    fetch(context, spec, f, base, now)
+                    fetch(context, spec, f, url, now)
                 } catch (e: CancellationException) {
                     throw e
-                } catch (_: Exception) {
+                } catch (e: Exception) {
                     // Keep whatever was cached.
+                    DebugLog.w(context, "feed", "${spec.id}/${f.id} fetch failed: ${e::class.java.simpleName}: ${e.message}")
                 }
             }
         }
     }
 
-    private fun fetch(context: Context, spec: WidgetSpec, f: FeedSpec, params: Map<String, String>, now: Long) {
-        val token = Regex("\\{\\{([A-Za-z0-9_.]+)\\}\\}")
-        val url = token.replace(f.url) { Uri.encode(params[it.groupValues[1]].orEmpty()) }
+    private fun fetch(context: Context, spec: WidgetSpec, f: FeedSpec, url: String, now: Long) {
         val body = String(Http.get(url).bytes, Charsets.UTF_8)
         val root = SpecCodec.json.parseToJsonElement(body)
-        val values = JSONObject()
-        f.fields.forEach { (name, path) -> extract(root, path)?.let { values.put(name, it) } }
-        if (values.length() == 0) return
-        WidgetPrefs.setFeedCache(context, spec.id, f.id, JSONObject().put("t", now).put("v", values).toString())
+        val cache = JSONObject().put("t", now).put("u", url)
+        if (f.list == null) {
+            val values = readFields(root, f.fields)
+            if (values.length() == 0) return
+            cache.put("v", values)
+        } else {
+            val elements: List<JsonElement> = (walk(root, f.list) as? JsonArray) ?: emptyList()
+            val items = JSONArray()
+            for (el in elements) {
+                if (items.length() >= f.keep) break
+                val values = readFields(el, f.fields)
+                if (values.length() > 0) items.put(values)
+            }
+            if (items.length() == 0) {
+                DebugLog.w(context, "feed", "${spec.id}/${f.id}: $url returned no usable items")
+                return
+            }
+            cache.put("i", items)
+        }
+        WidgetPrefs.setFeedCache(context, spec.id, f.id, cache.toString())
+        DebugLog.i(context, "feed", "${spec.id}/${f.id}: cached ${if (f.list != null) cache.getJSONArray("i").length() else 1} item(s) from $url")
     }
 
-    private fun extract(root: JsonElement, path: String): String? {
+    private fun readFields(root: JsonElement, fields: Map<String, String>): JSONObject {
+        val values = JSONObject()
+        fields.forEach { (name, path) -> extract(root, path)?.let { values.put(name, it) } }
+        return values
+    }
+
+    private fun walk(root: JsonElement, path: String): JsonElement? {
         var cur: JsonElement? = root
         for (part in path.split('.')) {
             if (part.isEmpty()) return null
@@ -212,8 +278,17 @@ object WidgetRuntime {
             }
             if (cur == null) return null
         }
-        val prim = cur as? JsonPrimitive ?: return null
-        if (prim is JsonNull) return null
-        return prim.content.take(200)
+        return cur
     }
+
+    private fun extract(root: JsonElement, path: String): String? {
+        val prim = walk(root, path) as? JsonPrimitive ?: return null
+        if (prim is JsonNull) return null
+        return decodeEntities(prim.content).take(200)
+    }
+
+    /** Some APIs send HTML entities (&quot; &#039;) inside plain text. Tags are never interpreted. */
+    private fun decodeEntities(s: String): String =
+        if (!ENTITY.containsMatchIn(s)) s
+        else Html.fromHtml(s.replace("<", "&lt;"), Html.FROM_HTML_MODE_LEGACY).toString().trim()
 }

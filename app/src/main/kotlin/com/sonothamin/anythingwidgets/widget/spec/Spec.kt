@@ -174,9 +174,16 @@ data class FeedSpec(
     val id: String,
     val url: String,
     val fields: Map<String, String>,
-    /** Minutes between refreshes (15..1440). */
+    /** Minutes between refreshes (15..1440; up to 43200 for a [list] feed). */
     val ttl: Int = 60,
     val label: String? = null,
+    /**
+     * Dotted path to a JSON array. When set, [fields] are read from each element, up to [keep] elements
+     * are cached on the device, and the widget shows a different one each day.
+     */
+    val list: String? = null,
+    /** How many array elements to cache (1..50). Only used with [list]. */
+    val keep: Int = 30,
 )
 
 @Serializable

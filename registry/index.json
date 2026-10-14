@@ -38,6 +38,28 @@
       "sha256": "66fb15f235b479237dbb74b2af94ec8dbdaf2a2b8814ff2137fe3ef8a0fb678a"
     },
     {
+      "id": "bento-red",
+      "name": "Bento Red",
+      "author": "AnythingWidgets",
+      "description": "Dark bento tile: a red date orb with battery and year-progress pills. Tap to refresh.",
+      "version": 1,
+      "created": "2026-10-12",
+      "categories": [
+        "Time & Date",
+        "System"
+      ],
+      "tags": [
+        "bento",
+        "red",
+        "dark",
+        "date",
+        "battery",
+        "year"
+      ],
+      "spec": "widgets/bento-red.json",
+      "sha256": "f8fcf00084aac383251e712825408ac0c9b271e41f310b4fbba8b27a8a8da100"
+    },
+    {
       "id": "clock-analog",
       "name": "Analog",
       "author": "AnythingWidgets",
@@ -109,28 +131,6 @@
       ],
       "spec": "widgets/coin.json",
       "sha256": "979861d0d5035c80610d8e03401f07742585d3a9c34cbc7563e9f49656173657"
-    },
-    {
-      "id": "bento-red",
-      "name": "Bento Red",
-      "author": "AnythingWidgets",
-      "description": "Dark bento tile: a red date orb with battery and year-progress pills. Tap to refresh.",
-      "version": 1,
-      "created": "2026-10-12",
-      "categories": [
-        "Time & Date",
-        "System"
-      ],
-      "tags": [
-        "bento",
-        "red",
-        "dark",
-        "date",
-        "battery",
-        "year"
-      ],
-      "spec": "widgets/bento-red.json",
-      "sha256": "f8fcf00084aac383251e712825408ac0c9b271e41f310b4fbba8b27a8a8da100"
     },
     {
       "id": "date",
@@ -244,8 +244,8 @@
       "id": "fact",
       "name": "Daily Fact",
       "author": "AnythingWidgets",
-      "description": "A new little fact every day, on paper white.",
-      "version": 1,
+      "description": "A fresh trivia fact every day from Open Trivia DB. Pick a topic and difficulty; 30 are kept on the device.",
+      "version": 2,
       "created": "2026-10-12",
       "categories": [
         "Fun"
@@ -256,7 +256,7 @@
         "trivia"
       ],
       "spec": "widgets/fact.json",
-      "sha256": "3557c0388d2ee4e9a601aac6f18794a600bb705afae58ca796c88975797b89cc"
+      "sha256": "e23df210017b009c9e728fb7b27f7f104a18ec06ba24485a7065e75eb9974e48"
     },
     {
       "id": "links",
