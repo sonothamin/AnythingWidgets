@@ -28,9 +28,18 @@ object WidgetPrefs {
 
     fun state(c: Context, id: String, name: String): String? = rt(c).getString("$id|s|$name", null)
 
-    fun setState(c: Context, id: String, name: String, value: String?) = put(c, "$id|s|$name", value)
+    fun setState(c: Context, id: String, name: String, value: String?) {
+        put(c, "$id|s|$name", value)
+        put(c, "$id|sd|$name", if (value == null) null else java.time.LocalDate.now().toString())
+    }
 
-    fun resetState(c: Context, id: String) = removeKind(c, id, "s")
+    /** The day (yyyy-MM-dd) a state value was last set, for `daily` state. */
+    fun stateDay(c: Context, id: String, name: String): String? = rt(c).getString("$id|sd|$name", null)
+
+    fun resetState(c: Context, id: String) {
+        removeKind(c, id, "s")
+        removeKind(c, id, "sd")
+    }
 
     // --- internet access -----------------------------------------------------------------------
 

@@ -82,7 +82,7 @@ data class Node(
     // text / glyph: pick one entry from a pool instead of [text]. [rotate]: day (default) | hour | random.
     val pool: List<String> = emptyList(),
     val rotate: String? = null,
-    /** glyph: dots (dot-matrix, default) | serif | sans | mono. clock: digital | analog-dark | analog-light | analog-dots. */
+    /** glyph: dots (dot-matrix, default) | serif | oldstandard | sans | mono. clock: digital | analog-dark | analog-light | analog-dots. */
     val font: String? = null,
     val variant: String? = null,
     // dotgrid: columns x rows of dots. Filled by [progress], or drawn from [pattern]
@@ -96,6 +96,12 @@ data class Node(
     val visible: String? = null,
     /** Numeric/bold overrides from bindings, e.g. {"size": "{{param.fontSize}}"}. */
     val bind: Map<String, String> = emptyMap(),
+    /** glyph: the first letter is drawn large in the serif face and spans this many lines (2-4). Start-aligned text only. */
+    val dropcap: Int? = null,
+    /** glyph: shrink from [size] down to this size until the text fits in [maxLines]. */
+    val minSize: Int? = null,
+    /** glyph: dp left free on each side of the widget when no [width] is set (default 8). */
+    val inset: Int? = null,
 )
 
 /**
@@ -163,6 +169,8 @@ data class StateSpec(
     val wrap: Boolean = false,
     /** choice: the values cycled through. */
     val values: List<String> = emptyList(),
+    /** Goes back to the default on the next calendar day (for example "answer revealed"). */
+    val daily: Boolean = false,
 )
 
 /**

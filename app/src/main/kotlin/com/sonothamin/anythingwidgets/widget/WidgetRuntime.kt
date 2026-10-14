@@ -89,7 +89,10 @@ object WidgetRuntime {
 
     private fun stateValue(context: Context, spec: WidgetSpec, id: String): String? {
         val st = spec.state.firstOrNull { it.id == id } ?: return null
-        return SpecRules.normalizeState(st, WidgetPrefs.state(context, spec.id, id)) ?: SpecRules.stateDefault(st)
+        // A daily value set on an earlier day counts as unset.
+        val stale = st.daily && WidgetPrefs.stateDay(context, spec.id, id) != LocalDate.now().toString()
+        val stored = if (stale) null else WidgetPrefs.state(context, spec.id, id)
+        return SpecRules.normalizeState(st, stored) ?: SpecRules.stateDefault(st)
     }
 
     private fun putState(context: Context, spec: WidgetSpec, out: MutableMap<String, String>) {
@@ -144,6 +147,7 @@ object WidgetRuntime {
     private class FeedCache(val time: Long, val items: List<Map<String, String>>)
 
     private val TOKEN = Regex("\\{\\{([A-Za-z0-9_.]+)\\}\\}")
+    private val NON_KEY = Regex("[^a-z0-9]+")
     private val ENTITY = Regex("&(#\\d+|#[xX][0-9a-fA-F]+|[A-Za-z][A-Za-z0-9]*);")
 
     /**
@@ -181,6 +185,10 @@ object WidgetRuntime {
             out["$key.index"] = (idx + 1).toString()
             cached.items[idx].forEach { (name, v) ->
                 out["$key.$name"] = v
+                // The part after a colon ("Entertainment: Music" -> "Music") and a lowercase id for conditions.
+                val short = v.substringAfterLast(':').trim()
+                out["$key.$name.short"] = short
+                out["$key.$name.key"] = short.lowercase().replace(NON_KEY, "-").trim('-').take(32)
                 v.toDoubleOrNull()?.takeIf { it.isFinite() }?.let { out["$key.$name.round"] = Math.round(it).toString() }
             }
         }
