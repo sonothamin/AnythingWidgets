@@ -179,6 +179,7 @@ object SpecValidator {
         if (spec.version < 1) return "Invalid version"
         if (spec.name.isBlank() || spec.name.length > 60) return "Invalid name"
         metaError(spec.created, spec.tags, spec.categories)?.let { return it }
+        if (spec.theme !in ThemeMode.ids) return "Unknown theme '${spec.theme}'"
         validateParams(spec)?.let { return it }
         validateState(spec)?.let { return it }
         validateFeeds(spec)?.let { return it }

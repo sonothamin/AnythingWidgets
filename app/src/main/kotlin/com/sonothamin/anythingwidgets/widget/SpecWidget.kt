@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.DpSize
@@ -87,7 +88,9 @@ class SpecWidget : GlanceAppWidget() {
                 DebugLog.d(context, "widget", "Redraw #$appWidgetId spec=${liveId ?: "none"} tick=$tick")
                 spec?.let { WidgetRuntime.data(context, it) } ?: DataSnapshot.build(context)
             }
-            GlanceTheme { WidgetContent(spec, liveData, appWidgetId) }
+            // Pinned dark/light is read here on every composition, so a redraw after a change picks it up.
+            val pinned = spec?.let { WidgetTheme.forcedDark(context, it) }
+            GlanceTheme { CompositionLocalProvider(LocalWidgetDark provides pinned) { WidgetContent(spec, liveData, appWidgetId) } }
         }
     }
 
@@ -121,7 +124,7 @@ private fun WidgetContent(spec: WidgetSpec?, data: Map<String, String>, appWidge
         GlanceModifier
             .fillMaxSize()
             .appWidgetBackground()
-            .background(GlanceTheme.colors.widgetBackground)
+            .background(themed(GlanceTheme.colors.widgetBackground))
             .let {
                 if (Build.VERSION.SDK_INT >= 31) it.cornerRadius(android.R.dimen.system_app_widget_background_radius)
                 else it.cornerRadius(16.dp)

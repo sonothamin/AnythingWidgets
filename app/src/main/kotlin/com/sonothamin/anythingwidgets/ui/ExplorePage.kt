@@ -63,6 +63,7 @@ import com.sonothamin.anythingwidgets.ui.components.NothingEmptyState
 import com.sonothamin.anythingwidgets.ui.components.PageHeader
 import com.sonothamin.anythingwidgets.widget.SpecWidget
 import com.sonothamin.anythingwidgets.widget.WidgetRuntime
+import com.sonothamin.anythingwidgets.widget.WidgetTheme
 import com.sonothamin.anythingwidgets.widget.data.Registry
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import com.sonothamin.anythingwidgets.widget.spec.IndexEntry
@@ -297,6 +298,7 @@ private fun BentoTile(
                     spec,
                     if (wide) PreviewSize.Wide else PreviewSize.Small,
                     remember(spec, refreshKey) { WidgetRuntime.data(context, spec) },
+                    pinnedDark = WidgetTheme.forcedDark(context, spec),
                 )
                 previewFailed -> Text(
                     "Preview unavailable",

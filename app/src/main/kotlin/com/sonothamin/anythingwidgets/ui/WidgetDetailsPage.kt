@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -70,6 +71,7 @@ import com.sonothamin.anythingwidgets.widget.SmallWidgetReceiver
 import com.sonothamin.anythingwidgets.widget.SpecWidget
 import com.sonothamin.anythingwidgets.widget.WideWidgetReceiver
 import com.sonothamin.anythingwidgets.widget.WidgetRuntime
+import com.sonothamin.anythingwidgets.widget.WidgetTheme
 import com.sonothamin.anythingwidgets.widget.data.Registry
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import com.sonothamin.anythingwidgets.widget.data.WidgetImporter
@@ -78,6 +80,7 @@ import com.sonothamin.anythingwidgets.widget.spec.ActionSpec
 import com.sonothamin.anythingwidgets.widget.spec.IndexEntry
 import com.sonothamin.anythingwidgets.widget.spec.SpecInfo
 import com.sonothamin.anythingwidgets.widget.spec.SpecValidator
+import com.sonothamin.anythingwidgets.widget.spec.ThemeMode
 import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -237,11 +240,14 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 }
                 Spacer(Modifier.height(20.dp))
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    // Read the tick so the preview re-reads the appearance choice right after it changes.
+                    @Suppress("UNUSED_VARIABLE") val previewTick = dataTick
                     SpecPreview(
                         spec, size, data,
                         onAction = if (installed != null) {
                             { a: ActionSpec -> if (WidgetRuntime.applyOp(context, spec, a)) changed() }
                         } else null,
+                        pinnedDark = WidgetTheme.forcedDark(context, spec),
                     )
                 }
             }
@@ -283,6 +289,39 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                     paramRows(spec.params, paramValues) { pid, v ->
                         WidgetPrefs.setParam(context, id, pid, v)
                         changed(refetch = spec.feeds.isNotEmpty())
+                    }
+                    if (SpecInfo.followsTheme(spec)) {
+                        row { shape ->
+                            var open by remember { mutableStateOf(false) }
+                            val current = WidgetTheme.mode(context, spec)
+                            Box {
+                                NothingItem(
+                                    title = "Appearance",
+                                    subtitle = if (current == ThemeMode.System) "System (follows your phone)" else current.label,
+                                    shape = shape,
+                                    onClick = { open = true },
+                                    trailing = {
+                                        Icon(
+                                            Icons.Rounded.KeyboardArrowDown,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    },
+                                )
+                                DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                                    ThemeMode.entries.forEach { m ->
+                                        DropdownMenuItem(
+                                            text = { Text(m.label) },
+                                            onClick = {
+                                                open = false
+                                                WidgetPrefs.setTheme(context, id, m.id)
+                                                changed()
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                     if (spec.feeds.isNotEmpty()) {
                         row { shape ->
@@ -347,7 +386,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                             )
                         }
                     }
-                    if (spec.params.isNotEmpty() || spec.state.isNotEmpty()) {
+                    if (spec.params.isNotEmpty() || spec.state.isNotEmpty() || SpecInfo.followsTheme(spec)) {
                         row { shape ->
                             NothingItem(
                                 title = "Reset to defaults",
@@ -355,6 +394,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                                 onClick = {
                                     WidgetPrefs.resetParams(context, id)
                                     WidgetPrefs.resetState(context, id)
+                                    WidgetPrefs.setTheme(context, id, null)
                                     changed(refetch = spec.feeds.isNotEmpty())
                                 },
                             )

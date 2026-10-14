@@ -16,6 +16,13 @@ object WidgetPrefs {
         prefs(c).edit().putBoolean("auto_update.$id", enabled).apply()
     }
 
+    // --- appearance ----------------------------------------------------------------------------
+
+    /** The user's choice of "system", "dark" or "light" for this widget; null means use the spec's default. */
+    fun theme(c: Context, id: String): String? = rt(c).getString("$id|theme", null)
+
+    fun setTheme(c: Context, id: String, mode: String?) = put(c, "$id|theme", mode)
+
     // --- parameters ----------------------------------------------------------------------------
 
     fun param(c: Context, id: String, name: String): String? = rt(c).getString("$id|p|$name", null)

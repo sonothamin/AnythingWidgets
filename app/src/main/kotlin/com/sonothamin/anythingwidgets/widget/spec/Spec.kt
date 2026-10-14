@@ -38,6 +38,11 @@ data class WidgetSpec(
     val state: List<StateSpec> = emptyList(),
     /** Read-only JSON fetched from the internet, only after the user allows it. */
     val feeds: List<FeedSpec> = emptyList(),
+    /**
+     * The look the widget starts with: "system" (follow the phone, the default), "dark" or "light".
+     * The user can change it per widget in the app. Only colors that adapt are affected (see NothingPalette).
+     */
+    val theme: String = "system",
 ) {
     /** Picks the layout for a widget of the given size in dp. */
     fun layoutFor(widthDp: Float, heightDp: Float): Node = when {

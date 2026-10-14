@@ -24,8 +24,10 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,17 +80,21 @@ fun SpecPreview(
     modifier: Modifier = Modifier,
     /** When set, taps on mini-app nodes (counters, toggles, pickers) are reported here so the preview is playable. */
     onAction: ((ActionSpec) -> Unit)? = null,
+    /** true = dark, false = light; null follows the app's own light/dark setting. */
+    pinnedDark: Boolean? = null,
 ) {
     val node = spec.layoutFor(size.width.toFloat(), size.height.toFloat())
     val bare = spec.chrome == "none"
     // The app uses a fixed Nothing palette, but real widgets follow the wallpaper (dynamic color),
     // so preview with the same scheme the home screen would use.
     val context = LocalContext.current
-    val dark = isSystemInDarkTheme()
+    val dark = pinnedDark ?: isSystemInDarkTheme()
     val scheme = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
             if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        else -> MaterialTheme.colorScheme
+        pinnedDark == null -> MaterialTheme.colorScheme
+        dark -> darkColorScheme()
+        else -> lightColorScheme()
     }
     MaterialTheme(colorScheme = scheme) {
         Surface(

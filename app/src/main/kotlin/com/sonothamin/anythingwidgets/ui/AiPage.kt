@@ -73,6 +73,7 @@ import com.sonothamin.anythingwidgets.ui.components.PageHeader
 import com.sonothamin.anythingwidgets.ui.components.pageMargin
 import com.sonothamin.anythingwidgets.widget.SpecWidget
 import com.sonothamin.anythingwidgets.widget.WidgetRuntime
+import com.sonothamin.anythingwidgets.widget.WidgetTheme
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -380,7 +381,7 @@ private fun AiResultView(
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 12.dp)) {
         DotStage(Modifier.pageMargin().padding(top = 4.dp)) {
-            Box(Modifier.padding(vertical = 32.dp)) { SpecPreview(spec, size, data) }
+            Box(Modifier.padding(vertical = 32.dp)) { SpecPreview(spec, size, data, pinnedDark = WidgetTheme.forcedDark(context, spec)) }
         }
 
         Row(
