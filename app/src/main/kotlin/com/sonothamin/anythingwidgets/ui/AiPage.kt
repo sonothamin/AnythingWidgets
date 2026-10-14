@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -24,14 +25,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Casino
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -90,6 +94,7 @@ private val StarterIdeas = listOf(
 )
 
 /** Describe a widget, watch it get made, step through the iterations, install the one you like. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiPage(
     refreshKey: Any? = null,
@@ -107,6 +112,7 @@ fun AiPage(
     var lastIdea by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var failures by remember { mutableStateOf<List<AiFailure>>(emptyList()) }
+    var showDetails by remember { mutableStateOf(false) }
     var size by rememberSaveable { mutableStateOf(PreviewSize.Wide) }
     val starters = remember { StarterIdeas.shuffled().take(3) }
 
@@ -135,6 +141,7 @@ fun AiPage(
         val base = AiSession.current
         loading = true
         error = null
+        showDetails = false
         asking = null
         askedRequest = text
         val began = System.currentTimeMillis()
@@ -244,15 +251,18 @@ fun AiPage(
 
         if (!loading) {
             error?.let { message ->
-                Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)) {
-                    Text(message, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-                    failures.forEach {
-                        Text(
-                            "${it.keyLabel}: ${it.message}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 2.dp),
-                        )
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        message,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (failures.isNotEmpty()) {
+                        TextButton(onClick = { showDetails = true }) { Text("Details (${failures.size})") }
                     }
                 }
             }
@@ -267,6 +277,54 @@ fun AiPage(
             onSend = ::generate,
             onSurprise = ::surprise,
         )
+    }
+
+    if (showDetails && failures.isNotEmpty()) {
+        ModalBottomSheet(
+            onDismissRequest = { showDetails = false },
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ) {
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp).navigationBarsPadding(),
+            ) {
+                Text("What went wrong", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
+                Text(
+                    "Each key was tried in order.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+                SelectionContainer {
+                    Column(
+                        Modifier.padding(top = 16.dp).heightIn(max = 420.dp).verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        failures.forEachIndexed { i, f ->
+                            Column(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                            ) {
+                                Text(
+                                    "${i + 1}. ${f.keyLabel}",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    f.message,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = 4.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -474,7 +532,7 @@ private fun AiComposer(
             textStyle = MaterialTheme.typography.bodyLarge.copy(color = scheme.onSurface, fontSize = 17.sp, lineHeight = 24.sp),
             cursorBrush = SolidColor(scheme.onSurface),
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-            modifier = Modifier.weight(1f).padding(top = 11.dp, bottom = 13.dp),
+            modifier = Modifier.weight(1f).padding(top = 11.dp, bottom = 13.dp, end = 14.dp),
             decorationBox = { inner ->
                 Box {
                     if (value.isEmpty()) {
