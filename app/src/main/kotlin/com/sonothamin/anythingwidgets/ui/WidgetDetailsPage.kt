@@ -274,8 +274,12 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
             // Widget settings (only once it's on the device)
             if (installed != null) {
                 SectionLabel("Widget settings")
+                // Read outside the stack's builder and tied to dataTick: the builder lambda is skipped when
+                // its captures are unchanged, so values read inside it would stay stale after a tap.
+                @Suppress("UNUSED_VARIABLE") val tick = dataTick
+                val paramValues = spec.params.associate { it.id to (WidgetRuntime.paramValue(context, spec, it.id) ?: "") }
+                val netAllowed = WidgetPrefs.netAllowed(context, id)
                 NothingStack(Modifier.pageMargin()) {
-                    val paramValues = spec.params.associate { it.id to (WidgetRuntime.paramValue(context, spec, it.id) ?: "") }
                     paramRows(spec.params, paramValues) { pid, v ->
                         WidgetPrefs.setParam(context, id, pid, v)
                         changed(refetch = spec.feeds.isNotEmpty())
@@ -283,7 +287,7 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                     if (spec.feeds.isNotEmpty()) {
                         row { shape ->
                             val hosts = spec.feeds.mapNotNull { SpecValidator.feedHost(it.url) }.distinct().joinToString(", ")
-                            val allowed = WidgetPrefs.netAllowed(context, id)
+                            val allowed = netAllowed
                             NothingItem(
                                 title = "Allow internet access",
                                 subtitle = hosts,
