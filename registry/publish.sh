@@ -2,6 +2,7 @@
 # Regenerates index.json (with SHA-256 checksums) from widgets/*.json. Run before every push to the registry.
 set -euo pipefail
 cd "$(dirname "$0")"
+python3 check.py
 python3 - <<'PY'
 import hashlib, json, glob
 entries = []
