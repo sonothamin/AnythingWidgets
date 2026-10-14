@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sonothamin.anythingwidgets.ui.theme.AppBarFont
 
 /*
  * Nothing OS-style building blocks: big dot-matrix title, quiet gray section labels, and grouped
@@ -78,7 +79,7 @@ fun PageHeader(
         }
         Text(
             title,
-            style = MaterialTheme.typography.displaySmall,
+            style = MaterialTheme.typography.displaySmall.copy(fontFamily = AppBarFont),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 16.dp),

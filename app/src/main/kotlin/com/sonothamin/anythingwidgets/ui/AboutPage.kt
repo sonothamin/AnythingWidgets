@@ -231,6 +231,13 @@ private val notices = listOf(
             "The license is available at http://scripts.sil.org/OFL",
     ),
     Notice(
+        name = "Old Standard TT",
+        license = "SIL Open Font License 1.1",
+        text = "Copyright 2011 The Old Standard Project Authors (amkryukov@gmail.com).\n\n" +
+            "This Font Software is licensed under the SIL Open Font License, Version 1.1. " +
+            "The license is available at https://openfontlicense.org",
+    ),
+    Notice(
         name = "AndroidX and Jetpack Compose",
         license = "Apache License 2.0",
         text = "Core KTX, Activity, Compose UI, Material 3, Material Icons, Glance, WorkManager and DataStore.\n\n" +
