@@ -1,0 +1,4 @@
+<resources>
+    <!-- Pass to NotificationCompat.Builder.setColor() together with R.drawable.ic_stat_widgets. -->
+    <color name="notification_accent">#D71921</color>
+</resources>
