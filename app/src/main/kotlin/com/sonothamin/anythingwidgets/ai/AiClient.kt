@@ -69,7 +69,7 @@ object AiClient {
                 throw AiException("No AI keys are set up. Add one in Settings.", emptyList())
             }
 
-            val system = AiPrompt.system(context)
+            val system = AiPrompt.system(context, request, currentRaw, AiPrompt.Tier.STANDARD)
             val user = if (current != null && currentRaw != null) AiPrompt.refine(currentRaw, request) else AiPrompt.create(request)
             val failures = mutableListOf<AiFailure>()
 
@@ -85,31 +85,44 @@ object AiClient {
             for ((i, key) in keys.withIndex()) {
                 onAttempt(key)
                 trace.secret = key.apiKey.trim()
-                trace.enter("starting")
                 log(context, DebugLog.Level.INFO, "ai", trace) { "Attempt ${i + 1}/${keys.size}: ${describe(key)}" }
-                val started = System.currentTimeMillis()
-                try {
-                    val text = withHeartbeat(context, trace, "ai") { call(context, trace, key, system, user) }
-                    trace.enter("parsing the answer")
-                    val (spec, raw) = parse(context, trace, text, forceId = current?.id, previousVersion = current?.version)
-                    val took = System.currentTimeMillis() - started
-                    log(context, DebugLog.Level.INFO, "ai", trace) {
-                        "${key.preset.label} ${key.model} answered in ${took}ms; spec id=${spec.id} name=\"${spec.name}\" " +
-                            "v${spec.version} (${raw.length} chars); ${failures.size} earlier key failure(s); total ${System.currentTimeMillis() - begun}ms"
+                var prompt = system
+                var minimal = false
+                while (true) {
+                    trace.enter("starting")
+                    val started = System.currentTimeMillis()
+                    try {
+                        val text = withHeartbeat(context, trace, "ai") { call(context, trace, key, prompt, user) }
+                        trace.enter("parsing the answer")
+                        val (spec, raw) = parse(context, trace, text, forceId = current?.id, previousVersion = current?.version)
+                        val took = System.currentTimeMillis() - started
+                        log(context, DebugLog.Level.INFO, "ai", trace) {
+                            "${key.preset.label} ${key.model} answered in ${took}ms; spec id=${spec.id} name=\"${spec.name}\" " +
+                                "v${spec.version} (${raw.length} chars); ${failures.size} earlier key failure(s); total ${System.currentTimeMillis() - begun}ms"
+                        }
+                        return@withContext AiResult(spec, raw, key.label, key.preset.label, key.model.trim(), took, failures)
+                    } catch (e: CancellationException) {
+                        log(context, DebugLog.Level.WARN, "ai", trace) {
+                            "Cancelled after ${System.currentTimeMillis() - started}ms while '${trace.phase}'"
+                        }
+                        throw e
+                    } catch (e: Exception) {
+                        log(context, DebugLog.Level.WARN, "ai", trace) {
+                            "${key.preset.label} ${key.model} failed after ${System.currentTimeMillis() - started}ms " +
+                                "while '${trace.phase}': ${e::class.java.simpleName}: ${e.message}\n${stack(e)}"
+                        }
+                        if (!minimal && isTooLong(e)) {
+                            // Small context window or token rate limit: same key, much smaller prompt.
+                            minimal = true
+                            prompt = AiPrompt.system(context, request, currentRaw, AiPrompt.Tier.MINIMAL)
+                            log(context, DebugLog.Level.INFO, "ai", trace) {
+                                "Prompt too long for ${key.preset.label}; retrying this key with the minimal prompt (${prompt.length} chars)"
+                            }
+                            continue
+                        }
+                        failures += AiFailure(key.label, e.message?.lineSequence()?.firstOrNull()?.take(160) ?: "Failed")
+                        break
                     }
-                    return@withContext AiResult(spec, raw, key.label, key.preset.label, key.model.trim(), took, failures)
-                } catch (e: CancellationException) {
-                    log(context, DebugLog.Level.WARN, "ai", trace) {
-                        "Cancelled after ${System.currentTimeMillis() - started}ms while '${trace.phase}'"
-                    }
-                    throw e
-                } catch (e: Exception) {
-                    val why = e.message?.lineSequence()?.firstOrNull()?.take(160) ?: "Failed"
-                    log(context, DebugLog.Level.WARN, "ai", trace) {
-                        "${key.preset.label} ${key.model} failed after ${System.currentTimeMillis() - started}ms " +
-                            "while '${trace.phase}': ${e::class.java.simpleName}: ${e.message}\n${stack(e)}"
-                    }
-                    failures += AiFailure(key.label, why)
                 }
             }
             log(context, DebugLog.Level.ERROR, "ai", trace) {
@@ -169,6 +182,19 @@ object AiClient {
         }
         log(context, DebugLog.Level.ERROR, "ai", trace) { "Idea: every key failed (${failures.size})" }
         throw AiException("Couldn't get an idea.", failures)
+    }
+
+    private val TOO_LONG = Regex(
+        "context.{0,12}(length|window)|maximum context|too long|too large|too many tokens|token limit|" +
+            "exceeds?.{0,40}(token|limit|context)|reduce the length|(input|prompt).{0,20}(length|size)|" +
+            "request_too_large|tokens per min",
+        RegexOption.IGNORE_CASE,
+    )
+
+    /** True when a provider rejected the request because the prompt was too big for it. */
+    private fun isTooLong(e: Exception): Boolean {
+        val m = e.message ?: return false
+        return m.startsWith("HTTP 413") || (m.startsWith("HTTP 4") && TOO_LONG.containsMatchIn(m))
     }
 
     // --- parsing -------------------------------------------------------------------------------
