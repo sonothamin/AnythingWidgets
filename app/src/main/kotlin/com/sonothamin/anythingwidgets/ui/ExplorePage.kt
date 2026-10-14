@@ -126,8 +126,8 @@ fun ExplorePage(refreshKey: Any? = null, onOpen: (String) -> Unit = {}) {
                 SpecWidget.redrawAll(context)
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
-                Toast.makeText(context, "Couldn't install ${entry.name}. Try again.", Toast.LENGTH_SHORT).show()
+            } catch (ex: Exception) {
+                Toast.makeText(context, "Couldn't install ${entry.name}: ${ex.message ?: "unknown error"}".take(160), Toast.LENGTH_LONG).show()
             } finally {
                 busy = busy - entry.id
             }

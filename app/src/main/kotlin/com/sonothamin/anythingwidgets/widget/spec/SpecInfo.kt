@@ -62,8 +62,12 @@ object SpecInfo {
                     "alarms" -> "Opens alarms"
                     "inc", "dec", "set", "toggle", "cycle", "reset" -> "Changes its own data"
                     "open_url" -> {
-                        val host = a.url?.let { runCatching { URI(it).host }.getOrNull() }
-                        if (host.isNullOrBlank()) "Opens a link" else "Opens $host"
+                        if (a.url?.contains("{{") == true) {
+                            "Opens a link you choose in the widget settings"
+                        } else {
+                            val host = a.url?.let { runCatching { URI(it).host }.getOrNull() }
+                            if (host.isNullOrBlank()) "Opens a link" else "Opens $host"
+                        }
                     }
                     else -> a.type
                 }

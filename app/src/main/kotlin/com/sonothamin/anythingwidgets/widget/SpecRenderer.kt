@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
@@ -25,6 +26,7 @@ import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
+import androidx.glance.color.ColorProvider as DayNightColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -105,13 +107,17 @@ fun RenderNode(raw: Node, data: Map<String, String>, extra: GlanceModifier = Gla
             val text = DataSnapshot.textOf(node, data)
             if (text.isNotEmpty()) {
                 val maxWidth = node.width?.toFloat() ?: (LocalSize.current.width.value - 2f * (node.inset ?: 8))
+                // Adaptive colors (n.card, n.ink, ...): draw the text in white and let the system tint it with
+                // the light or dark value, so it follows the theme instantly instead of waiting for a redraw.
+                val tinted = node.color?.let { NothingPalette.adaptive(it) } != null
+                val tint = colorOf(node.color, GlanceTheme.colors.onSurface)
                 val bitmap = DotArt.glyph(
                     context = context,
                     text = text,
                     font = node.font,
                     bold = node.bold,
                     sizeDp = node.size.toFloat(),
-                    argb = argbOf(node.color, GlanceTheme.colors.onSurface),
+                    argb = if (tinted) android.graphics.Color.WHITE else argbOf(node.color, GlanceTheme.colors.onSurface),
                     align = node.textAlign,
                     maxWidthDp = maxWidth,
                     maxLines = node.maxLines ?: Int.MAX_VALUE,
@@ -123,6 +129,7 @@ fun RenderNode(raw: Node, data: Map<String, String>, extra: GlanceModifier = Gla
                     contentDescription = text.replace('\n', ' '),
                     modifier = m,
                     contentScale = ContentScale.Fit,
+                    colorFilter = if (tinted) ColorFilter.tint(tint) else null,
                 )
             }
         }
@@ -215,7 +222,9 @@ private fun colorOf(ref: String?, fallback: ColorProvider): ColorProvider {
         "onBackground" -> c.onBackground
         "error" -> c.error
         "outline" -> c.outline
-        else -> NothingPalette.argb(ref)?.let { ColorProvider(Color(it)) } ?: fallback
+        else -> NothingPalette.adaptive(ref)?.let { (light, dark) -> DayNightColorProvider(day = Color(light), night = Color(dark)) }
+            ?: NothingPalette.argb(ref)?.let { ColorProvider(Color(it)) }
+            ?: fallback
     }
 }
 
@@ -231,7 +240,7 @@ private fun actionOf(a: ActionSpec?, data: Map<String, String>): Action? {
     fun t(s: String?) = DataSnapshot.apply(s.orEmpty(), data)
     val action: Action? = when (a.type) {
         "open_app" -> openAppAction()
-        "open_url" -> a.url?.takeIf { it.startsWith("https://") }?.let {
+        "open_url" -> webUrl(t(a.url))?.let {
             actionStartActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)).addCategory(Intent.CATEGORY_BROWSABLE))
         }
         "refresh" -> actionRunCallback<RefreshAction>()
@@ -274,6 +283,19 @@ private fun actionOf(a: ActionSpec?, data: Map<String, String>): Action? {
     if (action == null) DebugLog.w(context, "tap", "'${a.type}' on ${data["spec.id"] ?: "?"} has nothing to run (bad or missing fields); taps will do nothing")
     else DebugLog.d(context, "tap", "'${a.type}' attached on ${data["spec.id"] ?: "?"}")
     return action
+}
+
+/**
+ * The https URL a tap should open, or null. A value typed without a scheme ("github.com") gets https://;
+ * any other scheme, whitespace, or a host that is not a real domain name is refused.
+ */
+internal fun webUrl(raw: String): String? {
+    val s = raw.trim()
+    if (s.isEmpty() || s.length > 512 || s.any { it.isWhitespace() }) return null
+    val full = if (s.contains("://")) s else "https://$s"
+    if (!full.startsWith("https://", ignoreCase = true)) return null
+    val host = runCatching { Uri.parse(full).host }.getOrNull()
+    return if (host.isNullOrBlank() || !host.contains('.')) null else full
 }
 
 private fun settingsIntent(screen: String?): Intent? = when (screen) {

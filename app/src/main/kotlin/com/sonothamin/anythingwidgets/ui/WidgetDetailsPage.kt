@@ -149,8 +149,8 @@ fun WidgetDetailsPage(id: String, onBack: () -> Unit) {
                 SpecWidget.redrawAll(context)
             } catch (c: CancellationException) {
                 throw c
-            } catch (_: Exception) {
-                Toast.makeText(context, "Couldn't install ${e.name}. Try again.", Toast.LENGTH_SHORT).show()
+            } catch (ex: Exception) {
+                Toast.makeText(context, "Couldn't install ${e.name}: ${ex.message ?: "unknown error"}".take(160), Toast.LENGTH_LONG).show()
             } finally {
                 busy = false
             }

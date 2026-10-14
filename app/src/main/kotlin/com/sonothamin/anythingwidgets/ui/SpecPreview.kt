@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.viewinterop.AndroidView
@@ -255,7 +256,8 @@ internal fun colorOf(ref: String?, fallback: Color, s: ColorScheme): Color {
         "onBackground" -> s.onBackground
         "error" -> s.error
         "outline" -> s.outline
-        else -> NothingPalette.argb(ref)?.let { Color(it) } ?: fallback
+        // Adaptive names (n.card, n.ink, ...) pick their light or dark value from the app's own theme.
+        else -> NothingPalette.argb(ref, dark = s.background.luminance() < 0.5f)?.let { Color(it) } ?: fallback
     }
 }
 
