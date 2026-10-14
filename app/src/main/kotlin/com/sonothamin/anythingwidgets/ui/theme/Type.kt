@@ -6,7 +6,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.sonothamin.anythingwidgets.R
 
-/** Titles: NDOT 47 (dot-matrix display font, OFL). */
+/** App bar (page header) titles: Old Standard TT (OFL). */
+val AppBarFont = FontFamily(Font(R.font.old_standard_tt, FontWeight.Normal))
+
+/** Body titles: NDOT 47 (dot-matrix display font, OFL). */
 val TitleFont = FontFamily(Font(R.font.ndot_47, FontWeight.Normal))
 
 /** Everything else: Geist (OFL). */
