@@ -15,7 +15,7 @@ object SpecValidator {
     private val SHA256 = Regex("[a-f0-9]{64}")
     private val CONTAINERS = setOf("row", "column", "box")
     private val TYPES = CONTAINERS + setOf("text", "spacer", "progress", "glyph", "dotgrid", "clock")
-    private val FONTS = setOf("dots", "serif", "sans", "mono")
+    private val FONTS = setOf("dots", "serif", "oldstandard", "sans", "mono")
     private val CLOCKS = setOf("digital", "analog-dark", "analog-light", "analog-dots")
     private val ROTATE = setOf("day", "hour", "random")
     private val PATTERN = Regex("[#r._/\\s]*")
@@ -183,6 +183,10 @@ object SpecValidator {
                 if (v.length > 64) return "Binding too long"
             }
             if (n.type == "glyph" && n.font != null && n.font !in FONTS) return "Unknown font '${n.font}'"
+            if (n.type != "glyph" && (n.dropcap != null || n.minSize != null || n.inset != null)) return "Only glyph text can use dropcap, minSize or inset"
+            if (n.dropcap != null && (n.dropcap !in 2..4 || (n.textAlign != null && n.textAlign != "start"))) return "Invalid dropcap"
+            if (n.minSize != null && n.minSize !in 8..n.size) return "minSize out of range"
+            if (n.inset != null && n.inset !in 0..48) return "Inset out of range"
             if (n.type == "clock") {
                 if (n.variant != null && n.variant !in CLOCKS) return "Unknown clock '${n.variant}'"
                 if (n.text != null && !CLOCK_FORMAT.matches(n.text)) return "Invalid clock format"

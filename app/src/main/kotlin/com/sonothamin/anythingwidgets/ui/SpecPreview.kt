@@ -35,6 +35,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -59,6 +61,9 @@ enum class PreviewSize(val label: String, val width: Int, val height: Int) {
     Wide("Wide", 250, 110),
     Large("Large", 250, 250),
 }
+
+/** Width in dp of the widget being previewed, so glyph text wraps where the real widget would. */
+private val LocalPreviewWidth = compositionLocalOf { 240f }
 
 /**
  * In-app preview of a widget. Mirrors SpecRenderer (which draws with Glance and can't run inside
@@ -91,7 +96,9 @@ fun SpecPreview(
             color = if (bare) Color.Transparent else scheme.surface,
             border = if (bare) null else BorderStroke(1.dp, scheme.outlineVariant),
         ) {
-            Box(Modifier.fillMaxSize()) { PreviewNode(node, data, onAction, Modifier.fillMaxSize()) }
+            CompositionLocalProvider(LocalPreviewWidth provides size.width.toFloat()) {
+                Box(Modifier.fillMaxSize()) { PreviewNode(node, data, onAction, Modifier.fillMaxSize()) }
+            }
         }
     }
 }
@@ -148,11 +155,13 @@ private fun PreviewNode(raw: Node, data: Map<String, String>, onAction: ((Action
             val context = LocalContext.current
             val text = DataSnapshot.textOf(node, data)
             val color = colorOf(node.color, scheme.onSurface, scheme).toArgb()
-            val bitmap = remember(text, node, color) {
+            val previewWidth = LocalPreviewWidth.current
+            val bitmap = remember(text, node, color, previewWidth) {
                 if (text.isEmpty()) null
                 else DotArt.glyph(
                     context, text, node.font, node.bold, node.size.toFloat(), color, node.textAlign,
-                    node.width?.toFloat() ?: 240f, node.maxLines ?: Int.MAX_VALUE,
+                    node.width?.toFloat() ?: (previewWidth - 2f * (node.inset ?: 8)), node.maxLines ?: Int.MAX_VALUE,
+                    node.dropcap, node.minSize?.toFloat(),
                 )
             }
             if (bitmap != null) {

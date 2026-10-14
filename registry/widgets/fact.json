@@ -1,9 +1,9 @@
 {
   "schema": 2,
   "id": "fact",
-  "version": 2,
+  "version": 3,
   "name": "Daily Fact",
-  "description": "A fresh trivia fact every day from Open Trivia DB. Pick a topic and difficulty; 30 are kept on the device.",
+  "description": "A fresh trivia fact every day from Open Trivia DB. Pick a topic and difficulty, tap the widget to reveal the answer; 30 are kept on the device.",
   "author": "AnythingWidgets",
   "created": "2026-10-12",
   "categories": [
@@ -113,12 +113,14 @@
           "label": "Hard"
         }
       ]
-    },
+    }
+  ],
+  "state": [
     {
-      "id": "showAnswer",
-      "type": "toggle",
-      "label": "Show the answer",
-      "default": true
+      "id": "revealed",
+      "type": "bool",
+      "default": false,
+      "daily": true
     }
   ],
   "feeds": [
@@ -136,271 +138,1242 @@
     }
   ],
   "root": {
-    "type": "column",
-    "children": [
-      {
-        "type": "text",
-        "text": "{{feed.fact.question}}",
-        "size": 13,
-        "color": "n.black",
-        "maxLines": 3,
-        "bold": true,
-        "visible": "feed.fact.ok"
-      },
-      {
-        "type": "text",
-        "text": "→ {{feed.fact.answer}}",
-        "size": 15,
-        "color": "n.red",
-        "maxLines": 2,
-        "bold": true,
-        "visible": "feed.fact.ok && param.showAnswer"
-      },
-      {
-        "type": "text",
-        "pool": [
-          "Honey found in ancient tombs was still edible.",
-          "Octopuses have three hearts.",
-          "Bananas are berries. Strawberries are not.",
-          "A day on Venus is longer than its year.",
-          "Wombat droppings are cube-shaped.",
-          "Antarctica is the largest desert on Earth.",
-          "Crows can remember human faces.",
-          "Sharks are older than trees.",
-          "The Moon drifts about 3.8 cm farther every year.",
-          "Sunlight takes about 8 minutes to reach Earth.",
-          "A group of flamingos is called a flamboyance.",
-          "Cleopatra lived nearer to us than to the first pyramids.",
-          "Butterflies taste with their feet.",
-          "A teaspoon of neutron star weighs billions of tons.",
-          "Sea otters hold hands while they sleep.",
-          "Venus spins backwards compared to most planets.",
-          "Scotland’s national animal is the unicorn."
-        ],
-        "size": 15,
-        "color": "n.black",
-        "maxLines": 3,
-        "bold": true,
-        "visible": "!feed.fact.ok"
-      },
-      {
-        "type": "spacer",
-        "grow": true
-      },
-      {
-        "type": "box",
-        "children": [],
-        "width": 36,
-        "height": 2,
-        "background": "n.red"
-      },
-      {
-        "type": "text",
-        "text": "{{feed.fact.category}} · {{feed.fact.index}}/{{feed.fact.count}}",
-        "size": 10,
-        "color": "n.black",
-        "maxLines": 1,
-        "visible": "feed.fact.ok"
-      },
-      {
-        "type": "glyph",
-        "text": "TODAY'S FACT",
-        "size": 14,
-        "color": "n.black",
-        "visible": "!feed.fact.ok && net.allowed"
-      },
-      {
-        "type": "text",
-        "text": "Allow internet access in the app for daily facts",
-        "size": 9,
-        "color": "n.black",
-        "maxLines": 2,
-        "visible": "!net.allowed"
-      }
-    ],
+    "type": "box",
     "fill": "both",
     "background": "n.white",
     "radius": 32,
-    "padding": 18,
-    "gap": 6,
     "action": {
-      "type": "open_app"
-    }
+      "type": "toggle",
+      "target": "revealed"
+    },
+    "children": [
+      {
+        "type": "row",
+        "fill": "both",
+        "padding": 18,
+        "gap": 14,
+        "align": "center",
+        "visible": "!state.revealed || !feed.fact.ok",
+        "children": [
+          {
+            "type": "column",
+            "grow": true,
+            "fill": "height",
+            "gap": 4,
+            "children": [
+              {
+                "type": "glyph",
+                "font": "sans",
+                "bold": true,
+                "size": 15,
+                "minSize": 9,
+                "maxLines": 3,
+                "inset": 51,
+                "color": "n.black",
+                "text": "{{feed.fact.question}}",
+                "dropcap": 2,
+                "visible": "feed.fact.ok"
+              },
+              {
+                "type": "glyph",
+                "font": "sans",
+                "bold": true,
+                "size": 15,
+                "minSize": 9,
+                "maxLines": 3,
+                "inset": 51,
+                "color": "n.black",
+                "pool": [
+                  "Honey found in ancient tombs was still edible.",
+                  "Octopuses have three hearts.",
+                  "Bananas are berries. Strawberries are not.",
+                  "A day on Venus is longer than its year.",
+                  "Wombat droppings are cube-shaped.",
+                  "Antarctica is the largest desert on Earth.",
+                  "Crows can remember human faces.",
+                  "Sharks are older than trees.",
+                  "The Moon drifts about 3.8 cm farther every year.",
+                  "Sunlight takes about 8 minutes to reach Earth.",
+                  "A group of flamingos is called a flamboyance.",
+                  "Cleopatra lived nearer to us than to the first pyramids.",
+                  "Butterflies taste with their feet.",
+                  "A teaspoon of neutron star weighs billions of tons.",
+                  "Sea otters hold hands while they sleep.",
+                  "Venus spins backwards compared to most planets.",
+                  "Scotland’s national animal is the unicorn."
+                ],
+                "dropcap": 2,
+                "visible": "!feed.fact.ok"
+              },
+              {
+                "type": "spacer",
+                "grow": true
+              },
+              {
+                "type": "box",
+                "children": [],
+                "width": 36,
+                "height": 2,
+                "background": "n.red"
+              },
+              {
+                "type": "text",
+                "text": "{{feed.fact.category.short}} · {{feed.fact.index}}/{{feed.fact.count}}",
+                "size": 10,
+                "color": "n.black",
+                "maxLines": 1,
+                "visible": "feed.fact.ok"
+              },
+              {
+                "type": "glyph",
+                "text": "TODAY'S FACT",
+                "size": 14,
+                "color": "n.black",
+                "visible": "!feed.fact.ok && net.allowed"
+              },
+              {
+                "type": "text",
+                "text": "Allow internet access in the app for daily facts",
+                "size": 9,
+                "color": "n.black",
+                "maxLines": 2,
+                "visible": "!net.allowed"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "align": "center",
+            "children": [
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": ".................#####.......#.....#.....#.......#....#...r...#....#.......#.....#.....#.......#...#........#####.........###...........#......",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "!feed.fact.ok||feed.fact.category.key==general-knowledge"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "..............####...####..#...#.#...#..#.#.#.#.#.#..#...#.#...#..#.#.#.#.#.#..#...#.#...#..#..r#.#...#..####...####...........................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==books"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "..............###########..#.#.#.#.#.#..###########..#.........#..#....r....#..#.........#..###########..#.#.#.#.#.#..###########..............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==film"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "..................#######......#######......#.....#......#.....#......#.....#...##.#..##.#..####..####...###r..####....##....##................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==music"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "......#............#...........###.....#############.###########...####r####.....#######......###.###.....###...###....##.....##...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==celebrities||feed.fact.category.key==musicals-theatres"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "....#...#.........#.#...................###########..#.........#..#.........#..#....r....#..#.........#..###########....#.....#................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==television"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "............................#########...#.........#..#..#...r..#..#.###...#.#..#..#......#..#.........#...#########............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==video-games"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "...............#########....#.......#....#.#...#.#....#.......#....#...r...#....#.......#....#.#...#.#....#.......#....#########...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==board-games"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": ".....###..........#.#..........#.#..........#.#.........#...#.......#.....#.....#...r...#....#.......#....#########............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==science-nature"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "..............###########..#.........#..#.........#..#..r......#..#.........#..###########......###.........#####..............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==computers"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "...............#########.....#.............#.............#.............r...........#...........#...........#...........#########...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==mathematics"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": ".................#####........#...#........#...#........#...#........#...#........#...#........#...#........#.r.#........#####.................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==gadgets"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": ".......####........####........####........#######.....#######.........###.........###.........###.........##r.................................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==mythology"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": ".................#####.......#..#..#.....#...#...#....#...#...#....#########....#...#...#....#...r...#.....#..#..#.......#####.................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==sports"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": ".................#####.......#.#.#.#.....#..#.#..#....#..#.#..#....###r#####....#..#.#..#....#..#.#..#.....#.#.#.#.......#####.................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==geography"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "...............#########.....#.....#.......#...#.........#.#...........r...........#.#.........#.#.#.......#.###.#.....#########...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==history"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "..............#..#######...#..#.....#...#..#.....#...#..#######...#..#.....r...#..#.........#............#............###......................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==politics"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "..............###########..#.........#..#.....r...#..#.........#..#...#.....#..#..###..#.#..#.#####.###..###########...........................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==art"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "................##...##......##...##...##.........####....r....##....#####.......#######......#######......##...##.............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==animals"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "..............................#####.......#.....#....###########..#.........#..#.........#..###########...##.....#r....##.....##...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==vehicles"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 52,
+                "height": 44,
+                "pattern": "..............###########..#.........#..#..#.r.#..#..#.........#..###########....##............#...............................................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==comics||feed.fact.category.key==japanese-anime-manga||feed.fact.category.key==cartoon-animations"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "column",
+        "fill": "both",
+        "padding": 18,
+        "gap": 4,
+        "visible": "state.revealed && feed.fact.ok",
+        "children": [
+          {
+            "type": "glyph",
+            "font": "sans",
+            "bold": true,
+            "size": 10,
+            "minSize": 8,
+            "maxLines": 1,
+            "inset": 18,
+            "color": "#99000000",
+            "text": "{{feed.fact.question}}"
+          },
+          {
+            "type": "box",
+            "grow": true,
+            "fill": "both",
+            "align": "center",
+            "children": [
+              {
+                "type": "glyph",
+                "font": "oldstandard",
+                "bold": false,
+                "size": 26,
+                "minSize": 12,
+                "maxLines": 1,
+                "inset": 18,
+                "color": "n.red",
+                "text": "{{feed.fact.answer}}",
+                "textAlign": "center"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "children": [],
+            "width": 36,
+            "height": 2,
+            "background": "n.red"
+          },
+          {
+            "type": "text",
+            "text": "{{feed.fact.category.short}} · {{feed.fact.index}}/{{feed.fact.count}}",
+            "size": 10,
+            "color": "n.black",
+            "maxLines": 1
+          }
+        ]
+      }
+    ]
   },
   "compact": {
-    "type": "column",
-    "children": [
-      {
-        "type": "text",
-        "text": "{{feed.fact.question}}",
-        "size": 10,
-        "color": "n.black",
-        "maxLines": 4,
-        "bold": true,
-        "visible": "feed.fact.ok"
-      },
-      {
-        "type": "text",
-        "text": "→ {{feed.fact.answer}}",
-        "size": 12,
-        "color": "n.red",
-        "maxLines": 2,
-        "bold": true,
-        "visible": "feed.fact.ok && param.showAnswer"
-      },
-      {
-        "type": "text",
-        "pool": [
-          "Honey found in ancient tombs was still edible.",
-          "Octopuses have three hearts.",
-          "Bananas are berries. Strawberries are not.",
-          "A day on Venus is longer than its year.",
-          "Wombat droppings are cube-shaped.",
-          "Antarctica is the largest desert on Earth.",
-          "Crows can remember human faces.",
-          "Sharks are older than trees.",
-          "The Moon drifts about 3.8 cm farther every year.",
-          "Sunlight takes about 8 minutes to reach Earth.",
-          "A group of flamingos is called a flamboyance.",
-          "Cleopatra lived nearer to us than to the first pyramids.",
-          "Butterflies taste with their feet.",
-          "A teaspoon of neutron star weighs billions of tons.",
-          "Sea otters hold hands while they sleep.",
-          "Venus spins backwards compared to most planets.",
-          "Scotland’s national animal is the unicorn."
-        ],
-        "size": 11,
-        "color": "n.black",
-        "maxLines": 4,
-        "bold": true,
-        "visible": "!feed.fact.ok"
-      },
-      {
-        "type": "spacer",
-        "grow": true
-      },
-      {
-        "type": "box",
-        "children": [],
-        "width": 28,
-        "height": 2,
-        "background": "n.red"
-      },
-      {
-        "type": "glyph",
-        "text": "FACT",
-        "size": 13,
-        "color": "n.black",
-        "visible": "!feed.fact.ok && net.allowed"
-      },
-      {
-        "type": "text",
-        "text": "Allow internet access in the app for daily facts",
-        "size": 9,
-        "color": "n.black",
-        "maxLines": 2,
-        "visible": "!net.allowed"
-      }
-    ],
+    "type": "box",
     "fill": "both",
     "background": "n.white",
     "radius": 32,
-    "padding": 14,
-    "gap": 4,
     "action": {
-      "type": "open_app"
-    }
-  },
-  "large": {
-    "type": "column",
+      "type": "toggle",
+      "target": "revealed"
+    },
     "children": [
       {
-        "type": "text",
-        "text": "{{feed.fact.question}}",
-        "size": 18,
-        "color": "n.black",
-        "maxLines": 6,
-        "bold": true,
-        "visible": "feed.fact.ok"
+        "type": "column",
+        "fill": "both",
+        "padding": 14,
+        "gap": 4,
+        "visible": "!state.revealed || !feed.fact.ok",
+        "children": [
+          {
+            "type": "glyph",
+            "font": "sans",
+            "bold": true,
+            "size": 14,
+            "minSize": 8,
+            "maxLines": 6,
+            "inset": 14,
+            "color": "n.black",
+            "text": "{{feed.fact.question}}",
+            "dropcap": 2,
+            "visible": "feed.fact.ok"
+          },
+          {
+            "type": "glyph",
+            "font": "sans",
+            "bold": true,
+            "size": 14,
+            "minSize": 8,
+            "maxLines": 6,
+            "inset": 14,
+            "color": "n.black",
+            "pool": [
+              "Honey found in ancient tombs was still edible.",
+              "Octopuses have three hearts.",
+              "Bananas are berries. Strawberries are not.",
+              "A day on Venus is longer than its year.",
+              "Wombat droppings are cube-shaped.",
+              "Antarctica is the largest desert on Earth.",
+              "Crows can remember human faces.",
+              "Sharks are older than trees.",
+              "The Moon drifts about 3.8 cm farther every year.",
+              "Sunlight takes about 8 minutes to reach Earth.",
+              "A group of flamingos is called a flamboyance.",
+              "Cleopatra lived nearer to us than to the first pyramids.",
+              "Butterflies taste with their feet.",
+              "A teaspoon of neutron star weighs billions of tons.",
+              "Sea otters hold hands while they sleep.",
+              "Venus spins backwards compared to most planets.",
+              "Scotland’s national animal is the unicorn."
+            ],
+            "dropcap": 2,
+            "visible": "!feed.fact.ok"
+          },
+          {
+            "type": "box",
+            "grow": true,
+            "fill": "both",
+            "align": "center",
+            "children": [
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": ".................#####.......#.....#.....#.......#....#...r...#....#.......#.....#.....#.......#...#........#####.........###...........#......",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "!feed.fact.ok||feed.fact.category.key==general-knowledge"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "..............####...####..#...#.#...#..#.#.#.#.#.#..#...#.#...#..#.#.#.#.#.#..#...#.#...#..#..r#.#...#..####...####...........................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==books"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "..............###########..#.#.#.#.#.#..###########..#.........#..#....r....#..#.........#..###########..#.#.#.#.#.#..###########..............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==film"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "..................#######......#######......#.....#......#.....#......#.....#...##.#..##.#..####..####...###r..####....##....##................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==music"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "......#............#...........###.....#############.###########...####r####.....#######......###.###.....###...###....##.....##...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==celebrities||feed.fact.category.key==musicals-theatres"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "....#...#.........#.#...................###########..#.........#..#.........#..#....r....#..#.........#..###########....#.....#................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==television"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "............................#########...#.........#..#..#...r..#..#.###...#.#..#..#......#..#.........#...#########............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==video-games"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "...............#########....#.......#....#.#...#.#....#.......#....#...r...#....#.......#....#.#...#.#....#.......#....#########...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==board-games"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": ".....###..........#.#..........#.#..........#.#.........#...#.......#.....#.....#...r...#....#.......#....#########............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==science-nature"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "..............###########..#.........#..#.........#..#..r......#..#.........#..###########......###.........#####..............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==computers"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "...............#########.....#.............#.............#.............r...........#...........#...........#...........#########...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==mathematics"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": ".................#####........#...#........#...#........#...#........#...#........#...#........#...#........#.r.#........#####.................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==gadgets"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": ".......####........####........####........#######.....#######.........###.........###.........###.........##r.................................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==mythology"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": ".................#####.......#..#..#.....#...#...#....#...#...#....#########....#...#...#....#...r...#.....#..#..#.......#####.................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==sports"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": ".................#####.......#.#.#.#.....#..#.#..#....#..#.#..#....###r#####....#..#.#..#....#..#.#..#.....#.#.#.#.......#####.................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==geography"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "...............#########.....#.....#.......#...#.........#.#...........r...........#.#.........#.#.#.......#.###.#.....#########...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==history"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "..............#..#######...#..#.....#...#..#.....#...#..#######...#..#.....r...#..#.........#............#............###......................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==politics"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "..............###########..#.........#..#.....r...#..#.........#..#...#.....#..#..###..#.#..#.#####.###..###########...........................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==art"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "................##...##......##...##...##.........####....r....##....#####.......#######......#######......##...##.............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==animals"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "..............................#####.......#.....#....###########..#.........#..#.........#..###########...##.....#r....##.....##...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==vehicles"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 39,
+                "height": 33,
+                "pattern": "..............###########..#.........#..#..#.r.#..#..#.........#..###########....##............#...............................................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==comics||feed.fact.category.key==japanese-anime-manga||feed.fact.category.key==cartoon-animations"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "children": [],
+            "width": 28,
+            "height": 2,
+            "background": "n.red"
+          },
+          {
+            "type": "text",
+            "text": "{{feed.fact.category.short}}",
+            "size": 9,
+            "color": "n.black",
+            "maxLines": 1,
+            "visible": "feed.fact.ok"
+          },
+          {
+            "type": "glyph",
+            "text": "TODAY'S FACT",
+            "size": 13,
+            "color": "n.black",
+            "visible": "!feed.fact.ok && net.allowed"
+          },
+          {
+            "type": "text",
+            "text": "Allow internet access in the app for daily facts",
+            "size": 9,
+            "color": "n.black",
+            "maxLines": 2,
+            "visible": "!net.allowed"
+          }
+        ]
       },
       {
-        "type": "text",
-        "text": "→ {{feed.fact.answer}}",
-        "size": 22,
-        "color": "n.red",
-        "maxLines": 3,
-        "bold": true,
-        "visible": "feed.fact.ok && param.showAnswer"
-      },
-      {
-        "type": "text",
-        "pool": [
-          "Honey found in ancient tombs was still edible.",
-          "Octopuses have three hearts.",
-          "Bananas are berries. Strawberries are not.",
-          "A day on Venus is longer than its year.",
-          "Wombat droppings are cube-shaped.",
-          "Antarctica is the largest desert on Earth.",
-          "Crows can remember human faces.",
-          "Sharks are older than trees.",
-          "The Moon drifts about 3.8 cm farther every year.",
-          "Sunlight takes about 8 minutes to reach Earth.",
-          "A group of flamingos is called a flamboyance.",
-          "Cleopatra lived nearer to us than to the first pyramids.",
-          "Butterflies taste with their feet.",
-          "A teaspoon of neutron star weighs billions of tons.",
-          "Sea otters hold hands while they sleep.",
-          "Venus spins backwards compared to most planets.",
-          "Scotland’s national animal is the unicorn."
-        ],
-        "size": 22,
-        "color": "n.black",
-        "maxLines": 6,
-        "bold": true,
-        "visible": "!feed.fact.ok"
-      },
-      {
-        "type": "spacer",
-        "grow": true
-      },
-      {
-        "type": "box",
-        "children": [],
-        "width": 44,
-        "height": 3,
-        "background": "n.red"
-      },
-      {
-        "type": "text",
-        "text": "{{feed.fact.category}} · {{feed.fact.index}}/{{feed.fact.count}}",
-        "size": 12,
-        "color": "n.black",
-        "maxLines": 1,
-        "visible": "feed.fact.ok"
-      },
-      {
-        "type": "glyph",
-        "text": "TODAY'S FACT",
-        "size": 16,
-        "color": "n.black",
-        "visible": "!feed.fact.ok && net.allowed"
-      },
-      {
-        "type": "text",
-        "text": "Allow internet access in the app for daily facts",
-        "size": 9,
-        "color": "n.black",
-        "maxLines": 2,
-        "visible": "!net.allowed"
+        "type": "column",
+        "fill": "both",
+        "padding": 14,
+        "gap": 4,
+        "visible": "state.revealed && feed.fact.ok",
+        "children": [
+          {
+            "type": "glyph",
+            "font": "sans",
+            "bold": true,
+            "size": 10,
+            "minSize": 8,
+            "maxLines": 3,
+            "inset": 14,
+            "color": "#99000000",
+            "text": "{{feed.fact.question}}"
+          },
+          {
+            "type": "box",
+            "grow": true,
+            "fill": "both",
+            "align": "center",
+            "children": [
+              {
+                "type": "glyph",
+                "font": "oldstandard",
+                "bold": false,
+                "size": 24,
+                "minSize": 12,
+                "maxLines": 3,
+                "inset": 14,
+                "color": "n.red",
+                "text": "{{feed.fact.answer}}",
+                "textAlign": "center"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "children": [],
+            "width": 28,
+            "height": 2,
+            "background": "n.red"
+          },
+          {
+            "type": "text",
+            "text": "{{feed.fact.category.short}}",
+            "size": 9,
+            "color": "n.black",
+            "maxLines": 1
+          }
+        ]
       }
-    ],
+    ]
+  },
+  "large": {
+    "type": "box",
     "fill": "both",
     "background": "n.white",
     "radius": 40,
-    "padding": 22,
-    "gap": 10,
     "action": {
-      "type": "open_app"
-    }
+      "type": "toggle",
+      "target": "revealed"
+    },
+    "children": [
+      {
+        "type": "column",
+        "fill": "both",
+        "padding": 22,
+        "gap": 10,
+        "visible": "!state.revealed || !feed.fact.ok",
+        "children": [
+          {
+            "type": "glyph",
+            "font": "sans",
+            "bold": true,
+            "size": 20,
+            "minSize": 12,
+            "maxLines": 6,
+            "inset": 22,
+            "color": "n.black",
+            "text": "{{feed.fact.question}}",
+            "dropcap": 3,
+            "visible": "feed.fact.ok"
+          },
+          {
+            "type": "glyph",
+            "font": "sans",
+            "bold": true,
+            "size": 20,
+            "minSize": 12,
+            "maxLines": 6,
+            "inset": 22,
+            "color": "n.black",
+            "pool": [
+              "Honey found in ancient tombs was still edible.",
+              "Octopuses have three hearts.",
+              "Bananas are berries. Strawberries are not.",
+              "A day on Venus is longer than its year.",
+              "Wombat droppings are cube-shaped.",
+              "Antarctica is the largest desert on Earth.",
+              "Crows can remember human faces.",
+              "Sharks are older than trees.",
+              "The Moon drifts about 3.8 cm farther every year.",
+              "Sunlight takes about 8 minutes to reach Earth.",
+              "A group of flamingos is called a flamboyance.",
+              "Cleopatra lived nearer to us than to the first pyramids.",
+              "Butterflies taste with their feet.",
+              "A teaspoon of neutron star weighs billions of tons.",
+              "Sea otters hold hands while they sleep.",
+              "Venus spins backwards compared to most planets.",
+              "Scotland’s national animal is the unicorn."
+            ],
+            "dropcap": 3,
+            "visible": "!feed.fact.ok"
+          },
+          {
+            "type": "box",
+            "grow": true,
+            "fill": "both",
+            "align": "center",
+            "children": [
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": ".................#####.......#.....#.....#.......#....#...r...#....#.......#.....#.....#.......#...#........#####.........###...........#......",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "!feed.fact.ok||feed.fact.category.key==general-knowledge"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "..............####...####..#...#.#...#..#.#.#.#.#.#..#...#.#...#..#.#.#.#.#.#..#...#.#...#..#..r#.#...#..####...####...........................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==books"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "..............###########..#.#.#.#.#.#..###########..#.........#..#....r....#..#.........#..###########..#.#.#.#.#.#..###########..............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==film"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "..................#######......#######......#.....#......#.....#......#.....#...##.#..##.#..####..####...###r..####....##....##................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==music"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "......#............#...........###.....#############.###########...####r####.....#######......###.###.....###...###....##.....##...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==celebrities||feed.fact.category.key==musicals-theatres"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "....#...#.........#.#...................###########..#.........#..#.........#..#....r....#..#.........#..###########....#.....#................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==television"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "............................#########...#.........#..#..#...r..#..#.###...#.#..#..#......#..#.........#...#########............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==video-games"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "...............#########....#.......#....#.#...#.#....#.......#....#...r...#....#.......#....#.#...#.#....#.......#....#########...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==board-games"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": ".....###..........#.#..........#.#..........#.#.........#...#.......#.....#.....#...r...#....#.......#....#########............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==science-nature"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "..............###########..#.........#..#.........#..#..r......#..#.........#..###########......###.........#####..............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==computers"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "...............#########.....#.............#.............#.............r...........#...........#...........#...........#########...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==mathematics"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": ".................#####........#...#........#...#........#...#........#...#........#...#........#...#........#.r.#........#####.................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==gadgets"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": ".......####........####........####........#######.....#######.........###.........###.........###.........##r.................................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==mythology"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": ".................#####.......#..#..#.....#...#...#....#...#...#....#########....#...#...#....#...r...#.....#..#..#.......#####.................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==sports"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": ".................#####.......#.#.#.#.....#..#.#..#....#..#.#..#....###r#####....#..#.#..#....#..#.#..#.....#.#.#.#.......#####.................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==geography"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "...............#########.....#.....#.......#...#.........#.#...........r...........#.#.........#.#.#.......#.###.#.....#########...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==history"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "..............#..#######...#..#.....#...#..#.....#...#..#######...#..#.....r...#..#.........#............#............###......................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==politics"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "..............###########..#.........#..#.....r...#..#.........#..#...#.....#..#..###..#.#..#.#####.###..###########...........................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==art"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "................##...##......##...##...##.........####....r....##....#####.......#######......#######......##...##.............................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==animals"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "..............................#####.......#.....#....###########..#.........#..#.........#..###########...##.....#r....##.....##...............",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==vehicles"
+              },
+              {
+                "type": "dotgrid",
+                "columns": 13,
+                "rows": 11,
+                "width": 78,
+                "height": 66,
+                "pattern": "..............###########..#.........#..#..#.r.#..#..#.........#..###########....##............#...............................................",
+                "color": "#2E000000",
+                "track": "#10000000",
+                "accent": "#99D71921",
+                "visible": "feed.fact.category.key==comics||feed.fact.category.key==japanese-anime-manga||feed.fact.category.key==cartoon-animations"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "children": [],
+            "width": 44,
+            "height": 3,
+            "background": "n.red"
+          },
+          {
+            "type": "text",
+            "text": "{{feed.fact.category.short}} · {{feed.fact.index}}/{{feed.fact.count}}",
+            "size": 12,
+            "color": "n.black",
+            "maxLines": 1,
+            "visible": "feed.fact.ok"
+          },
+          {
+            "type": "glyph",
+            "text": "TODAY'S FACT",
+            "size": 16,
+            "color": "n.black",
+            "visible": "!feed.fact.ok && net.allowed"
+          },
+          {
+            "type": "text",
+            "text": "Allow internet access in the app for daily facts",
+            "size": 9,
+            "color": "n.black",
+            "maxLines": 2,
+            "visible": "!net.allowed"
+          }
+        ]
+      },
+      {
+        "type": "column",
+        "fill": "both",
+        "padding": 22,
+        "gap": 10,
+        "visible": "state.revealed && feed.fact.ok",
+        "children": [
+          {
+            "type": "glyph",
+            "font": "sans",
+            "bold": true,
+            "size": 13,
+            "minSize": 10,
+            "maxLines": 4,
+            "inset": 22,
+            "color": "#99000000",
+            "text": "{{feed.fact.question}}",
+            "dropcap": 2
+          },
+          {
+            "type": "box",
+            "grow": true,
+            "fill": "both",
+            "align": "center",
+            "children": [
+              {
+                "type": "glyph",
+                "font": "oldstandard",
+                "bold": false,
+                "size": 40,
+                "minSize": 18,
+                "maxLines": 3,
+                "inset": 22,
+                "color": "n.red",
+                "text": "{{feed.fact.answer}}",
+                "textAlign": "center"
+              }
+            ]
+          },
+          {
+            "type": "box",
+            "children": [],
+            "width": 44,
+            "height": 3,
+            "background": "n.red"
+          },
+          {
+            "type": "text",
+            "text": "{{feed.fact.category.short}} · {{feed.fact.index}}/{{feed.fact.count}}",
+            "size": 12,
+            "color": "n.black",
+            "maxLines": 1
+          }
+        ]
+      }
+    ]
   }
 }

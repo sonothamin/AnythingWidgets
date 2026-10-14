@@ -123,7 +123,7 @@ A bare key is true unless it is empty, `false`, `0`, `no` or `off`. Numbers comp
   {"id": "mood",  "type": "choice", "values": ["good", "ok", "bad"], "default": "ok"}
 ]
 ```
-Extra keys: bool `{{state.id.bit}}` (`#` or `.`, ideal for `dotgrid` patterns), number `{{state.id.fraction}}` (with `min` and `max`), choice `{{state.id.index}}`.
+Extra keys: bool `{{state.id.bit}}` (`#` or `.`, ideal for `dotgrid` patterns), number `{{state.id.fraction}}` (with `min` and `max`), choice `{{state.id.index}}`. Add `"daily": true` to a state value and it goes back to its default on the next calendar day (for example an answer that was revealed).
 
 Put an `action` on any node:
 
@@ -172,6 +172,7 @@ A feed is a read-only JSON endpoint. It does nothing until the user turns on **A
 - Responses are capped at 256 KB, and no cookies or custom headers are sent.
 - Cached data belongs to the URL it was fetched with: change a `{{param.x}}` and the old cache is ignored until the new fetch succeeds.
 - A query pair in `url` whose value comes out empty or as `any` is left out of the request, so a `choice` param can offer "any" as a no-preference option.
+- Every text field also gets `{{feed.id.name.short}}` (the part after a colon: `Entertainment: Music` becomes `Music`) and `{{feed.id.name.key}}` (that part in lowercase with dashes, up to 32 characters: `music`), handy in `visible` conditions such as `feed.fact.category.key==music`.
 - HTML entities in text values (`&quot;`, `&#039;`) are decoded; tags are never interpreted.
 
 #### List feeds: cache a batch, show one a day
@@ -184,6 +185,11 @@ Add `list` (dotted path to a JSON array) and optionally `keep` (1-50, default 30
 }]
 ```
 Extra bindings: `{{feed.id.count}}` (items cached) and `{{feed.id.index}}` (1-based position of today's item).
+
+### Glyph: text drawn with the app's fonts
+`glyph` draws text as an image so it can use fonts Glance cannot: `font` is `dots` (dot-matrix, default), `sans`, `serif`, `oldstandard` or `mono`. It wraps at the widget width minus `inset` dp on each side (default 8) and keeps at most `maxLines` lines. Do not set `width` for wrapped text: it stretches the image to that width.
+- `minSize`: shrink from `size` down to this size until the text fits `maxLines`, so short text is large and long text still fits.
+- `dropcap`: 2 to 4. The first letter is drawn large in Old Standard over that many lines of the text beside it (start-aligned text only; ignored when the text starts with punctuation).
 
 ### Limits added in schema 2
 At most 12 params, 12 state values, 4 feeds, 16 fields per feed, 10 `bind` entries per node. A state action must target an existing state of the right type, or the spec is rejected.

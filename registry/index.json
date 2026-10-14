@@ -244,8 +244,8 @@
       "id": "fact",
       "name": "Daily Fact",
       "author": "AnythingWidgets",
-      "description": "A fresh trivia fact every day from Open Trivia DB. Pick a topic and difficulty; 30 are kept on the device.",
-      "version": 2,
+      "description": "A fresh trivia fact every day from Open Trivia DB. Pick a topic and difficulty, tap the widget to reveal the answer; 30 are kept on the device.",
+      "version": 3,
       "created": "2026-10-12",
       "categories": [
         "Fun"
@@ -256,7 +256,7 @@
         "trivia"
       ],
       "spec": "widgets/fact.json",
-      "sha256": "e23df210017b009c9e728fb7b27f7f104a18ec06ba24485a7065e75eb9974e48"
+      "sha256": "c6c0da0aa51fb16e8a3b6a7c9b3a133431963157dded5af9ab9254a44858a094"
     },
     {
       "id": "links",

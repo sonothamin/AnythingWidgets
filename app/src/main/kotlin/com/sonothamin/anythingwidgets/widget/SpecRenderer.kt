@@ -104,7 +104,7 @@ fun RenderNode(raw: Node, data: Map<String, String>, extra: GlanceModifier = Gla
             val context = LocalContext.current
             val text = DataSnapshot.textOf(node, data)
             if (text.isNotEmpty()) {
-                val maxWidth = node.width?.toFloat() ?: (LocalSize.current.width.value - 16f)
+                val maxWidth = node.width?.toFloat() ?: (LocalSize.current.width.value - 2f * (node.inset ?: 8))
                 val bitmap = DotArt.glyph(
                     context = context,
                     text = text,
@@ -115,6 +115,8 @@ fun RenderNode(raw: Node, data: Map<String, String>, extra: GlanceModifier = Gla
                     align = node.textAlign,
                     maxWidthDp = maxWidth,
                     maxLines = node.maxLines ?: Int.MAX_VALUE,
+                    dropcap = node.dropcap,
+                    minSizeDp = node.minSize?.toFloat(),
                 )
                 Image(
                     provider = ImageProvider(bitmap),
