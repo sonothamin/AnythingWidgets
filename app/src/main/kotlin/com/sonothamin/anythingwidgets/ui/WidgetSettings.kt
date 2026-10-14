@@ -218,7 +218,8 @@ private fun ColorDialog(title: String, current: String, onDismiss: () -> Unit, o
     val scheme = MaterialTheme.colorScheme
     var hex by remember { mutableStateOf(if (current.startsWith("#")) current else "#") }
     val theme = listOf("primary", "secondary", "tertiary", "error", "onSurface", "primaryContainer", "secondaryContainer", "tertiaryContainer")
-    val fixed = NothingPalette.names.sorted()
+    val fixed = NothingPalette.fixedNames
+    val adaptive = NothingPalette.adaptiveNames
     val hexOk = hex.length > 1 && SpecRules.validColor(hex)
 
     @Composable
@@ -238,6 +239,7 @@ private fun ColorDialog(title: String, current: String, onDismiss: () -> Unit, o
     ) {
         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Group("Follows your wallpaper", theme)
+            Group("Light and dark", adaptive)
             Group("Fixed colors", fixed)
             OutlinedTextField(
                 value = hex,

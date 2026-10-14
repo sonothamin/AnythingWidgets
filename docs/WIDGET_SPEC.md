@@ -39,7 +39,21 @@ The registry URL is `REGISTRY_URL` in `app/build.gradle.kts` (must be HTTPS and 
 | `progress` | progress | template resolving to 0..1 |
 | `action` | all | `open_app`, `open_url` (https), `refresh` |
 
-**Colors**: Material tokens (`primary`, `onSurface`, `surfaceVariant`, `secondaryContainer`, …) follow the user's dynamic theme and light/dark mode. Prefer tokens; hex is `#RRGGBB` or `#AARRGGBB`.
+**Colors**: Material tokens (`primary`, `onSurface`, `surfaceVariant`, `secondaryContainer`, …) follow the user's dynamic theme and light/dark mode. Hex is `#RRGGBB` or `#AARRGGBB`.
+
+The Nothing palette comes in two kinds:
+- **Fixed** (`n.red`, `n.white`, `n.black`, `n.dark`, `n.ash`, `n.graphite`, `n.dot`, `n.mist`) never changes. Good for accents and deliberately colored cards.
+- **Adaptive** names have a light and a dark value and follow the system theme, so one spec gets a proper dark mode:
+
+| name | light | dark | use |
+|---|---|---|---|
+| `n.card` | `#EFEFEF` | `#1C1C1C` | card background |
+| `n.ink` | `#000000` | `#EFEFEF` | main text, lit dots |
+| `n.muted` | `#5C5C5C` | `#9A9A9A` | secondary text |
+| `n.faint` | `#CBCBCB` | `#3C3C3C` | unlit dots, tracks |
+| `n.ink06`, `n.ink18`, `n.ink60` | black at 6/18/60% | `#EFEFEF` at 6/18/60% | soft dot art |
+
+`glyph` text in an adaptive color switches the moment the system theme changes. Other drawn art (`dotgrid`) picks the theme when the widget is drawn, so it catches up on the next redraw.
 
 ## Bindings
 Use `{{key}}` inside `text` and `progress`:

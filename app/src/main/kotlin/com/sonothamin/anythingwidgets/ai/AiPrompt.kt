@@ -8,7 +8,8 @@ internal object AiPrompt {
     /** Built per request so the bindings and palette always match what this build supports. */
     fun system(context: Context): String {
         val bindings = DataSnapshot.build(context).keys.sorted().joinToString(", ") { "{{$it}}" }
-        val palette = NothingPalette.names.sorted().joinToString(", ")
+        val palette = NothingPalette.fixedNames.joinToString(", ")
+        val adaptivePalette = NothingPalette.adaptiveNames.joinToString(", ")
         return """
 You design home screen widgets for the AnythingWidgets Android app. A widget is a JSON spec: pure data, no code.
 Reply with ONE JSON object and nothing else: no markdown, no code fences, no commentary.
@@ -36,7 +37,8 @@ Limits: at most 100 nodes per layout, depth 10.
 
 COLORS
 - Material tokens that follow the user's wallpaper and light/dark mode (prefer these for normal cards): primary, onPrimary, primaryContainer, onPrimaryContainer, secondary, onSecondary, secondaryContainer, onSecondaryContainer, tertiary, onTertiary, tertiaryContainer, onTertiaryContainer, surface, onSurface, surfaceVariant, onSurfaceVariant, background, onBackground, error, outline.
-- Fixed Nothing-style palette (does not change with theme; use with chrome "none" and a dark card): $palette.
+- Adaptive Nothing-style palette (a light and a dark value that follow the system theme; use with chrome "none" for a card that is paper in light mode and near-black in dark mode): $adaptivePalette. n.card is the card background, n.ink the main text and lit dots, n.muted secondary text, n.faint unlit dots and tracks, n.ink06/n.ink18/n.ink60 soft ink for dot art. Prefer these over the fixed palette for cards and text.
+- Fixed Nothing-style palette (never changes with theme; for accents like n.red or a deliberately dark or colored card): $palette.
 - Or hex: #RRGGBB / #AARRGGBB.
 Always keep text readable against its background.
 
