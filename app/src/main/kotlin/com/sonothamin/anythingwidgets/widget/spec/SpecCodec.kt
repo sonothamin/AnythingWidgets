@@ -119,10 +119,28 @@ object SpecValidator {
         return null
     }
 
+    private val PARAM_TOKEN = Regex("\\{\\{([A-Za-z0-9_.]+)\\}\\}")
+
+    /** True when [ref] (like "param.url1" or "param.day.days") points at a param this spec declares. */
+    private fun paramDeclared(ref: String, spec: WidgetSpec): Boolean =
+        ref.startsWith("param.") && spec.params.any { p -> ref == "param.${p.id}" || ref.startsWith("param.${p.id}.") }
+
+    /**
+     * open_url is either a fixed https URL, or one built from the widget's own {{param.*}} settings
+     * (so the person can choose where a tap goes). Whatever it resolves to must still be https at tap time.
+     */
+    private fun openUrlError(url: String?, spec: WidgetSpec): String? {
+        if (url.isNullOrEmpty() || url.length > 512) return "open_url requires an https URL"
+        if (!url.contains("{{")) return if (url.startsWith("https://")) null else "open_url requires an https URL"
+        if (!(url.startsWith("https://") || url.startsWith("{{param."))) return "open_url must start with https:// or a {{param.*}} value"
+        val declared = PARAM_TOKEN.findAll(url).all { paramDeclared(it.groupValues[1], spec) }
+        return if (declared && BINDING_ONLY.matches(url)) null else "open_url may only use declared {{param.*}} values"
+    }
+
     private fun validateAction(a: ActionSpec, spec: WidgetSpec): String? {
         if (a.type !in NAV_ACTIONS && a.type !in STATE_ACTIONS) return "Unknown action '${a.type}'"
         when (a.type) {
-            "open_url" -> if (!(a.url?.startsWith("https://") == true && a.url.length <= 512)) return "open_url requires an https URL"
+            "open_url" -> openUrlError(a.url, spec)?.let { return it }
             "launch_app" -> if (a.pkg == null || !PACKAGE.matches(a.pkg) || a.pkg.length > 128) return "launch_app needs a package name"
             "dial" -> if (a.number.isNullOrBlank() || a.number.length > 40 || !BINDING_ONLY.matches(a.number)) return "dial needs a number"
             "email" -> if (a.to.isNullOrBlank() || a.to.length > 120 || !BINDING_ONLY.matches(a.to) || (a.subject?.length ?: 0) > 120) return "email needs an address"

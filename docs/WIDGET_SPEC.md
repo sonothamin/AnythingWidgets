@@ -152,7 +152,7 @@ Put an `action` on any node:
 These redraw the widget immediately, and the preview in the app is playable.
 
 ### More actions (integrations)
-`open_app`, `refresh`, `open_url {url}` (https), plus:
+`open_app`, `refresh`, `open_url {url}` (https; the `url` may be built from the widget's own settings, like `{{param.link1}}`, and a value typed without a scheme such as `github.com` gets `https://`), plus:
 
 | action | fields | notes |
 |---|---|---|

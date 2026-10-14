@@ -240,7 +240,7 @@ private fun actionOf(a: ActionSpec?, data: Map<String, String>): Action? {
     fun t(s: String?) = DataSnapshot.apply(s.orEmpty(), data)
     val action: Action? = when (a.type) {
         "open_app" -> openAppAction()
-        "open_url" -> a.url?.takeIf { it.startsWith("https://") }?.let {
+        "open_url" -> webUrl(t(a.url))?.let {
             actionStartActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)).addCategory(Intent.CATEGORY_BROWSABLE))
         }
         "refresh" -> actionRunCallback<RefreshAction>()
@@ -283,6 +283,19 @@ private fun actionOf(a: ActionSpec?, data: Map<String, String>): Action? {
     if (action == null) DebugLog.w(context, "tap", "'${a.type}' on ${data["spec.id"] ?: "?"} has nothing to run (bad or missing fields); taps will do nothing")
     else DebugLog.d(context, "tap", "'${a.type}' attached on ${data["spec.id"] ?: "?"}")
     return action
+}
+
+/**
+ * The https URL a tap should open, or null. A value typed without a scheme ("github.com") gets https://;
+ * any other scheme, whitespace, or a host that is not a real domain name is refused.
+ */
+internal fun webUrl(raw: String): String? {
+    val s = raw.trim()
+    if (s.isEmpty() || s.length > 512 || s.any { it.isWhitespace() }) return null
+    val full = if (s.contains("://")) s else "https://$s"
+    if (!full.startsWith("https://", ignoreCase = true)) return null
+    val host = runCatching { Uri.parse(full).host }.getOrNull()
+    return if (host.isNullOrBlank() || !host.contains('.')) null else full
 }
 
 private fun settingsIntent(screen: String?): Intent? = when (screen) {
