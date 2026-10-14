@@ -33,7 +33,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -87,10 +86,14 @@ fun AboutPage(onBack: () -> Unit) {
             Box(
                 Modifier
                     .size(96.dp)
-                    .clip(RoundedCornerShape(28.dp))
-                    .background(colorResource(R.color.ic_launcher_background)),
+                    .clip(RoundedCornerShape(28.dp)),
                 contentAlignment = Alignment.Center,
             ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_launcher_background),
+                    contentDescription = null,
+                    modifier = Modifier.size(96.dp),
+                )
                 Image(
                     painter = painterResource(R.drawable.ic_launcher_foreground),
                     contentDescription = "AnythingWidgets app icon",
