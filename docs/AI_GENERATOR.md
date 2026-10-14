@@ -12,3 +12,10 @@ Optional tab (Settings > AI > Show AI tab) that turns a description into a widge
   only. Installed AI widgets use source `ai` and are not touched by registry sync.
 - **JSON mode:** per-key toggle for OpenAI-compatible servers (`response_format: json_object`); turn it off if
   a server rejects it.
+- **Prompt size:** the system prompt is built per request from a small core (about 1.3k tokens) plus only the
+  sections the request needs: tap actions, conditions, widget settings (`params`), mini-app `state`, online
+  `feeds`. When editing a widget, the sections its current spec already uses are included. If a provider rejects
+  a request as too long (HTTP 413, context length, token limit), the same key is retried once with a minimal
+  prompt (about 0.8k tokens) before falling through to the next key. Keep new spec features out of the core
+  and put them in a section in `AiPrompt.kt`.
+
