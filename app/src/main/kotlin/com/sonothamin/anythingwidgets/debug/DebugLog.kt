@@ -16,7 +16,7 @@ object DebugLog {
     private const val PREFS = "settings"
     private const val KEY_ENABLED = "debug_logging"
     private const val FILE = "debug.log"
-    private const val MAX_BYTES = 256 * 1024L
+    private const val MAX_BYTES = 1024 * 1024L
     private val lock = Any()
 
     private fun prefs(c: Context) = c.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
