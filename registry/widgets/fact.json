@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "id": "fact",
-  "version": 3,
+  "version": 4,
   "name": "Daily Fact",
   "description": "A fresh trivia fact every day from Open Trivia DB. Pick a topic and difficulty, tap the widget to reveal the answer; 30 are kept on the device.",
   "author": "AnythingWidgets",
@@ -151,7 +151,7 @@
         "type": "row",
         "fill": "both",
         "padding": 18,
-        "gap": 14,
+        "gap": 8,
         "align": "center",
         "visible": "!state.revealed || !feed.fact.ok",
         "children": [
@@ -168,7 +168,7 @@
                 "size": 15,
                 "minSize": 9,
                 "maxLines": 3,
-                "inset": 51,
+                "inset": 48,
                 "color": "n.black",
                 "text": "{{feed.fact.question}}",
                 "dropcap": 2,
@@ -181,7 +181,7 @@
                 "size": 15,
                 "minSize": 9,
                 "maxLines": 3,
-                "inset": 51,
+                "inset": 48,
                 "color": "n.black",
                 "pool": [
                   "Honey found in ancient tombs was still edible.",
