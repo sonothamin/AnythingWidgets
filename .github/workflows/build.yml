@@ -53,7 +53,8 @@ jobs:
   release:
     name: Release APK
     runs-on: ubuntu-latest
-    needs: [debug, widgets]
+    # Only the widgets zip is needed. Don't wait for the debug build: it compiles the same code, so run in parallel.
+    needs: [widgets]
     if: github.event_name != 'pull_request'
     permissions:
       contents: write
