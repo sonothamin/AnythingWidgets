@@ -12,6 +12,7 @@ PATTERN=re.compile(r"[#r._/\s]*")
 def cond(e): return len(e)<=160 and all(CLAUSE.fullmatch(c.strip()) for o in e.split("||") for c in o.split("&&"))
 def check(spec):
     errs=[]
+    if spec.get("theme","system") not in ("system","dark","light"): errs.append(f"Unknown theme {spec['theme']}")
     def walk(n,depth,cnt):
         cnt[0]+=1
         if cnt[0]>100: errs.append("Too many nodes"); return

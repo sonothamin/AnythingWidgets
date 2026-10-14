@@ -30,6 +30,7 @@ import com.sonothamin.anythingwidgets.ui.components.PageHeader
 import com.sonothamin.anythingwidgets.ui.components.SectionLabel
 import com.sonothamin.anythingwidgets.ui.components.pageMargin
 import com.sonothamin.anythingwidgets.widget.WidgetRuntime
+import com.sonothamin.anythingwidgets.widget.WidgetTheme
 import com.sonothamin.anythingwidgets.widget.data.SpecStore
 import com.sonothamin.anythingwidgets.widget.spec.WidgetSpec
 
@@ -85,7 +86,10 @@ private fun WidgetTile(spec: WidgetSpec, refreshKey: Any?, modifier: Modifier, o
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 14.dp),
     ) {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            SpecPreview(spec, PreviewSize.Small, remember(spec, refreshKey) { WidgetRuntime.data(context, spec) })
+            SpecPreview(
+                spec, PreviewSize.Small, remember(spec, refreshKey) { WidgetRuntime.data(context, spec) },
+                pinnedDark = WidgetTheme.forcedDark(context, spec),
+            )
         }
         Spacer(Modifier.height(12.dp))
         Text(

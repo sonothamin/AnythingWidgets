@@ -123,10 +123,11 @@ You design Android home screen widgets for the AnythingWidgets app. A widget is 
 Reply with ONE JSON object and nothing else: no markdown, no code fences, no commentary.
 
 SPEC
-{"schema":2,"id":"slug","version":1,"name":"max 60 chars","description":"one sentence","categories":["max 5"],"tags":["max 10"],"chrome":"none"|"default","root":Node,"compact":Node,"large":Node?}
+{"schema":2,"id":"slug","version":1,"name":"max 60 chars","description":"one sentence","categories":["max 5"],"tags":["max 10"],"chrome":"none"|"default","theme":"system"|"dark"|"light"?,"root":Node,"compact":Node,"large":Node?}
 - Labels are 1-24 chars. root = default/wide layout (about 250x110dp). compact = under 180dp wide (about 110x110dp). large = from 180x180dp up (about 250x250dp), only if it really differs.
 - Always give compact, and make it a real redesign for a small square, not a squeezed copy.
 - chrome "none" removes the system card so root draws its own shape; omit it for a normal card.
+- theme is the look the widget starts with: "system" (default, follows the phone), "dark" or "light"; the user can change it per widget. Only adaptive colors (n.card, n.ink, ...), Material tokens and the default card follow it; fixed colors never change.
 - At most 100 nodes per layout, depth 10.
 
 NODE: {"type":"row|column|box|text|spacer|progress|glyph|dotgrid|clock", ...}; every other field is optional.

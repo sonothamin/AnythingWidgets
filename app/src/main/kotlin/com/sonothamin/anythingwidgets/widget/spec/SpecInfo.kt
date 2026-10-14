@@ -18,6 +18,19 @@ object SpecInfo {
         return out
     }
 
+    /**
+     * Whether the light/dark choice changes anything: the default card follows it, and so do adaptive
+     * palette names, Material tokens and any color left unset (which falls back to the theme's own).
+     */
+    fun followsTheme(spec: WidgetSpec): Boolean {
+        if (spec.chrome != "none") return true
+        fun adapts(ref: String?) = ref != null && (NothingPalette.adaptive(ref) != null || ref in SpecRules.MATERIAL_TOKENS)
+        return nodes(spec).any { n ->
+            val coloured = n.type in setOf("text", "glyph", "dotgrid", "progress", "clock")
+            adapts(n.color) || adapts(n.background) || adapts(n.track) || adapts(n.accent) || (coloured && n.color == null)
+        }
+    }
+
     /** Human-readable names for the device data the widget binds to; empty for a static widget. */
     fun dataUsed(spec: WidgetSpec): List<String> =
         nodes(spec)

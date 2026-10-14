@@ -88,7 +88,12 @@ Widgets that aren't installed yet are previewed from a verified download; nothin
 
 ## Schema 2
 
-New top-level fields (all optional): `params`, `state`, `feeds`. New node fields: `visible`, `bind`. Use `"schema": 2`.
+New top-level fields (all optional): `params`, `state`, `feeds`, `theme`. New node fields: `visible`, `bind`. Use `"schema": 2`.
+
+### Theme: dark and light
+`"theme": "system" | "dark" | "light"` (default `system`) is the look the widget starts with. `system` follows the phone's light/dark setting. The user can override it per widget under **Widget settings > Appearance** (System, Dark or Light); **Reset to defaults** goes back to the spec's value.
+
+Only colors that adapt are affected: the default card (unless `chrome` is `none`), the adaptive palette names (`n.card`, `n.ink`, `n.muted`, `n.faint`, `n.ink06`, `n.ink18`, `n.ink60`), Material tokens (`surface`, `onSurface`, `primary`, ...) and any color you leave unset. Fixed colors (`n.red`, `n.dark`, `#RRGGBB`) never change, so a widget made only of those has no Appearance option. For a card that is paper in light mode and near-black in dark mode, use `chrome: none` with `background: n.card` and `n.ink` / `n.muted` text.
 
 ### Parameters: options the user edits
 Shown in the widget's details screen under **Widget settings**. Values are stored per widget on the device, validated on every read, and read in layouts as `{{param.<id>}}`. Ids match `[a-z][A-Za-z0-9]{0,23}`; at most 12 params.

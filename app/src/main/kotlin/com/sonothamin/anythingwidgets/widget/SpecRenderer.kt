@@ -1,8 +1,12 @@
 package com.sonothamin.anythingwidgets.widget
 
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
@@ -50,6 +54,27 @@ import com.sonothamin.anythingwidgets.widget.spec.ActionSpec
 import com.sonothamin.anythingwidgets.widget.spec.Node
 import com.sonothamin.anythingwidgets.widget.spec.NothingPalette
 import com.sonothamin.anythingwidgets.widget.spec.SpecRules
+
+/**
+ * Set when the user (or the spec) pins a widget to dark or light: true = dark, false = light.
+ * null means follow the system, which is what DayNight color providers do on their own.
+ */
+internal val LocalWidgetDark = compositionLocalOf<Boolean?> { null }
+
+private fun modeContext(base: Context, dark: Boolean): Context {
+    val cfg = Configuration(base.resources.configuration)
+    val night = if (dark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+    cfg.uiMode = (cfg.uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or night
+    return base.createConfigurationContext(cfg)
+}
+
+/** In a pinned theme, turns a system-following color into the fixed color it has in that theme. */
+@Composable
+internal fun themed(provider: ColorProvider): ColorProvider {
+    val dark = LocalWidgetDark.current ?: return provider
+    val base = LocalContext.current
+    return remember(provider, dark) { ColorProvider(provider.getColor(modeContext(base, dark))) }
+}
 
 /** Maps a validated [Node] tree onto Glance composables. Unknown input is never executed. */
 @Composable
@@ -199,9 +224,12 @@ private fun argbOf(ref: String?, fallback: ColorProvider): Int =
 /** Material token ("primary", "onSurface", ...), Nothing palette name ("n.red", ...) or "#RRGGBB" / "#AARRGGBB". */
 @Composable
 private fun colorOf(ref: String?, fallback: ColorProvider): ColorProvider {
-    if (ref == null) return fallback
+    if (ref == null) return themed(fallback)
     val c = GlanceTheme.colors
-    return when (ref) {
+    val pinned = LocalWidgetDark.current
+    // Nothing's adaptive names have both values on hand, so a pinned theme just picks one.
+    if (pinned != null) NothingPalette.argb(ref, pinned)?.takeIf { NothingPalette.adaptive(ref) != null }?.let { return ColorProvider(Color(it)) }
+    return themed(when (ref) {
         "primary" -> c.primary
         "onPrimary" -> c.onPrimary
         "primaryContainer" -> c.primaryContainer
@@ -225,7 +253,7 @@ private fun colorOf(ref: String?, fallback: ColorProvider): ColorProvider {
         else -> NothingPalette.adaptive(ref)?.let { (light, dark) -> DayNightColorProvider(day = Color(light), night = Color(dark)) }
             ?: NothingPalette.argb(ref)?.let { ColorProvider(Color(it)) }
             ?: fallback
-    }
+    })
 }
 
 /** Opens the app. (Intent-based: the reified actionStartActivity<T>() lives in a different package.) */
